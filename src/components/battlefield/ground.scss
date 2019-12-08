@@ -1,0 +1,7 @@
+@import '../../style/constant.scss';
+
+.battle-field-ground {
+  width: 100%;
+  min-height: inherit;
+  background-color: $battle-ground-color;
+}
