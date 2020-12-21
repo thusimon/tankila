@@ -1,14 +1,14 @@
 require('dotenv').config();
-const path = require('path');
-const express = require('express');
+import path from 'path';
+import express from 'express';
 const app = express();
 
 const PORT = process.env.PORT;
 
-app.use(express.static(path.join(__dirname, '../client/build')));
+app.use(express.static(path.join(__dirname, '../../client/build')));
 
 app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  res.sendFile(path.join(__dirname, '../../client/build/index.html'));
 });
 
 app.listen(PORT, () => {
