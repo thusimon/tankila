@@ -22,3 +22,7 @@ export interface Move {
   forward: number, // 1 forward, 0 stale, -1 backword
   rotation: number // 1 right, 0 stale, -1 left
 }
+
+export interface MessageListener {
+  (data: string): void;
+}

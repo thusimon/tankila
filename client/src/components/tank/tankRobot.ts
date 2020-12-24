@@ -23,7 +23,7 @@ class TankRobot extends TankBase {
   }
   draw(): void {
     this.randomMove();
-    this.p5.stroke(0, 0, 255);
+    //this.p5.stroke(0, 255, 255);
     super.draw();
   }
 

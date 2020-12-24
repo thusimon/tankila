@@ -64,8 +64,8 @@ class Tank {
     p5.fill(255, 255, 0);
     this.drawBullets();
 
-    p5.fill(0, 0, 255);
     if (this.debug) {
+      p5.fill(0, 0, 255);
       this.debugInfo();
     }
   }
@@ -87,6 +87,14 @@ class Tank {
       const circle = new Circle(b.position, b.radius);
       return isCircleInBound(circle, this.battleField);
     });
+  }
+
+  nomalizePostion(p: Point): Point {
+    return new Point(p.x/this.config.width, p.y/this.config.height);
+  }
+
+  denomalizePosition(p: Point): Point {
+    return new Point(p.x*this.config.width, p.y*this.config.height);
   }
 }
 
