@@ -6,6 +6,10 @@ import WebSocket from "ws"
 /* ------interface------- */
 enum MessageType {
   pos='pos',
+  fwd='fwd',
+  bwd='bwd',
+  rl='rl',
+  rr='rr',
   blt='blt',
   ext='ext'
 }
@@ -16,7 +20,7 @@ interface Position {
   r: number
 }
 
-interface TanksData {
+interface TankData {
   [key: string]: string
 }
 
@@ -45,21 +49,20 @@ const wss = new WebSocket.Server({
   path: '/websockets'
 });
 
-const tanks: TanksData = {};
-const bullets: BulletsData = {};
-
-const boradcastMessage = (message: string): void => {
+const broadcastMessage = (message: string): void => {
   wss.clients.forEach(client => {
     client.send(message);
   });
 }
+
 wss.on('connection', (ws, req) => {
   const id = getQueryFromUrl('id', req.url!);
+  console.log(`${id} tank enters`);
   if(id) {
     ws.on('close', () => {
       console.log(`${id} tank exits`);
       delete tanks[id];
-      boradcastMessage(`ext,${id}`);
+      broadcastMessage(`${MessageType.ext},${id}`);
     });
     ws.on('message', msg => {
       handleMessage(id, msg as string);
@@ -67,20 +70,23 @@ wss.on('connection', (ws, req) => {
   }
 });
 
-const updateRate = 20;
+const tanks: TankData = {};
+
+const updateRate = 100;
 setInterval(() => {
-  boradcastMessage(`${MessageType.pos},${JSON.stringify(tanks)}`);
+  broadcastMessage(`${MessageType.pos},${JSON.stringify(tanks)}`);
 }, updateRate);
 
-const handleTankPosition = (id: string, x: string, y: string, r: string) => {
+const handleTankCommand = (id: string, commandType: string, command: string) => {
+  broadcastMessage(`${commandType},${id},${command}`);
+}
+
+const handleTanksPosition = (id: string, x: string, y: string, r: string) => {
   tanks[id] = `${x},${y},${r}`;
 }
 
 const handleBulletPosition = (id: string, x: string, y: string, r: string) => {
-  const bulletMessage = `${MessageType.blt},${id},${x},${y},${r}`;
-  wss.clients.forEach(client => {
-    client.send(bulletMessage);
-  });
+  broadcastMessage(`${MessageType.blt},${id},${x},${y},${r}`);
 }
 
 const handleMessage = (id: string, message: string): void => {
@@ -88,7 +94,13 @@ const handleMessage = (id: string, message: string): void => {
   const messageType = messageParts[0]
   switch (messageType) {
     case MessageType.pos:
-      handleTankPosition(id, messageParts[1], messageParts[2], messageParts[3]);
+      handleTanksPosition(id, messageParts[1], messageParts[2], messageParts[3])
+      break;
+    case MessageType.fwd:
+    case MessageType.bwd:
+    case MessageType.rl:
+    case MessageType.rr:
+      handleTankCommand(id, messageType, messageParts[1]);
       break;
     case MessageType.blt:
       handleBulletPosition(id, messageParts[1], messageParts[2], messageParts[3]);

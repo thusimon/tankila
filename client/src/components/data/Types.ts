@@ -4,6 +4,7 @@ export interface GameConfigType {
   width: number;
   height: number;
   canvasParentId: string;
+  syncRate: number;
 }
 
 export interface Bound {
@@ -16,6 +17,14 @@ export interface Bound {
 export interface TankStatus {
   position: Point,
   rotation: number
+}
+
+export interface TankCommands {
+  fwd: boolean,
+  bwd: boolean,
+  rl: boolean,
+  rr: boolean,
+  blt: boolean,
 }
 
 export interface Move {

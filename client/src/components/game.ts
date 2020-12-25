@@ -51,8 +51,13 @@ class Game {
 
     const isConnected = await this.message.getConnection();
     if (isConnected) {
-      this.me = new TankMe(this.p5, this.config, this.id, this.message, this.getRandTankStatus());
+      const tankStatus = this.getRandTankStatus();
+      this.me = new TankMe(this.p5, this.config, this.id, this.message, tankStatus);
       this.message.listenOnMessage(this.handleMessages.bind(this));
+      //this.message.sendMessage(`pos,${this.me.position.x},${this.me.position.y},${this.me.rotation}`);
+      setInterval(() => {
+        this.message.sendMessage(`pos,${this.me.position.x},${this.me.position.y},${this.me.rotation}`);
+      }, this.config.syncRate);
     }
   }
 
@@ -83,7 +88,13 @@ class Game {
     const messageData = data.substring(typeIdx + 1);
     switch (messageType) {
       case 'pos':
-        this.updatePlayers(messageData);
+        this.updatePlayersPostion(messageData);
+        break;
+      case 'fwd':
+      case 'bwd':
+      case 'rl':
+      case 'rr':
+        this.updatePlayer(messageType, messageData);
         break;
       case 'blt':
         this.updateBullets(messageData);
@@ -95,23 +106,39 @@ class Game {
         break;
     }
   }
-  updatePlayers(data: string): void {
-    const dataParse = JSON.parse(data);
-    // remove my own tank
-    delete dataParse[this.id];
-    for (const playerId in dataParse) {
-      const playerTankData = dataParse[playerId].split(',');
-      const position = new Point(+playerTankData[0], +playerTankData[1]);
-      const rotation = +playerTankData[2];
-      const player = this.players[playerId];
+
+  updatePlayersPostion(commandData: string): void {
+    const tanksData = JSON.parse(commandData);
+    for (const tankId in tanksData) {
+      const data = tanksData[tankId].split(',');
+      if (tankId === this.id) {
+        // no need to create myself
+        continue;
+      }
+      const playerStatus: TankStatus = {
+        position: new Point(+data[0], +data[1]),
+        rotation: +data[2]
+      };
+      const player = this.players[tankId];
       if (player) {
-        player.updateStatus(position, rotation);
+        player.updateStatus(playerStatus.position, playerStatus.rotation);
       } else {
-        const playerTank = new TankPlayer(this.p5, this.config, playerId);
-        playerTank.updateStatus(position, rotation);
-        this.players[playerId] = playerTank;
+        this.players[tankId] = new TankPlayer(this.p5, this.config, tankId, playerStatus);
       }
     }
+  }
+
+  updatePlayer(commandType: string, commandData: string): void {
+    const data = commandData.split(',');
+    const id = data[0];
+    const commandValue = +data[1];
+    if (id === this.id || !this.players[id]) {
+      // no need to update myself or invald player
+      return;
+    }
+    const player = this.players[id];
+    const playerCommandUpdate = {[commandType]: !!commandValue};
+    player.tankCommands = {...player.tankCommands, ...playerCommandUpdate};
   }
 
   updateBullets(data: string): void {

@@ -20,31 +20,37 @@ class TankMe extends TankBase {
     // w: 87, s: 83, a:65, d:68
     if (p5.keyIsDown(65)) {
       rotation -= this.speedRotate;
+      this.sendRotateLeft(true);
     }
     if (p5.keyIsDown(68)) {
       rotation += this.speedRotate;
+      this.sendRotateRight(true);
     }
     rotation %= 2 * p5.PI;
     let speed = 0;
     if (p5.keyIsDown(87)) {
       speed = this.speedMove;
+      this.sendMoveForward(true);
     }
     if (p5.keyIsDown(83)) {
       speed = -this.speedMove;
+      this.sendMoveBackword(true);
     }
-
-    rotation %= 2 * p5.PI;
 
     const offset = new Point(speed * Math.cos(rotation), speed * Math.sin(rotation));
     position = position.add(offset);
 
     const body = new Rect(position, rotation, this.size);
 
-    if (isRectInBound(body, this.battleField)) {
-      this.position = position;
-      this.rotation = rotation;
-      this.body = body;
-    }
+    // if (isRectInBound(body, this.battleField)) {
+    //   this.position = position;
+    //   this.rotation = rotation;
+    //   this.body = body;
+    // }
+
+    this.position = position;
+    this.rotation = rotation;
+    this.body = body;
 
     if (p5.keyIsDown(32) && this.allowFire) {
       // fire a bullet
@@ -59,10 +65,34 @@ class TankMe extends TankBase {
       if (p5.keyCode == 32) {
         this.allowFire = true;
       }
+      if (p5.keyCode == 65) {
+        this.sendRotateLeft(false);
+      }
+      if (p5.keyCode == 68) {
+        this.sendRotateRight(false);
+      }
+      if (p5.keyCode == 87) {
+        this.sendMoveForward(false);
+      }
+      if (p5.keyCode == 83) {
+        this.sendMoveBackword(false);
+      }
     };
     p5.stroke(255, 0, 0);
-    this.message.sendMessage(`pos,${this.position.x},${this.position.y},${this.rotation}`);
     super.draw();
+  }
+
+  sendMoveForward(startFlag: boolean): void {
+    this.message.sendMessage(`fwd,${startFlag ? '1' : '0'}`);
+  }
+  sendMoveBackword(startFlag: boolean): void {
+    this.message.sendMessage(`bwd,${startFlag ? '1' : '0'}`);
+  }
+  sendRotateLeft(startFlag: boolean): void {
+    this.message.sendMessage(`rl,${startFlag ? '1' : '0'}`);
+  }
+  sendRotateRight(startFlag: boolean): void {
+    this.message.sendMessage(`rr,${startFlag ? '1' : '0'}`);
   }
 }
 

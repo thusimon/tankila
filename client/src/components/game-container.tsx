@@ -15,7 +15,8 @@ const GameContainer = (): JSX.Element => {
     new Game({
       width,
       height,
-      canvasParentId: 'game-container'
+      canvasParentId: 'game-container',
+      syncRate: 100
     });
   }, []);
   return <div id='game-container' ref={container}></div>;
