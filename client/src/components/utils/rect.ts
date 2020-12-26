@@ -1,5 +1,5 @@
-import Point from '../data/Point';
-import Rect from '../data/Rect';
+import Point from '../../data/Point';
+import Rect from '../../data/Rect';
 
 const getRectPoints = (rect: Rect):Point[] => {
   const {position, rotation, size} = rect;

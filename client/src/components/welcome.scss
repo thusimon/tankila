@@ -1,0 +1,30 @@
+#tank-name-form {
+  height: 100vh;
+  display: flex;
+  color: black;
+  font-size: 30px;
+  text-align: center;
+  form {
+    width: 50%;
+    margin: auto;
+  }
+  #tank-name {
+    padding: 12px 20px;
+    margin: 20px 0;
+    box-sizing: border-box;
+    font-size: 30px;
+    width: 100%;
+  }
+  button {
+    font-size: 26px;
+    transition-duration: 0.4s;
+    padding: 5px 10px;
+    background-color:ghostwhite;
+    color: cornflowerblue;
+    cursor: pointer;
+    &:hover {
+      background-color: cornflowerblue;
+      color: ghostwhite;
+    }
+  }
+}

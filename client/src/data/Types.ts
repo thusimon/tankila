@@ -1,12 +1,21 @@
 import Point from './Point';
 
-export interface GameConfigType {
+export interface GameConfig {
   width: number;
   height: number;
   canvasParentId: string;
   syncRate: number;
+  id: string;
 }
 
+export interface GameData {
+  id: string;
+}
+
+export interface GameDataContextType {
+  gameData: GameData;
+  setGameData: (gameData: GameData) => void;
+}
 export interface Bound {
   top: number,
   right: number,

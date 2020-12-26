@@ -1,7 +1,7 @@
-import { GameConfigType, TankStatus } from '../data/Types';
+import { GameConfig, TankStatus } from '../../data/Types';
 import p5 from 'p5';
-import Point from '../data/Point';
-import Rect from '../data/Rect';
+import Point from '../../data/Point';
+import Rect from '../../data/Rect';
 import Bullet from '../bullet';
 import TankBase from './tankBase';
 import Message from '../message';
@@ -9,7 +9,7 @@ import { isRectInBound } from '../utils/collision';
 
 class TankMe extends TankBase {
   message: Message;
-  constructor(p5: p5, config: GameConfigType, id: string, message: Message, initStatus?: TankStatus) {
+  constructor(p5: p5, config: GameConfig, id: string, message: Message, initStatus?: TankStatus) {
     super(p5, config, id, initStatus);
     this.message = message;
   }
@@ -78,8 +78,7 @@ class TankMe extends TankBase {
         this.sendMoveBackword(false);
       }
     };
-    p5.stroke(255, 0, 0);
-    super.draw();
+    super.draw(p5.color(255, 0, 0));
   }
 
   sendMoveForward(startFlag: boolean): void {

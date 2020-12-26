@@ -1,4 +1,4 @@
-import { MessageListener } from './data/Types';
+import { MessageListener } from '../data/Types';
 import { getWebSockedDomain } from './utils/urls';
 
 class Message {

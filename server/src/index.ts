@@ -11,6 +11,7 @@ enum MessageType {
   rl='rl',
   rr='rr',
   blt='blt',
+  hit='hit',
   ext='ext'
 }
 
@@ -22,6 +23,10 @@ interface Position {
 
 interface TankData {
   [key: string]: string
+}
+
+interface ScoreData {
+  [key: string]: number
 }
 
 interface BulletsData {
@@ -59,9 +64,12 @@ wss.on('connection', (ws, req) => {
   const id = getQueryFromUrl('id', req.url!);
   console.log(`${id} tank enters`);
   if(id) {
+    score[id] = 0;
+    broadcastMessage(`${MessageType.hit},${JSON.stringify(score)}`);
     ws.on('close', () => {
       console.log(`${id} tank exits`);
       delete tanks[id];
+      delete score[id];
       broadcastMessage(`${MessageType.ext},${id}`);
     });
     ws.on('message', msg => {
@@ -71,6 +79,7 @@ wss.on('connection', (ws, req) => {
 });
 
 const tanks: TankData = {};
+const score: ScoreData = {};
 
 const updateRate = 100;
 setInterval(() => {
@@ -79,6 +88,11 @@ setInterval(() => {
 
 const handleTankCommand = (id: string, commandType: string, command: string) => {
   broadcastMessage(`${commandType},${id},${command}`);
+}
+
+const handleScoreUpdate = (id: string) => {
+  score[id]++;
+  broadcastMessage(`${MessageType.hit},${JSON.stringify(score)}`);
 }
 
 const handleTanksPosition = (id: string, x: string, y: string, r: string) => {
@@ -101,6 +115,9 @@ const handleMessage = (id: string, message: string): void => {
     case MessageType.rl:
     case MessageType.rr:
       handleTankCommand(id, messageType, messageParts[1]);
+      break;
+    case MessageType.hit:
+      handleScoreUpdate(id);
       break;
     case MessageType.blt:
       handleBulletPosition(id, messageParts[1], messageParts[2], messageParts[3]);

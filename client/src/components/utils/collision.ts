@@ -1,6 +1,6 @@
-import Rect from '../data/Rect';
-import Circle from '../data/Circle';
-import Point from '../data/Point';
+import Rect from '../../data/Rect';
+import Circle from '../../data/Circle';
+import Point from '../../data/Point';
 
 export const isRectInBound = (rect1: Rect, rect2: Rect): boolean => {
   const b1 = rect1.getBound();

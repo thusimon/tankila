@@ -1,7 +1,7 @@
-import { GameConfigType, TankStatus, Move } from '../data/Types';
+import { GameConfig, TankStatus, Move } from '../../data/Types';
 import p5 from 'p5';
-import Point from '../data/Point';
-import Rect from '../data/Rect';
+import Point from '../../data/Point';
+import Rect from '../../data/Rect';
 import TankBase from './tankBase';
 import { isRectInBound } from '../utils/collision';
 
@@ -9,7 +9,7 @@ class TankRobot extends TankBase {
   lastMoveTime: number;
   minMoveTime: number;
   move: Move;
-  constructor(p5: p5, config: GameConfigType, id: string, initStatus?: TankStatus) {
+  constructor(p5: p5, config: GameConfig, id: string, initStatus?: TankStatus) {
     super(p5, config, id, initStatus);
     this.speedMove = 1;
     this.speedRotate = p5.PI/80;
@@ -22,9 +22,9 @@ class TankRobot extends TankBase {
     };
   }
   draw(): void {
+    const p5 = this.p5;
     this.randomMove();
-    //this.p5.stroke(0, 255, 255);
-    super.draw();
+    super.draw(p5.color(0, 255, 255));
   }
 
   randomMove(): void {

@@ -1,15 +1,15 @@
-import { GameConfigType, TankStatus } from '../data/Types';
+import { GameConfig, TankStatus } from '../../data/Types';
 import p5 from 'p5';
-import Point from '../data/Point';
-import Rect from '../data/Rect';
-import { TankCommands } from '../data/Types';
+import Point from '../../data/Point';
+import Rect from '../../data/Rect';
+import { TankCommands } from '../../data/Types';
 import TankBase from './tankBase';
 import Bullet from '../bullet';
 import { isRectInBound } from '../utils/collision';
 
 class TankPlayer extends TankBase {
   tankCommands: TankCommands
-  constructor(p5: p5, config: GameConfigType, id: string, initStatus?: TankStatus) {
+  constructor(p5: p5, config: GameConfig, id: string, initStatus?: TankStatus) {
     super(p5, config, id, initStatus);
     this.tankCommands = {
       fwd: false,
@@ -64,8 +64,7 @@ class TankPlayer extends TankBase {
     this.rotation = rotation;
     this.body = body;
 
-    this.p5.stroke(0, 0, 255);
-    super.draw();
+    super.draw(p5.color(0, 0, 255));
   }
 
   addBullet(x: number, y: number, rotation: number): void {

@@ -1,15 +1,15 @@
-import { GameConfigType, TankStatus } from '../data/Types';
+import { GameConfig, TankStatus } from '../../data/Types';
 import p5 from 'p5';
-import Point from '../data/Point';
-import Size from '../data/Size';
-import Rect from '../data/Rect';
-import Circle from '../data/Circle';
+import Point from '../../data/Point';
+import Size from '../../data/Size';
+import Rect from '../../data/Rect';
+import Circle from '../../data/Circle';
 import Bullet from '../bullet';
 import { isCircleInBound } from '../utils/collision';
 
 class Tank {
   p5: p5;
-  config: GameConfigType;
+  config: GameConfig;
   size: Size;
   halfSize: Size;
   position: Point;
@@ -24,7 +24,7 @@ class Tank {
   allowFire = true;
   debug: boolean;
   isLive = true;
-  constructor(p5: p5, config: GameConfigType, id: string, initStatus?: TankStatus) {
+  constructor(p5: p5, config: GameConfig, id: string, initStatus?: TankStatus) {
     this.p5 = p5;
     this.config = config;
     this.size = {w: 48, h: 32};
@@ -46,8 +46,9 @@ class Tank {
     this.debug = false;
   }
 
-  draw():void {
+  draw(color: p5.Color):void {
     const p5 = this.p5;
+    p5.stroke(color);
     p5.textSize(12);
 
     // plot tank
@@ -57,11 +58,14 @@ class Tank {
     p5.rotate(this.rotation);
     p5.rect(-this.halfSize.w, -this.halfSize.h, this.size.w, this.size.h, 5);
     p5.rect(0 , -this.halfSize.h / 4, this.size.w , this.halfSize.h / 2);
+    p5.stroke(255, 255, 255);
+    p5.fill(color);
+    this.p5.text(this.id, -this.halfSize.w+1, 0);
 
     // plot debug info
     p5.pop();
     // plot bullets
-    p5.fill(255, 255, 0);
+    p5.fill(color);
     this.drawBullets();
 
     if (this.debug) {

@@ -1,5 +1,5 @@
 import p5 from 'p5';
-import Point from './data/Point';
+import Point from '../data/Point';
 
 class Bullet {
   p5: p5;

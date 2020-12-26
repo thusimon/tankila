@@ -1,29 +1,32 @@
-import { GameConfigType } from './data/Types';
-import TankMe from './tank/tankMe';
-import TankPlayer from './tank/tankPlayer';
-import TankRobot from './tank/tankRobot';
+import { GameConfig } from '../../data/Types';
+import TankMe from '../tank/tankMe';
+import TankPlayer from '../tank/tankPlayer';
+import TankRobot from '../tank/tankRobot';
 import p5 from 'p5';
-import Point from './data/Point';
-import { TankStatus } from './data/Types';
-import { isCircleHitRect } from './utils/collision';
-import { getRandomNumber } from './utils/urls';
-import Circle from './data/Circle';
-import Messge from './message';
-import Message from './message';
+import Point from '../../data/Point';
+import { TankStatus } from '../../data/Types';
+import { isCircleHitRect } from '../utils/collision';
+import Circle from '../../data/Circle';
+import Messge from '../message';
+import Message from '../message';
 
 class Game {
-  config: GameConfigType;
+  config: GameConfig;
   p5: p5;
   sketch: p5;
   me: TankMe;
-  enemies: TankRobot[];
+  robots: TankRobot[];
   players: {[key: string]: TankPlayer};
   canvas: p5.Renderer;
-  score: number;
+  score: {[key: string]: number};
   message: Message;
   id: string;
-  constructor(config: GameConfigType) {
+  constructor(config: GameConfig) {
     this.config = config;
+    this.robots = [];
+    this.players = {};
+    this.id = config.id;
+    this.message = new Messge(this.id);
     this.p5 = new p5((sketch) => {
       sketch.setup = () => {
         this.setupGame(sketch);
@@ -32,11 +35,6 @@ class Game {
         this.runGame();
       };
     });
-    this.enemies = [];
-    this.players = {};
-    this.id = getRandomNumber();
-    this.message = new Messge(this.id);
-    this.score = 0;
   }
 
   async setupGame(sketch: p5) {
@@ -54,7 +52,6 @@ class Game {
       const tankStatus = this.getRandTankStatus();
       this.me = new TankMe(this.p5, this.config, this.id, this.message, tankStatus);
       this.message.listenOnMessage(this.handleMessages.bind(this));
-      //this.message.sendMessage(`pos,${this.me.position.x},${this.me.position.y},${this.me.rotation}`);
       setInterval(() => {
         this.message.sendMessage(`pos,${this.me.position.x},${this.me.position.y},${this.me.rotation}`);
       }, this.config.syncRate);
@@ -64,11 +61,7 @@ class Game {
   runGame(): void {
     //clear all canvas
     this.sketch.background('#F3F3F3');
-    const p5 = this.p5;
-    p5.fill(0, 0, 255);
-    p5.stroke(0, 0, 255);
-    p5.textSize(32);
-    this.p5.text(`Score: ${this.score}`, 20, 40);
+    this.drawScore();
 
     if (this.me) {
       this.me.draw();
@@ -80,6 +73,16 @@ class Game {
     }
     
     this.checkIfHit();
+  }
+
+  drawScore(): void {
+    const p5 = this.p5;
+    p5.fill(0, 0, 255);
+    p5.stroke(0, 0, 255);
+    p5.textSize(32);
+    Object.keys(this.score).forEach((tankId, idx) => {
+      p5.text(`${tankId}: ${this.score[tankId]}`, 20, 40 + 32 * idx);
+    });
   }
 
   handleMessages(data: string): void {
@@ -98,6 +101,9 @@ class Game {
         break;
       case 'blt':
         this.updateBullets(messageData);
+        break;
+      case 'hit':
+        this.updateScore(messageData);
         break;
       case 'ext':
         this.updateExit(messageData);
@@ -141,6 +147,10 @@ class Game {
     player.tankCommands = {...player.tankCommands, ...playerCommandUpdate};
   }
 
+  updateScore(scoreData: string): void {
+    this.score = JSON.parse(scoreData);
+  }
+
   updateBullets(data: string): void {
     const [id, x, y, r] = data.split(',');
     // skip my own bullet
@@ -156,11 +166,12 @@ class Game {
 
   updateExit(id: string): void {
     delete this.players[id];
+    delete this.score[id];
   }
 
-  addEnemy(): void {
-    const enemyCount = this.enemies.length;
-    this.enemies.push(new TankRobot(this.p5, this.config, `robot${enemyCount}`, this.getRandTankStatus()));
+  addRobots(): void {
+    const enemyCount = this.robots.length;
+    this.robots.push(new TankRobot(this.p5, this.config, `robot${enemyCount}`, this.getRandTankStatus()));
   }
 
   getRandTankStatus(): TankStatus {
@@ -192,7 +203,7 @@ class Game {
             if (isCircleHitRect(tbCircle, enemy.body)) {
               console.log(`tank ${tankId} bullet hits tank ${playerId}`);
               if (tankId == this.id) {
-                this.score++;
+                this.message.sendMessage(`hit,${this.id}`);
               }
               tb.isHit = true;
             }
