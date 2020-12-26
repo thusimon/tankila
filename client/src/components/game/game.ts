@@ -26,6 +26,7 @@ class Game {
     this.robots = [];
     this.players = {};
     this.id = config.id;
+    this.score = {};
     this.message = new Messge(this.id);
     this.p5 = new p5((sketch) => {
       sketch.setup = () => {
