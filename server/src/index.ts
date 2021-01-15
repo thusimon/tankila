@@ -95,14 +95,10 @@ router.get('/api/lasercredit', async (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, '../../client/build')));
-app.use(express.static(path.join(__dirname, '../../client/static')));
+app.use('/laserdefender', express.static(path.join(__dirname, '../../client/static/laserDefender')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../../client/build/index.html'));
-});
-
-app.get('/laserdefender', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../client/static/laserDefender/index.html'));
 });
 
 app.use(router);
