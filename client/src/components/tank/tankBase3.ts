@@ -7,7 +7,7 @@ import Rect from '../../data/Rect';
 import Circle from '../../data/Circle';
 import Bullet from '../bullet';
 import { isCircleInBound } from '../utils/collision';
-import { BoxGeometry, Clock, Mesh, MeshBasicMaterial, Scene } from 'three';
+import { BoxGeometry, Clock, CylinderGeometry, Mesh, MeshBasicMaterial, Scene, PolyhedronGeometry } from 'three';
 
 class Tank {
   p5: p5;
@@ -26,14 +26,43 @@ class Tank {
   debug: boolean;
   isLive = true;
   bodyGeometry: BoxGeometry;
-  bodyMaterial: MeshBasicMaterial;
+  towerGeometry: CylinderGeometry;
+  cannonGeometry: CylinderGeometry;
+  material: MeshBasicMaterial;
   body: Mesh;
   clock: Clock;
   constructor(scene: Scene, config: GameConfig, clock: Clock, initStatus?: TankStatus) {
     this.clock = clock;
-    this.bodyGeometry = new THREE.BoxGeometry(24, 15, 0);
-    this.bodyMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-    this.body = new THREE.Mesh(this.bodyGeometry, this.bodyMaterial);
+    this.material = new THREE.MeshPhongMaterial( { color: 0xffff00 } );
+
+    // const verticesOfCube = [
+    //   -4,-3, 2,         4,-3, 2,        4, 3, 2,        -4, 3, 2,
+    //   -3.3,-2.5, 0,     3.3,-2.5, 0,    3.3, 2.5, 0,    -3.3, 2.5, 0,
+    // ];
+  
+    // const indicesOfFaces = [
+    //   2,1,0,    0,3,2,
+    //   0,4,7,    7,3,0,
+    //   0,1,5,    5,4,0,
+    //   1,2,6,    6,5,1,
+    //   2,3,7,    7,6,2,
+    //   4,5,6,    6,7,4
+    // ];
+    //this.bodyGeometry = new THREE.PolyhedronGeometry(verticesOfCube, indicesOfFaces, 6, 2);
+    //this.bodyGeometry = new THREE.CylinderGeometry(8, 6, 2, 4, 1);
+    //this.bodyGeometry.rotateX(Math.PI / 2);
+    this.bodyGeometry = new THREE.BoxGeometry(8, 6, 1.2);
+    this.towerGeometry = new THREE.CylinderGeometry(2, 2, 1, 16);
+    this.towerGeometry.rotateX(Math.PI / 2);
+    this.towerGeometry.translate(0, 0, 1.1);
+    this.cannonGeometry = new THREE.CylinderGeometry(0.5, 0.25, 8, 16);
+    this.cannonGeometry.rotateZ(Math.PI / 2);
+    this.cannonGeometry.translate(5, 0, 1.1);
+
+    this.bodyGeometry.merge(this.towerGeometry);
+    this.bodyGeometry.merge(this.cannonGeometry);
+
+    this.body = new THREE.Mesh(this.bodyGeometry, this.material);
 
     scene.add(this.body);
   }

@@ -6,16 +6,17 @@ import GameContainer3 from './components/game/game-container3';
 import Welcome from './components/welcome';
 
 function App():JSX.Element {
-  const [gameData, setGameData] = useState({id: '', engine: true});
+  const [gameData, setGameData] = useState({id: 'test', engine: true});
   console.log(gameData);
   const getView = () => {
-    if (!gameData.id) {
-      return <Welcome />;
-    } else if (gameData.engine) {
-      return <GameContainer3 />;
-    } else {
-      return <GameContainer />;
-    }
+    // if (!gameData.id) {
+    //   return <Welcome />;
+    // } else if (gameData.engine) {
+    //   return <GameContainer3 />;
+    // } else {
+    //   return <GameContainer />;
+    // }
+    return <GameContainer3 />;
   };
   return <GameDataContext.Provider value={{ gameData, setGameData }}>
     <div className="App">

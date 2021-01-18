@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Mesh, PerspectiveCamera, Scene, WebGLRenderer, OrthographicCamera, Clock } from 'three';
+import { Mesh, PerspectiveCamera, Scene, WebGLRenderer, OrthographicCamera, Clock, Vector3, AmbientLight, DirectionalLight } from 'three';
 import { GameConfig } from '../../data/Types';
 import TankMe3 from '../tank/tankMe3';
 import Message from '../message';
@@ -14,6 +14,7 @@ class Game {
   renderer: WebGLRenderer;
   player: TankMe3;
   clock: Clock;
+  light: DirectionalLight;
   constructor(config: GameConfig) {
     this.config = config;
     this.id = config.id;
@@ -21,9 +22,19 @@ class Game {
     this.message = new Message(this.id);
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xACDF87);
-    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-    //this.camera = new THREE.OrthographicCamera( -window.innerWidth / 2, window.innerWidth / 2, window.innerHeight / 2, -window.innerHeight / 2, 1, 1000 );
-    this.camera.position.z = 800;
+    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 999 );
+    
+    this.camera.position.set(0, -50, 200);
+    this.camera.lookAt(0, 50, -200);
+    
+    const envLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.scene.add(envLight);
+    this.light = new THREE.DirectionalLight(0xffffff, 1); // soft white light
+    this.light.position.set(0, -50, 200);
+    this.light.target.position.set(0, 0, 0);
+    this.scene.add(this.light);
+    this.scene.add(this.light.target);
+    
     this.renderer = new THREE.WebGLRenderer({antialias: true});
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     document.getElementById(config.canvasParentId)!.appendChild(this.renderer.domElement);
@@ -40,10 +51,13 @@ class Game {
     this.player.update();
   }
 
+  updateCamera() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+  }
   registerEvents() {
     window.addEventListener('resize', () => {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
+      this.updateCamera();
       this.renderer.setSize( window.innerWidth, window.innerHeight );
     });
     window.addEventListener('keydown', this.keydownListener.bind(this));
