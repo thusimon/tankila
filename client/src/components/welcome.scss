@@ -7,6 +7,10 @@
   form {
     width: 50%;
     margin: auto;
+
+    .form-div {
+      text-align: left;
+    }
   }
   #tank-name {
     padding: 12px 20px;
@@ -14,6 +18,9 @@
     box-sizing: border-box;
     font-size: 30px;
     width: 100%;
+  }
+  #threejs-engine {
+    zoom: 2;
   }
   button {
     font-size: 26px;
