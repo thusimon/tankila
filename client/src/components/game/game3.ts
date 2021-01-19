@@ -1,10 +1,17 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
 import * as THREE from 'three';
-import { Mesh, PerspectiveCamera, Scene, WebGLRenderer, OrthographicCamera, Clock, Vector3, AmbientLight, DirectionalLight } from 'three';
-import { GameConfig } from '../../data/Types';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const Stats = require('stats-js');
+/* eslint-enable @typescript-eslint/no-var-requires */
+import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, Euler, DirectionalLight, AmbientLight } from 'three';
+import { DebugInfo, GameConfig } from '../../data/Types';
+import Debug from '../debug/debug';
 import TankMe3 from '../tank/tankMe3';
+import TankBase3 from '../tank/tankBase3';
 import Message from '../message';
 
-class Game {
+class Game3 {
   config: GameConfig;
   score: {[key: string]: number};
   message: Message;
@@ -12,85 +19,163 @@ class Game {
   scene: Scene;
   camera: PerspectiveCamera;
   renderer: WebGLRenderer;
-  player: TankMe3;
+  me: TankMe3;
+  players: {[key: string]: TankBase3};
   clock: Clock;
   light: DirectionalLight;
+  stats: Stats;
+  debugContainer: HTMLDivElement;
+  playBoundary: Vector3;
   constructor(config: GameConfig) {
     this.config = config;
     this.id = config.id;
     this.score = {};
     this.message = new Message(this.id);
-    this.scene = new THREE.Scene();
+    this.scene = new Scene();
     this.scene.background = new THREE.Color(0xACDF87);
-    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 999 );
+    this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 999);
     
-    this.camera.position.set(0, -50, 200);
-    this.camera.lookAt(0, 50, -200);
+    this.camera.position.set(0, 0, 150);
+    this.camera.lookAt(0, 0, -150);
     
-    const envLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const envLight = new AmbientLight(0xffffff, 0.5);
     this.scene.add(envLight);
-    this.light = new THREE.DirectionalLight(0xffffff, 1); // soft white light
-    this.light.position.set(0, -50, 200);
+    this.light = new DirectionalLight(0xffffff, 1); // soft white light
+    this.light.position.set(0, -80, 150);
     this.light.target.position.set(0, 0, 0);
     this.scene.add(this.light);
     this.scene.add(this.light.target);
     
-    this.renderer = new THREE.WebGLRenderer({antialias: true});
+    this.renderer = new WebGLRenderer({antialias: true});
     this.renderer.setSize( window.innerWidth, window.innerHeight );
-    document.getElementById(config.canvasParentId)!.appendChild(this.renderer.domElement);
+
+    this.updatePlayBoundary();
+
+    this.stats = new Stats();
+    this.stats.showPanel(0);
+
+    const debugInfo = {playerPosition: new Vector3(0, 0, 0), playerRotation: new Euler(0, 0, 0)};
+    const debugJSX = React.createElement(Debug, debugInfo);
+
+    const gameContainer = document.getElementById(config.canvasParentId)!;
+    this.debugContainer = document.createElement('div');
+    this.debugContainer.id = 'debug-containter';
+    ReactDOM.render(debugJSX, this.debugContainer);
+    
+    gameContainer.appendChild(this.renderer.domElement);
+    gameContainer.appendChild(this.stats.dom);
+    gameContainer.appendChild(this.debugContainer);
+
     this.registerEvents();
-    this.clock = new THREE.Clock();
-    // add a tank
-    this.player = new TankMe3(this.scene, config, this.message, this.clock);
+    this.clock = new Clock();
+    this.clock.getDelta();
+
     this.animate();
   }
 
-  animate() {
-    requestAnimationFrame(this.animate.bind(this));
-    this.renderer.render(this.scene, this.camera);
-    this.player.update();
+  async addMe() {
+    //const isConnected = await this.message.getConnection();
+    const isConnected = true;
+    if (isConnected) {
+      // add a tank
+      this.me = new TankMe3(this.scene, this.config, this.message, this.playBoundary);
+      // this.message.listenOnMessage(this.handleMessages.bind(this));
+      // setInterval(() => {
+      //   this.message.sendMessage(`pos,${this.me.body.position.x},${this.me.body.position.y},${this.me.body.rotation.z}`);
+      // }, this.config.syncRate);
+    }
   }
 
-  updateCamera() {
+  animate(): void {
+    this.stats.begin();
+    const deltaTime = this.clock.getDelta();
+    requestAnimationFrame(this.animate.bind(this));
+    this.renderer.render(this.scene, this.camera);
+    if (this.me) {
+      this.me.update(deltaTime);
+      this.updateDebugInfo();
+    }
+    this.stats.end();
+  }
+
+  updateCamera(): void {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
   }
-  registerEvents() {
+
+  updatePlayBoundary(): void {
+    const vec = new Vector3();
+    const pos = new Vector3();
+    vec.set(1, 1, 0.5);
+    vec.unproject(this.camera);
+    vec.sub(this.camera.position).normalize();
+    const distance = -this.camera.position.z / vec.z;
+    pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
+    this.playBoundary = pos;
+  }
+
+  updateDebugInfo(): void {
+    const debugInfo: DebugInfo = {
+      playerPosition: this.me.mesh.position,
+      playerRotation: this.me.mesh.rotation
+    };
+    const debugJSX = React.createElement(Debug, debugInfo);
+    ReactDOM.render(debugJSX, this.debugContainer);
+  }
+
+  registerEvents(): void {
     window.addEventListener('resize', () => {
       this.updateCamera();
+      this.updatePlayBoundary();
+      if (this.me) {
+        this.me.updateBoundary(this.playBoundary);
+      }
       this.renderer.setSize( window.innerWidth, window.innerHeight );
     });
     window.addEventListener('keydown', this.keydownListener.bind(this));
     window.addEventListener('keyup', this.keyupListener.bind(this));
   }
 
-  keydownListener(evt: KeyboardEvent) {
+  keydownListener(evt: KeyboardEvent): void {
+    if (!this.me) {
+      return;
+    }
     if (evt.key === 'w') {
-      this.player.moveForward();
+      this.me.moveForward();
     }
     if (evt.key === 's') {
-      this.player.moveBackward();
+      this.me.moveBackward();
     }
     if (evt.key === 'a') {
-      this.player.rotateLeft();
+      this.me.rotateLeft();
     }
     if (evt.key === 'd') {
-      this.player.rotateRight();
+      this.me.rotateRight();
+    }
+    if (evt.key === ' ' && this.me.allowShoot) {
+      this.me.allowShoot = false;
+      this.me.shoot();
     }
   }
 
-  keyupListener(evt: KeyboardEvent) {
-    if (evt.key === 'w' && this.player.isMovingForward()) {
-      this.player.stopMoving();
+  keyupListener(evt: KeyboardEvent): void {
+    if (!this.me) {
+      return;
     }
-    if (evt.key === 's' && this.player.isMovingBackward()) {
-      this.player.stopMoving();
+    if (evt.key === 'w' && this.me.isMovingForward()) {
+      this.me.stopMoving();
     }
-    if (evt.key === 'a' && this.player.isRotatingLeft()) {
-      this.player.stopRotating();
+    if (evt.key === 's' && this.me.isMovingBackward()) {
+      this.me.stopMoving();
     }
-    if (evt.key === 'd' && this.player.isRotatingRight()) {
-      this.player.stopRotating();
+    if (evt.key === 'a' && this.me.isRotatingLeft()) {
+      this.me.stopRotating();
+    }
+    if (evt.key === 'd' && this.me.isRotatingRight()) {
+      this.me.stopRotating();
+    }
+    if (evt.key === ' ') {
+      this.me.allowShoot = true;
     }
   }
 
@@ -125,7 +210,6 @@ class Game {
   updatePlayersPostion(commandData: string): void {
     const tanksData = JSON.parse(commandData);
     for (const tankId in tanksData) {
-      const data = tanksData[tankId].split(',');
       if (tankId === this.id) {
         // no need to create myself
         continue;
@@ -137,6 +221,13 @@ class Game {
     const data = commandData.split(',');
     const id = data[0];
     const commandValue = +data[1];
+    if (id === this.id || !this.players[id]) {
+      // no need to update myself or invald player
+      return;
+    }
+    const player = this.players[id];
+    const playerCommandUpdate = {[commandType]: !!commandValue};
+    player.tankCommands = {...player.tankCommands, ...playerCommandUpdate};
   }
 
   updateScore(scoreData: string): void {
@@ -144,7 +235,7 @@ class Game {
   }
 
   updateBullets(data: string): void {
-    const [id, x, y, r] = data.split(',');
+    const [id] = data.split(',');
     // skip my own bullet
     if (id === this.id) {
       return;
@@ -165,4 +256,4 @@ class Game {
   }
 }
 
-export default Game;
+export default Game3;

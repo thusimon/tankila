@@ -1,0 +1,21 @@
+#game-container {
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+#debug-containter {
+  position: fixed;
+  top: 0px; 
+  right: 0px;
+  opacity: 0.9; 
+  z-index: 10000;
+  font-size: 12pt;
+  color: black;
+  margin: 0px;
+  padding: 0px;
+  p {
+    margin: 0px;
+    padding: 0px;
+  }
+}

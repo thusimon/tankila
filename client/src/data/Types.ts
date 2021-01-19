@@ -1,4 +1,5 @@
 import Point from './Point';
+import { Vector3, Euler } from 'three';
 
 export interface GameConfig {
   width: number;
@@ -11,6 +12,16 @@ export interface GameConfig {
 export interface GameData {
   id: string;
   engine: boolean;
+}
+
+export interface DebugInfo {
+  playerPosition: Vector3;
+  playerRotation: Euler;
+}
+
+export interface DebugProps {
+  data: DebugInfo,
+  update: () => void
 }
 
 export interface GameDataContextType {

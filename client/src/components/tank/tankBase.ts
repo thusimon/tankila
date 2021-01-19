@@ -4,7 +4,7 @@ import Point from '../../data/Point';
 import Size from '../../data/Size';
 import Rect from '../../data/Rect';
 import Circle from '../../data/Circle';
-import Bullet from '../bullet';
+import Bullet from '../bullet/bullet';
 import { isCircleInBound } from '../utils/collision';
 
 class Tank {

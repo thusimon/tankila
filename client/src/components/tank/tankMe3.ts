@@ -1,26 +1,21 @@
 import { GameConfig, TankStatus, TankTransformStatus } from '../../data/Types';
 import * as THREE from 'three';
-import p5 from 'p5';
-import Point from '../../data/Point';
-import Rect from '../../data/Rect';
-import Bullet from '../bullet';
 import TankBase3 from './tankBase3';
 import Message from '../message';
-import { isRectInBound } from '../utils/collision';
-import { Clock, Scene, Vector3 } from 'three';
+import { Scene, Vector3 } from 'three';
 
 class TankMe3 extends TankBase3 {
 
   message: Message;
   transformStatus: TankTransformStatus;
   headDirection: Vector3;
-  constructor(scene: Scene, config: GameConfig, message: Message, clock: Clock, initStatus?: TankStatus) {
-    super(scene, config, clock, initStatus);
+  constructor(scene: Scene, config: GameConfig, message: Message, boundary: Vector3, initStatus?: TankStatus) {
+    super(scene, config, boundary, initStatus);
     this.message = message;
     this.transformStatus = {direction: 0, rotation: 0};
-    this.speedMove = 80;
+    this.speedMove = 20;
     this.speedRotate = 1;
-    this.speedBullet = 500;
+    this.speedBullet = 80;
     this.bullets = [];
     this.debug = false;
     this.headDirection = new Vector3(1, 0, 0);
@@ -39,61 +34,81 @@ class TankMe3 extends TankBase3 {
     this.message.sendMessage(`rr,${startFlag ? '1' : '0'}`);
   }
 
-  moveForward() {
+  moveForward(): void {
     this.transformStatus.direction = 1;
   }
 
-  isMovingForward() {
+  isMovingForward(): boolean {
     return this.transformStatus.direction === 1;
   }
 
-  moveBackward() {
+  moveBackward(): void {
     this.transformStatus.direction = -1;
   }
 
-  isMovingBackward() {
+  isMovingBackward(): boolean {
     return this.transformStatus.direction === -1;
   }
 
-  stopMoving() {
+  stopMoving(): void {
     this.transformStatus.direction = 0;
   }
 
-  isMovingStop() {
+  isMovingStop(): boolean {
     return this.transformStatus.direction === 0;
   }
 
-  rotateRight() {
+  rotateRight(): void {
     this.transformStatus.rotation = -1;
   }
 
-  isRotatingRight() {
+  isRotatingRight(): boolean {
     return this.transformStatus.rotation === -1;
   }
 
-  rotateLeft() {
+  rotateLeft(): void {
     this.transformStatus.rotation = 1;
   }
 
-  isRotatingLeft() {
+  isRotatingLeft(): boolean {
     return this.transformStatus.rotation === 1;
   }
 
-  stopRotating() {
+  stopRotating(): void {
     this.transformStatus.rotation = 0;
   }
 
-  isRotatingStop() {
+  isRotatingStop(): boolean {
     return this.transformStatus.rotation === 0;
   }
 
-  update() {
-    const deltaTime = this.clock.getDelta();
-    const rotationDelta = this.transformStatus.rotation * this.speedRotate * deltaTime;
-    this.body.rotateZ(rotationDelta);
-    const speed = this.transformStatus.direction * this.speedMove * deltaTime;
-    const axis = new THREE.Vector3(1, 0, 0);
-    this.body.translateOnAxis(axis, speed);
+  update(deltaTime: number): void {
+    if (this.transformStatus.rotation != 0) {
+      const rotationDelta = this.transformStatus.rotation * this.speedRotate * deltaTime;
+      this.mesh.rotateZ(rotationDelta);
+    }
+    if (this.transformStatus.direction != 0) {
+      const speed = this.transformStatus.direction * this.speedMove * deltaTime;
+      const axis = new THREE.Vector3(1, 0, 0);
+      const lastPosition = this.mesh.position.clone();
+      this.mesh.translateOnAxis(axis, speed);
+      if (!this.isTankInBoundary()) {
+        this.mesh.position.set(lastPosition.x, lastPosition.y, lastPosition.z);
+      }
+    }
+    this.bullets.forEach(bullet => {
+      bullet.update(deltaTime, this.boundary);
+    });
+    this.bullets = this.bullets.filter(bullet => !bullet.isHit);
+  }
+
+  isTankInBoundary(): boolean {
+    return this.mesh.position.x < this.boundary.x && this.mesh.position.x > -this.boundary.x
+      && this.mesh.position.y < this.boundary.y && this.mesh.position.y > -this.boundary.y;
+  }
+
+  updateBoundary(boundary: Vector3): void {
+    this.boundary = boundary;
   }
 
 }

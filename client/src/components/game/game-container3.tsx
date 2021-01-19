@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import { useGameData } from '../../context/context';
-import './game-container.scss';
+import './game-container3.scss';
 import Game3 from './game3';
 
 const GameContainer3 = (): JSX.Element => {
@@ -17,6 +17,7 @@ const GameContainer3 = (): JSX.Element => {
         syncRate: 100,
         id: gameData.id
       });
+      game3.addMe();
     }
   }, []);
   return <div id='game-container'></div>;

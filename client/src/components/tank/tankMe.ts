@@ -2,10 +2,9 @@ import { GameConfig, TankStatus } from '../../data/Types';
 import p5 from 'p5';
 import Point from '../../data/Point';
 import Rect from '../../data/Rect';
-import Bullet from '../bullet';
+import Bullet from '../bullet/bullet';
 import TankBase from './tankBase';
 import Message from '../message';
-import { isRectInBound } from '../utils/collision';
 
 class TankMe extends TankBase {
   message: Message;

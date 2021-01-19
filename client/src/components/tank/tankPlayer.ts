@@ -4,8 +4,7 @@ import Point from '../../data/Point';
 import Rect from '../../data/Rect';
 import { TankCommands } from '../../data/Types';
 import TankBase from './tankBase';
-import Bullet from '../bullet';
-import { isRectInBound } from '../utils/collision';
+import Bullet from '../bullet/bullet';
 
 class TankPlayer extends TankBase {
   tankCommands: TankCommands
