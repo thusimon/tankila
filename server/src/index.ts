@@ -18,7 +18,12 @@ enum MessageType {
   rr='rr',
   blt='blt',
   hit='hit',
-  ext='ext'
+  ext='ext',
+  //Engine version
+  st3='st3', // start
+  dir='dir', // move forward, backward or stop
+  rot='rot', // rotate left, right or stop
+  pos3='pos3' // send all tank position
 }
 
 interface Position {
@@ -29,6 +34,22 @@ interface Position {
 
 interface TankData {
   [key: string]: string
+}
+
+interface Command {
+  cmd: string,
+  stmp: number
+}
+
+interface TankData3 {
+  pos: Position,
+  spd: number[], // 0 move speed, 1 rotate speed 2 bullet speed
+  sat: number[] // 0: dir, 1: rotate
+  stmp: number
+}
+
+interface TanksData3 {
+  [key: string]: TankData3
 }
 
 interface ScoreData {
@@ -141,15 +162,64 @@ wss.on('connection', (ws, req) => {
 });
 
 const tanks: TankData = {};
+const tanks3: TanksData3 = {};
 const score: ScoreData = {};
 
-const updateRate = 100;
+const updateRate = 1000 / 50;
 setInterval(() => {
   broadcastMessage(`${MessageType.pos},${JSON.stringify(tanks)}`);
+  updateTanks3Position();
+  broadcastMessage(`${MessageType.pos3}, ${JSON.stringify(tanks3)}`);
 }, updateRate);
+
+const updateTanks3Position = () => {
+  for (let tankId in tanks3) {
+    const tankData = tanks3[tankId];
+    updatePosByStatus(tankData);
+  }
+}
+
+const updatePosByStatus = (tankData: TankData3) => {
+  const curTime = Date.now();
+  const deltaTime = (curTime - tankData.stmp) / 1000;
+  const [mvSpd, rtSpd, bltSpd] = tankData.spd;
+  const pos = tankData.pos;
+  const [dir, rot] = tankData.sat;
+
+  pos.r += rot * rtSpd * deltaTime;
+  const offSet = dir * mvSpd * deltaTime;
+  pos.x += Math.cos(pos.r) * offSet;
+  pos.y += Math.sin(pos.r) * offSet;
+  tankData.stmp = curTime;
+}
 
 const handleTankCommand = (id: string, commandType: string, command: string) => {
   broadcastMessage(`${commandType},${id},${command}`);
+}
+
+const handleTankCommand3 = (id: string, commandType: string, command: Array<string>) => {
+  switch (commandType) {
+    case MessageType.st3:
+      // tank start, command=x,y,r,speed move,speed rotate,bullet speed,timestamp
+      console.log(`tank start with ${command.join(',')}`);
+      tanks3[id] = {
+        pos: {x: parseFloat(command[0]), y: parseFloat(command[1]), r: parseFloat(command[2])},
+        spd: [parseFloat(command[3]), parseFloat(command[4]), parseFloat(command[5])],
+        sat: [0,0],
+        stmp: Date.now()
+      };
+      break;
+    case MessageType.dir:
+      // tank move
+      console.log(`tank move ${command[0]} at ${command[1]}`);
+      tanks3[id].sat[0] = parseInt(command[0]);
+      break;
+    case MessageType.rot:
+      // tank rotate
+      console.log(`tank rotate ${command[0]} at ${command[1]}`);
+      tanks3[id].sat[1] = parseInt(command[0]);
+      break;
+  }
 }
 
 const handleScoreUpdate = (id: string) => {
@@ -166,23 +236,29 @@ const handleBulletPosition = (id: string, x: string, y: string, r: string) => {
 }
 
 const handleMessage = (id: string, message: string): void => {
-  const messageParts = message.split(',');
-  const messageType = messageParts[0]
+  const messageData = message.split(',');
+  const messageType = messageData.shift();
   switch (messageType) {
     case MessageType.pos:
-      handleTanksPosition(id, messageParts[1], messageParts[2], messageParts[3])
+      handleTanksPosition(id, messageData[0], messageData[1], messageData[2])
       break;
     case MessageType.fwd:
     case MessageType.bwd:
     case MessageType.rl:
     case MessageType.rr:
-      handleTankCommand(id, messageType, messageParts[1]);
+      handleTankCommand(id, messageType, messageData[0]);
       break;
     case MessageType.hit:
       handleScoreUpdate(id);
       break;
     case MessageType.blt:
-      handleBulletPosition(id, messageParts[1], messageParts[2], messageParts[3]);
+      handleBulletPosition(id, messageData[0], messageData[1], messageData[2]);
+      break;
+    // Engine version
+    case MessageType.st3:
+    case MessageType.dir:
+    case MessageType.rot:
+      handleTankCommand3(id, messageType, messageData)
       break;
     default:
       break;

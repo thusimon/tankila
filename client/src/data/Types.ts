@@ -14,6 +14,13 @@ export interface GameData {
   engine: boolean;
 }
 
+export interface TankData3 {
+  pos: {x:number, y:number, r:number},
+  spd: number[], // 0 move speed, 1 rotate speed 2 bullet speed
+  sat: number[] // 0: dir, 1: rotate
+  stmp: number
+}
+
 export interface DebugInfo {
   playerPosition: Vector3;
   playerRotation: Euler;

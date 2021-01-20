@@ -9,10 +9,12 @@ class TankMe3 extends TankBase3 {
   message: Message;
   transformStatus: TankTransformStatus;
   headDirection: Vector3;
+  boundary: Vector3;
   constructor(scene: Scene, config: GameConfig, message: Message, boundary: Vector3, initStatus?: TankStatus) {
-    super(scene, config, boundary, initStatus);
+    super(scene, config, initStatus);
     this.message = message;
     this.transformStatus = {direction: 0, rotation: 0};
+    this.boundary = boundary;
     this.speedMove = 20;
     this.speedRotate = 1;
     this.speedBullet = 80;
@@ -21,20 +23,11 @@ class TankMe3 extends TankBase3 {
     this.headDirection = new Vector3(1, 0, 0);
   }
 
-  sendMoveForward(startFlag: boolean): void {
-    this.message.sendMessage(`fwd,${startFlag ? '1' : '0'}`);
-  }
-  sendMoveBackword(startFlag: boolean): void {
-    this.message.sendMessage(`bwd,${startFlag ? '1' : '0'}`);
-  }
-  sendRotateLeft(startFlag: boolean): void {
-    this.message.sendMessage(`rl,${startFlag ? '1' : '0'}`);
-  }
-  sendRotateRight(startFlag: boolean): void {
-    this.message.sendMessage(`rr,${startFlag ? '1' : '0'}`);
-  }
-
   moveForward(): void {
+    if (this.transformStatus.direction != 1) {
+      // direction changes
+      this.message.sendMessage(`dir,1,${Date.now()}`);
+    }
     this.transformStatus.direction = 1;
   }
 
@@ -43,6 +36,10 @@ class TankMe3 extends TankBase3 {
   }
 
   moveBackward(): void {
+    if (this.transformStatus.direction != -1) {
+      // direction changes
+      this.message.sendMessage(`dir,-1,${Date.now()}`);
+    }
     this.transformStatus.direction = -1;
   }
 
@@ -51,6 +48,10 @@ class TankMe3 extends TankBase3 {
   }
 
   stopMoving(): void {
+    if (this.transformStatus.direction != 0) {
+      // direction changes
+      this.message.sendMessage(`dir,0,${Date.now()}`);
+    }
     this.transformStatus.direction = 0;
   }
 
@@ -59,6 +60,10 @@ class TankMe3 extends TankBase3 {
   }
 
   rotateRight(): void {
+    if (this.transformStatus.rotation != -1) {
+      // rotation changes
+      this.message.sendMessage(`rot,-1,${Date.now()}`);
+    }
     this.transformStatus.rotation = -1;
   }
 
@@ -67,6 +72,10 @@ class TankMe3 extends TankBase3 {
   }
 
   rotateLeft(): void {
+    if (this.transformStatus.rotation != 1) {
+      // rotation changes
+      this.message.sendMessage(`rot,1,${Date.now()}`);
+    }
     this.transformStatus.rotation = 1;
   }
 
@@ -75,6 +84,10 @@ class TankMe3 extends TankBase3 {
   }
 
   stopRotating(): void {
+    if (this.transformStatus.rotation != 0) {
+      // rotation changes
+      this.message.sendMessage(`rot,0,${Date.now()}`);
+    }
     this.transformStatus.rotation = 0;
   }
 
@@ -83,23 +96,29 @@ class TankMe3 extends TankBase3 {
   }
 
   update(deltaTime: number): void {
-    if (this.transformStatus.rotation != 0) {
-      const rotationDelta = this.transformStatus.rotation * this.speedRotate * deltaTime;
-      this.mesh.rotateZ(rotationDelta);
-    }
-    if (this.transformStatus.direction != 0) {
-      const speed = this.transformStatus.direction * this.speedMove * deltaTime;
-      const axis = new THREE.Vector3(1, 0, 0);
-      const lastPosition = this.mesh.position.clone();
-      this.mesh.translateOnAxis(axis, speed);
-      if (!this.isTankInBoundary()) {
-        this.mesh.position.set(lastPosition.x, lastPosition.y, lastPosition.z);
-      }
-    }
+    // if (this.transformStatus.rotation != 0) {
+    //   const rotationDelta = this.transformStatus.rotation * this.speedRotate * deltaTime;
+    //   this.mesh.rotateZ(rotationDelta);
+    // }
+    // if (this.transformStatus.direction != 0) {
+    //   const speed = this.transformStatus.direction * this.speedMove * deltaTime;
+    //   const axis = new THREE.Vector3(1, 0, 0);
+    //   const lastPosition = this.mesh.position.clone();
+    //   this.mesh.translateOnAxis(axis, speed);
+    //   if (!this.isTankInBoundary()) {
+    //     this.mesh.position.set(lastPosition.x, lastPosition.y, lastPosition.z);
+    //   }
+    // }
     this.bullets.forEach(bullet => {
       bullet.update(deltaTime, this.boundary);
     });
     this.bullets = this.bullets.filter(bullet => !bullet.isHit);
+  }
+
+  updatePosByServer(x: number, y: number, r: number) {
+    this.mesh.rotation.z = r;
+    this.mesh.position.x = x;
+    this.mesh.position.y = y;
   }
 
   isTankInBoundary(): boolean {

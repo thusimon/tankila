@@ -5,7 +5,7 @@ import * as THREE from 'three';
 const Stats = require('stats-js');
 /* eslint-enable @typescript-eslint/no-var-requires */
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, Euler, DirectionalLight, AmbientLight } from 'three';
-import { DebugInfo, GameConfig } from '../../data/Types';
+import { DebugInfo, GameConfig, TankData3 } from '../../data/Types';
 import Debug from '../debug/debug';
 import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
@@ -74,15 +74,12 @@ class Game3 {
   }
 
   async addMe() {
-    //const isConnected = await this.message.getConnection();
-    const isConnected = true;
+    const isConnected = await this.message.getConnection();
     if (isConnected) {
       // add a tank
       this.me = new TankMe3(this.scene, this.config, this.message, this.playBoundary);
-      // this.message.listenOnMessage(this.handleMessages.bind(this));
-      // setInterval(() => {
-      //   this.message.sendMessage(`pos,${this.me.body.position.x},${this.me.body.position.y},${this.me.body.rotation.z}`);
-      // }, this.config.syncRate);
+      this.message.sendMessage(`st3,0,0,0,${this.me.speedMove},${this.me.speedRotate},${this.me.speedBullet},${Date.now()}`);
+      this.message.listenOnMessage(this.handleMessages.bind(this));
     }
   }
 
@@ -184,7 +181,8 @@ class Game3 {
     const messageType = data.substring(0, typeIdx);
     const messageData = data.substring(typeIdx + 1);
     switch (messageType) {
-      case 'pos':
+      case 'pos3':
+        //console.log(185, messageData);
         this.updatePlayersPostion(messageData);
         break;
       case 'fwd':
@@ -211,8 +209,10 @@ class Game3 {
     const tanksData = JSON.parse(commandData);
     for (const tankId in tanksData) {
       if (tankId === this.id) {
-        // no need to create myself
-        continue;
+        const tankData: TankData3 = tanksData[tankId];
+        this.me.updatePosByServer(tankData.pos.x, tankData.pos.y, tankData.pos.r);
+      } else {
+        //TODO update other tanks data
       }
     }
   }

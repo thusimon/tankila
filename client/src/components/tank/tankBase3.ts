@@ -19,13 +19,11 @@ class TankBase3 {
   material: MeshBasicMaterial;
   mesh: Mesh;
   tankCommands: TankCommands;
-  boundary: Vector3;
   scene: Scene;
-  constructor(scene: Scene, config: GameConfig, boundary: Vector3, initStatus?: TankStatus) {
+  constructor(scene: Scene, config: GameConfig, initStatus?: TankStatus) {
     this.scene = scene;
     this.config = config;
     this.id = config.id;
-    this.boundary = boundary;
     this.material = new THREE.MeshPhongMaterial( { color: 0xffff00 } );
 
     // const verticesOfCube = [
