@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Euler, Vector3, MeshBasicMaterial, MeshPhongMaterial, SphereGeometry, Mesh, Scene } from 'three';
+import { Euler, Vector3, MeshBasicMaterial, MeshPhongMaterial, SphereGeometry, Mesh, Scene, Raycaster } from 'three';
 
 class Bullet3 {
   id: string;
@@ -41,11 +41,23 @@ class Bullet3 {
       this.mesh.position.y > boundary.y || this.mesh.position.y < -boundary.y;
   }
 
+  collisionWithMeshes(meshes: Mesh[]): boolean {
+    const originPoint = this.mesh.position.clone();
+    const directionVector = new Vector3(0, 0, -1); // always pointing to the ground
+    const ray = new Raycaster(originPoint, directionVector);
+    const collisionResults = ray.intersectObjects(meshes);
+    if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+      console.log('hit the mesh!');
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   destory(): void {
     this.geo.dispose();
     this.material.dispose();
     this.scene.remove(this.mesh);
-    console.log('destory bullet');
   }
 }
 

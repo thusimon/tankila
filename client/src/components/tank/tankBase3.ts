@@ -55,12 +55,6 @@ class TankBase3 {
 
     this.scene.add(this.mesh);
   }
-
-  shoot(): void {
-    const cannonPos = this.mesh.position.clone().add(new Vector3(10, 0, 1.1).applyEuler(this.mesh.rotation));
-    const bullet = new Bullet3(this.scene, this.id, cannonPos, this.mesh.rotation, this.speedBullet);
-    this.bullets.push(bullet);
-  }
 }
 
 export default TankBase3;

@@ -1,8 +1,9 @@
-import { GameConfig, TankStatus, TankTransformStatus } from '../../data/Types';
+import { BulletData, GameConfig, TankStatus, TankTransformStatus } from '../../data/Types';
 import * as THREE from 'three';
 import TankBase3 from './tankBase3';
+import Bullet3 from '../bullet/bullet3';
 import Message from '../message';
-import { Scene, Vector3 } from 'three';
+import { Euler, Scene, Vector3 } from 'three';
 
 class TankMe3 extends TankBase3 {
 
@@ -95,6 +96,13 @@ class TankMe3 extends TankBase3 {
     return this.transformStatus.rotation === 0;
   }
 
+  shoot(): void {
+    this.message.sendMessage(`blt3,${Date.now()}`);
+    //const cannonPos = this.mesh.position.clone().add(new Vector3(10, 0, 1.1).applyEuler(this.mesh.rotation));
+    //const bullet = new Bullet3(this.scene, this.id, cannonPos, this.mesh.rotation, this.speedBullet);
+    //this.bullets.push(bullet);
+  }
+
   update(deltaTime: number): void {
     // if (this.transformStatus.rotation != 0) {
     //   const rotationDelta = this.transformStatus.rotation * this.speedRotate * deltaTime;
@@ -109,16 +117,30 @@ class TankMe3 extends TankBase3 {
     //     this.mesh.position.set(lastPosition.x, lastPosition.y, lastPosition.z);
     //   }
     // }
-    this.bullets.forEach(bullet => {
-      bullet.update(deltaTime, this.boundary);
-    });
-    this.bullets = this.bullets.filter(bullet => !bullet.isHit);
+    // this.bullets.forEach(bullet => {
+    //   bullet.update(deltaTime, this.boundary);
+    // });
+    // this.bullets = this.bullets.filter(bullet => !bullet.isHit);
   }
 
   updatePosByServer(x: number, y: number, r: number) {
     this.mesh.rotation.z = r;
     this.mesh.position.x = x;
     this.mesh.position.y = y;
+  }
+
+  updateBulletsByServer(bullets: BulletData[]) {
+    // destory all the current bullets
+    this.bullets.forEach(b => {
+      b.destory();
+    });
+    this.bullets = [];
+    bullets.forEach(blt => {
+      const bulletPos = new Vector3(blt.pos.x, blt.pos.y, blt.pos.z);
+      const bulletRot = new Euler(0, 0, blt.rot);
+      const bullet = new Bullet3(this.scene, this.id, bulletPos, bulletRot, this.speedBullet);
+      this.bullets.push(bullet);
+    });
   }
 
   isTankInBoundary(): boolean {

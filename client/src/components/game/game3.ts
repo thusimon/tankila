@@ -30,6 +30,7 @@ class Game3 {
     this.config = config;
     this.id = config.id;
     this.score = {};
+    this.players = {};
     this.message = new Message(this.id);
     this.scene = new Scene();
     this.scene.background = new THREE.Color(0xACDF87);
@@ -48,8 +49,6 @@ class Game3 {
     
     this.renderer = new WebGLRenderer({antialias: true});
     this.renderer.setSize( window.innerWidth, window.innerHeight );
-
-    this.updatePlayBoundary();
 
     this.stats = new Stats();
     this.stats.showPanel(0);
@@ -79,7 +78,12 @@ class Game3 {
       // add a tank
       this.me = new TankMe3(this.scene, this.config, this.message, this.playBoundary);
       this.message.sendMessage(`st3,0,0,0,${this.me.speedMove},${this.me.speedRotate},${this.me.speedBullet},${Date.now()}`);
+      this.updatePlayBoundary();
       this.message.listenOnMessage(this.handleMessages.bind(this));
+
+      const testTarget = new TankBase3(this.scene, this.config);
+      testTarget.mesh.translateOnAxis(new Vector3(1, 1, 0), 50);
+      this.players['test'] = testTarget;
     }
   }
 
@@ -90,6 +94,11 @@ class Game3 {
     this.renderer.render(this.scene, this.camera);
     if (this.me) {
       this.me.update(deltaTime);
+      // check bullet hits
+      const playersArr = Object.values(this.players).map(p => p.mesh);
+      this.me.bullets.forEach(bullet => {
+        bullet.collisionWithMeshes(playersArr);
+      });
       this.updateDebugInfo();
     }
     this.stats.end();
@@ -109,6 +118,7 @@ class Game3 {
     const distance = -this.camera.position.z / vec.z;
     pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
     this.playBoundary = pos;
+    this.message.sendMessage(`bon,${pos.x},${pos.y}`);
   }
 
   updateDebugInfo(): void {
@@ -126,6 +136,7 @@ class Game3 {
       this.updatePlayBoundary();
       if (this.me) {
         this.me.updateBoundary(this.playBoundary);
+        
       }
       this.renderer.setSize( window.innerWidth, window.innerHeight );
     });
@@ -183,7 +194,7 @@ class Game3 {
     switch (messageType) {
       case 'pos3':
         //console.log(185, messageData);
-        this.updatePlayersPostion(messageData);
+        this.updatePlayersAndBulletsPostion(messageData);
         break;
       case 'fwd':
       case 'bwd':
@@ -205,12 +216,13 @@ class Game3 {
     }
   }
 
-  updatePlayersPostion(commandData: string): void {
+  updatePlayersAndBulletsPostion(commandData: string): void {
     const tanksData = JSON.parse(commandData);
     for (const tankId in tanksData) {
       if (tankId === this.id) {
         const tankData: TankData3 = tanksData[tankId];
         this.me.updatePosByServer(tankData.pos.x, tankData.pos.y, tankData.pos.r);
+        this.me.updateBulletsByServer(tankData.blt);
       } else {
         //TODO update other tanks data
       }

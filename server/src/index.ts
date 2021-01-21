@@ -3,6 +3,7 @@ import path from 'path';
 import express from 'express';
 import WebSocket from 'ws';
 import mongoose from 'mongoose';
+import {Euler, Vector3} from 'three';
 const Schema = mongoose.Schema;
 mongoose.set('useFindAndModify', false);
 mongoose.set('useNewUrlParser', true);
@@ -21,8 +22,10 @@ enum MessageType {
   ext='ext',
   //Engine version
   st3='st3', // start
+  bon='bon', // boundary
   dir='dir', // move forward, backward or stop
   rot='rot', // rotate left, right or stop
+  blt3='blt3',
   pos3='pos3' // send all tank position
 }
 
@@ -41,11 +44,19 @@ interface Command {
   stmp: number
 }
 
+interface BulletData {
+  pos: Vector3,
+  rot: number,
+  hit: boolean
+}
+
 interface TankData3 {
   pos: Position,
   spd: number[], // 0 move speed, 1 rotate speed 2 bullet speed
-  sat: number[] // 0: dir, 1: rotate
-  stmp: number
+  sat: number[], // 0: dir, 1: rotate
+  bon: number[], // boundary [x, y]
+  stmp: number,
+  blt: BulletData[]
 }
 
 interface TanksData3 {
@@ -54,10 +65,6 @@ interface TanksData3 {
 
 interface ScoreData {
   [key: string]: number
-}
-
-interface BulletsData {
-  [key: string]: Position[]
 }
 
 /* ------db------ */
@@ -170,12 +177,20 @@ setInterval(() => {
   broadcastMessage(`${MessageType.pos},${JSON.stringify(tanks)}`);
   updateTanks3Position();
   broadcastMessage(`${MessageType.pos3}, ${JSON.stringify(tanks3)}`);
+  filterTanksBults();
 }, updateRate);
 
 const updateTanks3Position = () => {
   for (let tankId in tanks3) {
     const tankData = tanks3[tankId];
     updatePosByStatus(tankData);
+  }
+}
+
+const filterTanksBults = () => {
+  for (let tankId in tanks3) {
+    const tankData = tanks3[tankId];
+    filterHitBults(tankData);
   }
 }
 
@@ -187,10 +202,35 @@ const updatePosByStatus = (tankData: TankData3) => {
   const [dir, rot] = tankData.sat;
 
   pos.r += rot * rtSpd * deltaTime;
-  const offSet = dir * mvSpd * deltaTime;
-  pos.x += Math.cos(pos.r) * offSet;
-  pos.y += Math.sin(pos.r) * offSet;
+  const offset = dir * mvSpd * deltaTime;
+  const offsetBlt = bltSpd * deltaTime;
+  const [boundX, boundY] = tankData.bon;
+  const predictX = pos.x + Math.cos(pos.r) * offset;
+  const predictY = pos.y + Math.sin(pos.r) * offset;
+  if (predictX < boundX && predictX > -boundX) {
+    pos.x = predictX;
+  }
+  if (predictY < boundY && predictY > -boundY) {
+    pos.y = predictY;
+  }
+  // update tank bullets
+  tankData.blt.forEach(b => {
+    const predictBltX = b.pos.x + Math.cos(b.rot) * offsetBlt;
+    const predictBltY = b.pos.y + Math.sin(b.rot) * offsetBlt;
+    // check if bullet exceed boundary
+    if (predictBltX > boundX || predictBltX < -boundX || predictBltY > boundY || predictBltY < -boundY) {
+      // exceed boundary
+      b.hit = true;
+    } else {
+      b.pos.x = predictBltX;
+      b.pos.y = predictBltY;
+    }
+  });
   tankData.stmp = curTime;
+}
+
+const filterHitBults = (tankData: TankData3) => {
+  tankData.blt = tankData.blt.filter(b => !b.hit);
 }
 
 const handleTankCommand = (id: string, commandType: string, command: string) => {
@@ -206,8 +246,13 @@ const handleTankCommand3 = (id: string, commandType: string, command: Array<stri
         pos: {x: parseFloat(command[0]), y: parseFloat(command[1]), r: parseFloat(command[2])},
         spd: [parseFloat(command[3]), parseFloat(command[4]), parseFloat(command[5])],
         sat: [0,0],
-        stmp: Date.now()
+        bon: [0,0],
+        stmp: Date.now(),
+        blt: []
       };
+      break;
+    case MessageType.bon:
+      tanks3[id].bon = [parseFloat(command[0]), parseFloat(command[1])];
       break;
     case MessageType.dir:
       // tank move
@@ -218,6 +263,12 @@ const handleTankCommand3 = (id: string, commandType: string, command: Array<stri
       // tank rotate
       console.log(`tank rotate ${command[0]} at ${command[1]}`);
       tanks3[id].sat[1] = parseInt(command[0]);
+      break;
+    case MessageType.blt3:
+      // tank shoot bullet
+      const tank = tanks3[id];
+      const bltInitPos = new Vector3(tank.pos.x, tank.pos.y, 0).add(new Vector3(10, 0, 1.1).applyEuler(new Euler(0, 0, tank.pos.r)));
+      tanks3[id].blt.push({pos: bltInitPos, rot: tank.pos.r, hit: false});
       break;
   }
 }
@@ -256,8 +307,10 @@ const handleMessage = (id: string, message: string): void => {
       break;
     // Engine version
     case MessageType.st3:
+    case MessageType.bon:
     case MessageType.dir:
     case MessageType.rot:
+    case MessageType.blt3:
       handleTankCommand3(id, messageType, messageData)
       break;
     default:
