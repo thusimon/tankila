@@ -4,6 +4,7 @@ import express from 'express';
 import WebSocket from 'ws';
 import mongoose from 'mongoose';
 import {Euler, Vector3} from 'three';
+import { unzipToFolder } from '../tools/unzip';
 import TankBase3 from './TankBase3';
 import Bullet3 from './Bullet3';
 import { BulletData } from '../../client/src/data/Types';
@@ -120,8 +121,11 @@ router.get('/api/lasercredit', async (req, res) => {
   }
 });
 
-app.use(express.static(path.join(__dirname, '../../../../client/build')));
-app.use('/laserdefender', express.static(path.join(__dirname, '../../../../client/static/laserDefender')));
+const tankilaClientPath = path.join(__dirname, '../../../../client/build');
+app.use(express.static(tankilaClientPath));
+
+const otherClientPath = path.join(__dirname, '../../../../client/static');
+app.use('/laserdefender', express.static(path.join(otherClientPath, '/laserDefender')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../../../../client/build/index.html'));
@@ -132,6 +136,8 @@ app.use(router);
 const server = app.listen(PORT, () => {
   connectToDb().then(() => {
     console.log(`Successfully started server on port ${PORT}`);
+    unzipToFolder(path.join(otherClientPath, '/laserDefender.zip'), otherClientPath);
+    console.log('successfully unziped laser defender');
   });
 });
 
