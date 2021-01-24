@@ -4,6 +4,10 @@ import express from 'express';
 import WebSocket from 'ws';
 import mongoose from 'mongoose';
 import {Euler, Vector3} from 'three';
+import TankBase3 from './TankBase3';
+import Bullet3 from './Bullet3';
+import { BulletData } from '../../client/src/data/Types';
+
 const Schema = mongoose.Schema;
 mongoose.set('useFindAndModify', false);
 mongoose.set('useNewUrlParser', true);
@@ -23,10 +27,13 @@ enum MessageType {
   //Engine version
   st3='st3', // start
   bon='bon', // boundary
+  stup='stup', // setup speed
   dir='dir', // move forward, backward or stop
   rot='rot', // rotate left, right or stop
   blt3='blt3',
-  pos3='pos3' // send all tank position
+  pos3='pos3', // send all tank position
+  scor='scor',
+  hit3='hit3',
 }
 
 interface Position {
@@ -44,19 +51,10 @@ interface Command {
   stmp: number
 }
 
-interface BulletData {
-  pos: Vector3,
-  rot: number,
-  hit: boolean
-}
-
 interface TankData3 {
-  pos: Position,
-  spd: number[], // 0 move speed, 1 rotate speed 2 bullet speed
-  sat: number[], // 0: dir, 1: rotate
-  bon: number[], // boundary [x, y]
-  stmp: number,
-  blt: BulletData[]
+  tank: TankBase3;
+  stmp: number;
+  scor: number;
 }
 
 interface TanksData3 {
@@ -122,11 +120,11 @@ router.get('/api/lasercredit', async (req, res) => {
   }
 });
 
-app.use(express.static(path.join(__dirname, '../../client/build')));
-app.use('/laserdefender', express.static(path.join(__dirname, '../../client/static/laserDefender')));
+app.use(express.static(path.join(__dirname, '../../../../client/build')));
+app.use('/laserdefender', express.static(path.join(__dirname, '../../../../client/static/laserDefender')));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../client/build/index.html'));
+  res.sendFile(path.join(__dirname, '../../../../client/build/index.html'));
 });
 
 app.use(router);
@@ -158,7 +156,7 @@ wss.on('connection', (ws, req) => {
     broadcastMessage(`${MessageType.hit},${JSON.stringify(score)}`);
     ws.on('close', () => {
       console.log(`${id} tank exits`);
-      delete tanks[id];
+      delete tanks3[id];
       delete score[id];
       broadcastMessage(`${MessageType.ext},${id}`);
     });
@@ -172,41 +170,72 @@ const tanks: TankData = {};
 const tanks3: TanksData3 = {};
 const score: ScoreData = {};
 
+const extractTanksMessage = () => {
+  const tanksMessage: {[key: string]: object} = {};
+  for (const tankId in tanks3) {
+    const tank = tanks3[tankId];
+    const tankBlts: BulletData[] = Object.values(tank.tank.bullets).map(blt => {
+      return {
+        pos: blt.position,
+        rot: blt.rotation.z,
+        hit: blt.isHit,
+        idx: blt.idx
+      }
+    });
+    const tankMessage = {
+      pos: {
+        x: tank.tank.position.x,
+        y: tank.tank.position.y,
+        r: tank.tank.rotation.z
+      },
+      blt: tankBlts,
+      scor: tank.scor
+    }
+    tanksMessage[tankId] = tankMessage;
+  }
+  return tanksMessage;
+}
+
 const updateRate = 1000 / 50;
 setInterval(() => {
-  broadcastMessage(`${MessageType.pos},${JSON.stringify(tanks)}`);
   updateTanks3Position();
-  broadcastMessage(`${MessageType.pos3}, ${JSON.stringify(tanks3)}`);
-  filterTanksBults();
+  const tanksMessage = extractTanksMessage();
+  broadcastMessage(`${MessageType.pos3},${JSON.stringify(tanksMessage)}`);
+  postProcessTanksAndBults();
 }, updateRate);
 
 const updateTanks3Position = () => {
-  for (let tankId in tanks3) {
-    const tankData = tanks3[tankId];
-    updatePosByStatus(tankData);
-  }
+  const tanksArr = Object.values(tanks3);
+  tanksArr.forEach(tank => {
+    updatePosByStatus(tank, tanksArr);
+  });
 }
 
-const filterTanksBults = () => {
-  for (let tankId in tanks3) {
-    const tankData = tanks3[tankId];
-    filterHitBults(tankData);
-  }
+const postProcessTanksAndBults = () => {
+  const tanksArr = Object.values(tanks3);
+  tanksArr.forEach(tank => {
+    filterHitBullets(tank);
+  });
 }
 
-const updatePosByStatus = (tankData: TankData3) => {
+const updatePosByStatus = (tankData: TankData3, tanksData: TankData3[]) => {
   const curTime = Date.now();
   const deltaTime = (curTime - tankData.stmp) / 1000;
-  const [mvSpd, rtSpd, bltSpd] = tankData.spd;
-  const pos = tankData.pos;
-  const [dir, rot] = tankData.sat;
+  const tankId = tankData.tank.id;
+  const tank = tankData.tank;
+  const boundary = tank.boundary;
+  const {direction, rotation} = tank.transformStatus;
+  tank.rotation.z += rotation * tank.speedRotate * deltaTime;
+  
+  const pos = tank.position;
+  const rot = tank.rotation;
 
-  pos.r += rot * rtSpd * deltaTime;
-  const offset = dir * mvSpd * deltaTime;
-  const offsetBlt = bltSpd * deltaTime;
-  const [boundX, boundY] = tankData.bon;
-  const predictX = pos.x + Math.cos(pos.r) * offset;
-  const predictY = pos.y + Math.sin(pos.r) * offset;
+  const offset = direction * tank.speedMove * deltaTime;
+  const offsetBlt = tank.speedBullet * deltaTime;
+  const boundX = boundary.x;
+  const boundY = boundary.y;
+  const predictX = pos.x + Math.cos(rot.z) * offset;
+  const predictY = pos.y + Math.sin(rot.z) * offset;
   if (predictX < boundX && predictX > -boundX) {
     pos.x = predictX;
   }
@@ -214,61 +243,104 @@ const updatePosByStatus = (tankData: TankData3) => {
     pos.y = predictY;
   }
   // update tank bullets
-  tankData.blt.forEach(b => {
-    const predictBltX = b.pos.x + Math.cos(b.rot) * offsetBlt;
-    const predictBltY = b.pos.y + Math.sin(b.rot) * offsetBlt;
+  const tankBullets = tank.bullets;
+  
+  for (const bltIdx in tankBullets) {
+    const b = tankBullets[bltIdx], bpos = b.position, brot = b.rotation;
+    // check if bullet hit other tanks
+    if (b.isHit) {
+      continue;
+    }
+    const bdir = [Math.cos(brot.z), Math.sin(brot.z)];
+    const predictBltX = bpos.x + bdir[0] * offsetBlt;
+    const predictBltY = bpos.y + bdir[1] * offsetBlt;
+    
     // check if bullet exceed boundary
     if (predictBltX > boundX || predictBltX < -boundX || predictBltY > boundY || predictBltY < -boundY) {
       // exceed boundary
-      b.hit = true;
+      b.isHit = true;
     } else {
-      b.pos.x = predictBltX;
-      b.pos.y = predictBltY;
+      b.position.x = predictBltX;
+      b.position.y = predictBltY;
     }
-  });
+  }
   tankData.stmp = curTime;
 }
 
-const filterHitBults = (tankData: TankData3) => {
-  tankData.blt = tankData.blt.filter(b => !b.hit);
+const filterHitBullets = (tankData: TankData3) => {
+  const tankBlts = tankData.tank.bullets;
+  for (const bltIdx in tankBlts) {
+    if (tankBlts[bltIdx].isHit) {
+      delete tankBlts[bltIdx];
+    }
+  }
+  tankData.tank.bullets = tankBlts;
 }
 
 const handleTankCommand = (id: string, commandType: string, command: string) => {
   broadcastMessage(`${commandType},${id},${command}`);
 }
 
+const createNewTank = (id: string, x: number, y: number, r: number): TankData3 => {
+  if (!tanks3[id]) {
+    tanks3[id] = {
+      tank: new TankBase3(id, new Vector3(x, y, 0), new Euler(0, 0, r)),
+      stmp: Date.now(),
+      scor: 0
+    }
+  }
+  return tanks3[id];
+}
+
 const handleTankCommand3 = (id: string, commandType: string, command: Array<string>) => {
   switch (commandType) {
-    case MessageType.st3:
+    case MessageType.st3: {
       // tank start, command=x,y,r,speed move,speed rotate,bullet speed,timestamp
       console.log(`tank start with ${command.join(',')}`);
-      tanks3[id] = {
-        pos: {x: parseFloat(command[0]), y: parseFloat(command[1]), r: parseFloat(command[2])},
-        spd: [parseFloat(command[3]), parseFloat(command[4]), parseFloat(command[5])],
-        sat: [0,0],
-        bon: [0,0],
-        stmp: Date.now(),
-        blt: []
-      };
+      createNewTank(id, parseFloat(command[0]), parseFloat(command[1]), parseFloat(command[2]));
       break;
-    case MessageType.bon:
-      tanks3[id].bon = [parseFloat(command[0]), parseFloat(command[1])];
+    }
+    case MessageType.bon: {
+      tanks3[id].tank.boundary = new Vector3(parseFloat(command[0]), parseFloat(command[1]), 0);
       break;
-    case MessageType.dir:
+    }
+    case MessageType.stup: {
+      const tk = tanks3[id];
+      tk.tank.speedMove = parseFloat(command[0]);
+      tk.tank.speedRotate = parseFloat(command[1]);
+      tk.tank.speedBullet = parseFloat(command[2]);
+      break;
+    }
+    case MessageType.dir: {
       // tank move
-      console.log(`tank move ${command[0]} at ${command[1]}`);
-      tanks3[id].sat[0] = parseInt(command[0]);
+      tanks3[id].tank.transformStatus.direction = parseInt(command[0]);
       break;
-    case MessageType.rot:
+    }
+    case MessageType.rot: {
       // tank rotate
-      console.log(`tank rotate ${command[0]} at ${command[1]}`);
-      tanks3[id].sat[1] = parseInt(command[0]);
+      tanks3[id].tank.transformStatus.rotation = parseInt(command[0]);
       break;
-    case MessageType.blt3:
+    }
+    case MessageType.blt3: {
       // tank shoot bullet
-      const tank = tanks3[id];
-      const bltInitPos = new Vector3(tank.pos.x, tank.pos.y, 0).add(new Vector3(10, 0, 1.1).applyEuler(new Euler(0, 0, tank.pos.r)));
-      tanks3[id].blt.push({pos: bltInitPos, rot: tank.pos.r, hit: false});
+      const tk = tanks3[id];
+      const tkPos = tk.tank.position;
+      const tkRot = tk.tank.rotation;
+      const bltInitPos = new Vector3(tkPos.x, tkPos.y, 0).add(new Vector3(10, 0, 1.1).applyEuler(new Euler(0, 0, tkRot.z)));
+      const currentBlts = Object.values(tk.tank.bullets);
+      const maxBltIdx = currentBlts.length > 0 ? Math.max.apply(null, currentBlts.map(blt => blt.idx)) : 0;
+      tk.tank.bullets[maxBltIdx + 1] = new Bullet3(bltInitPos, tkRot, tk.tank.speedBullet, maxBltIdx + 1);
+      break;
+    }
+    case MessageType.hit3: {
+      // tank hit another tanker
+      const tk = tanks3[id];
+      const bltId = parseInt(command[0]);
+      tk.scor++;
+      tk.tank.bullets[bltId].isHit = true;
+      break;
+    }
+    default:
       break;
   }
 }
@@ -311,6 +383,8 @@ const handleMessage = (id: string, message: string): void => {
     case MessageType.dir:
     case MessageType.rot:
     case MessageType.blt3:
+    case MessageType.stup:
+    case MessageType.hit3:
       handleTankCommand3(id, messageType, messageData)
       break;
     default:

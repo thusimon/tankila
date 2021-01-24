@@ -1,5 +1,5 @@
 import Point from './Point';
-import { Vector3, Euler } from 'three';
+import { Vector3, Euler, Color } from 'three';
 
 export interface GameConfig {
   width: number;
@@ -18,18 +18,30 @@ export interface BulletData {
   pos: Vector3;
   rot: number;
   hit: boolean;
+  idx: number;
 }
+
 export interface TankData3 {
   pos: {x:number, y:number, r:number};
   spd: number[]; // 0 move speed, 1 rotate speed 2 bullet speed
   sat: number[]; // 0: dir, 1: rotate
   blt: BulletData[];
   stmp: number;
+  scor: number;
 }
 
 export interface DebugInfo {
   playerPosition: Vector3;
   playerRotation: Euler;
+}
+
+export interface ScoreInfo {
+  id: string;
+  score: number;
+}
+export interface ScorePros {
+  scores: ScoreInfo[];
+  id: string;
 }
 
 export interface DebugProps {
@@ -49,13 +61,18 @@ export interface Bound {
 }
 
 export interface TankStatus {
-  position: Point,
-  rotation: number
+  position: Point;
+  rotation: number;
+}
+
+export interface TankStatus3 {
+  color: Color;
+  bltColor: Color;
 }
 
 export interface TankTransformStatus {
-  direction: 1 | -1 | 0, // 1 forward, -1 backward, 0 stop
-  rotation: 1 | -1 | 0 // 1 clockwise, -1 counterclockwise, 0 stop
+  direction: number; // 1 forward, -1 backward, 0 stop
+  rotation: number; // 1 clockwise, -1 counterclockwise, 0 stop
 }
 
 export interface TankCommands {

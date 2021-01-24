@@ -20,7 +20,10 @@ const GameContainer3 = (): JSX.Element => {
       game3.addMe();
     }
   }, []);
-  return <div id='game-container'></div>;
+  return (<div id='overall-container'>
+    <div id='game-container'></div>
+    <div id='stat-container'></div>
+  </div>);
 };
 
 export default GameContainer3;

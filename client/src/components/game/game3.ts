@@ -4,16 +4,16 @@ import * as THREE from 'three';
 /* eslint-disable @typescript-eslint/no-var-requires */
 const Stats = require('stats-js');
 /* eslint-enable @typescript-eslint/no-var-requires */
-import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, Euler, DirectionalLight, AmbientLight } from 'three';
-import { DebugInfo, GameConfig, TankData3 } from '../../data/Types';
-import Debug from '../debug/debug';
+import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
+import { DebugInfo, GameConfig, TankData3, TankStatus3 } from '../../data/Types';
+// import Debug from '../info/debug';
+import Score from '../info/score';
 import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
 import Message from '../message';
 
 class Game3 {
   config: GameConfig;
-  score: {[key: string]: number};
   message: Message;
   id: string;
   scene: Scene;
@@ -24,12 +24,11 @@ class Game3 {
   clock: Clock;
   light: DirectionalLight;
   stats: Stats;
-  debugContainer: HTMLDivElement;
   playBoundary: Vector3;
+  scoreContainer: HTMLDivElement;
   constructor(config: GameConfig) {
     this.config = config;
     this.id = config.id;
-    this.score = {};
     this.players = {};
     this.message = new Message(this.id);
     this.scene = new Scene();
@@ -53,17 +52,18 @@ class Game3 {
     this.stats = new Stats();
     this.stats.showPanel(0);
 
-    const debugInfo = {playerPosition: new Vector3(0, 0, 0), playerRotation: new Euler(0, 0, 0)};
-    const debugJSX = React.createElement(Debug, debugInfo);
+    const scoreJSX = React.createElement(Score, {scores: [], id: this.id});
 
     const gameContainer = document.getElementById(config.canvasParentId)!;
-    this.debugContainer = document.createElement('div');
-    this.debugContainer.id = 'debug-containter';
-    ReactDOM.render(debugJSX, this.debugContainer);
+    const statContainer = document.getElementById('stat-container')!;
+    this.scoreContainer = document.createElement('div');
+    this.scoreContainer.id = 'score-containter';
+    ReactDOM.render(scoreJSX, this.scoreContainer);
     
     gameContainer.appendChild(this.renderer.domElement);
-    gameContainer.appendChild(this.stats.dom);
-    gameContainer.appendChild(this.debugContainer);
+    this.stats.dom.style.removeProperty('position');
+    statContainer.appendChild(this.stats.dom);
+    gameContainer.appendChild(this.scoreContainer);
 
     this.registerEvents();
     this.clock = new Clock();
@@ -75,31 +75,37 @@ class Game3 {
   async addMe() {
     const isConnected = await this.message.getConnection();
     if (isConnected) {
-      // add a tank
-      this.me = new TankMe3(this.scene, this.config, this.message, this.playBoundary);
-      this.message.sendMessage(`st3,0,0,0,${this.me.speedMove},${this.me.speedRotate},${this.me.speedBullet},${Date.now()}`);
       this.updatePlayBoundary();
+      const initX = MathUtils.randFloat(-this.playBoundary.x, this.playBoundary.x);
+      const initY = MathUtils.randFloat(-this.playBoundary.y, this.playBoundary.y);
+      const initR = MathUtils.randFloat(0, Math.PI);
+      // add a tank
+      // this.me = new TankMe3(this.scene, this.config, this.message, this.playBoundary, initStatus);
+      this.message.sendMessage(`st3,${initX},${initY},${initR},${Date.now()}`);
+      this.message.sendMessage(`bon,${this.playBoundary.x},${this.playBoundary.y}`);
       this.message.listenOnMessage(this.handleMessages.bind(this));
-
-      const testTarget = new TankBase3(this.scene, this.config);
-      testTarget.mesh.translateOnAxis(new Vector3(1, 1, 0), 50);
-      this.players['test'] = testTarget;
     }
   }
 
   animate(): void {
     this.stats.begin();
-    const deltaTime = this.clock.getDelta();
     requestAnimationFrame(this.animate.bind(this));
     this.renderer.render(this.scene, this.camera);
     if (this.me) {
-      this.me.update(deltaTime);
+      // this.updateDebugInfo();
       // check bullet hits
       const playersArr = Object.values(this.players).map(p => p.mesh);
-      this.me.bullets.forEach(bullet => {
-        bullet.collisionWithMeshes(playersArr);
-      });
-      this.updateDebugInfo();
+      for (const bltIdx in this.me.bullets) {
+        const blt = this.me.bullets[bltIdx];
+        if (blt.isHit) {
+          continue;
+        }
+        blt.isHit = blt.collisionWithMeshes(playersArr);
+        if (blt.isHit) {
+          this.message.sendMessage(`hit3,${bltIdx}`);
+        }
+      }
+      this.updateScore();
     }
     this.stats.end();
   }
@@ -118,7 +124,6 @@ class Game3 {
     const distance = -this.camera.position.z / vec.z;
     pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
     this.playBoundary = pos;
-    this.message.sendMessage(`bon,${pos.x},${pos.y}`);
   }
 
   updateDebugInfo(): void {
@@ -126,17 +131,26 @@ class Game3 {
       playerPosition: this.me.mesh.position,
       playerRotation: this.me.mesh.rotation
     };
-    const debugJSX = React.createElement(Debug, debugInfo);
-    ReactDOM.render(debugJSX, this.debugContainer);
+    console.log(debugInfo);
+    // const debugJSX = React.createElement(Debug, debugInfo);
+    // ReactDOM.render(debugJSX, this.debugContainer);
+  }
+
+  updateScore(): void {
+    const myScore = {id: this.me.id, score: this.me.score};
+    const playerScores = Object.values(this.players).map(player => ({id: player.id, score: player.score}));
+    playerScores.push(myScore);
+    playerScores.sort((a, b) => b.score - a.score);
+    const scoreJSX = React.createElement(Score, {scores: playerScores, id: myScore.id});
+    ReactDOM.render(scoreJSX, this.scoreContainer);
   }
 
   registerEvents(): void {
     window.addEventListener('resize', () => {
       this.updateCamera();
-      this.updatePlayBoundary();
       if (this.me) {
-        this.me.updateBoundary(this.playBoundary);
-        
+        this.updatePlayBoundary();
+        this.message.sendMessage(`bon,${this.playBoundary.x},${this.playBoundary.y}`);
       }
       this.renderer.setSize( window.innerWidth, window.innerHeight );
     });
@@ -193,23 +207,10 @@ class Game3 {
     const messageData = data.substring(typeIdx + 1);
     switch (messageType) {
       case 'pos3':
-        //console.log(185, messageData);
         this.updatePlayersAndBulletsPostion(messageData);
-        break;
-      case 'fwd':
-      case 'bwd':
-      case 'rl':
-      case 'rr':
-        this.updatePlayer(messageType, messageData);
         break;
       case 'blt':
         this.updateBullets(messageData);
-        break;
-      case 'hit':
-        this.updateScore(messageData);
-        break;
-      case 'ext':
-        this.updateExit(messageData);
         break;
       default:
         break;
@@ -218,32 +219,45 @@ class Game3 {
 
   updatePlayersAndBulletsPostion(commandData: string): void {
     const tanksData = JSON.parse(commandData);
-    for (const tankId in tanksData) {
+    const tanksDataIdxArrServer = Object.keys(tanksData);
+    const tanksDataIdxArrLocal = Object.keys(this.players);
+    tanksDataIdxArrServer.forEach(tankId => {
+      const tankData: TankData3 = tanksData[tankId];
       if (tankId === this.id) {
-        const tankData: TankData3 = tanksData[tankId];
+        if (!this.me) {
+          const status: TankStatus3 = {
+            color: new Color(0xffff00),
+            bltColor: new Color(0xff0000)
+          };
+          this.me = new TankMe3(this.scene, this.id, this.message, this.playBoundary, status);
+          this.message.sendMessage(`stup,${this.me.speedMove},${this.me.speedRotate},${this.me.speedBullet}`);
+        }
         this.me.updatePosByServer(tankData.pos.x, tankData.pos.y, tankData.pos.r);
-        this.me.updateBulletsByServer(tankData.blt);
+        this.me.updateBulletsByServer(tankData.blt, tankId);
+        this.me.score = tankData.scor;
       } else {
-        //TODO update other tanks data
+        if (!this.players[tankId]) {
+          const status: TankStatus3 = {
+            color: new Color(0x00ffff),
+            bltColor: new Color(0xff0000)
+          };
+          const player = new TankBase3(this.scene, tankId, status);
+          this.players[tankId] = player;
+        }
+        const player = this.players[tankId];
+        player.updatePosByServer(tankData.pos.x, tankData.pos.y, tankData.pos.r);
+        player.updateBulletsByServer(tankData.blt, tankId);
+        player.score = tankData.scor;
       }
-    }
-  }
+    });
 
-  updatePlayer(commandType: string, commandData: string): void {
-    const data = commandData.split(',');
-    const id = data[0];
-    const commandValue = +data[1];
-    if (id === this.id || !this.players[id]) {
-      // no need to update myself or invald player
-      return;
-    }
-    const player = this.players[id];
-    const playerCommandUpdate = {[commandType]: !!commandValue};
-    player.tankCommands = {...player.tankCommands, ...playerCommandUpdate};
-  }
-
-  updateScore(scoreData: string): void {
-    this.score = JSON.parse(scoreData);
+    // find which tank has left the game
+    const deletedTanks = tanksDataIdxArrLocal.filter(idxLocal => !tanksDataIdxArrServer.includes(idxLocal));
+    deletedTanks.forEach(deletedIdx => {
+      this.players[deletedIdx].destory();
+      delete this.players[deletedIdx];
+      console.log(`player ${deletedIdx} exits`);
+    });
   }
 
   updateBullets(data: string): void {
@@ -253,18 +267,6 @@ class Game3 {
       return;
     }
     // add the bullet to the player
-  }
-
-  updateExit(id: string): void {
-    delete this.score[id];
-  }
-
-  addRobots(): void {
-    console.log(1);
-  }
-
-  checkIfHit(): void {
-    console.log(1);
   }
 }
 

@@ -22,7 +22,7 @@
     "start-client-dev": "cd client && yarn start",
     "build-client": "cd client && yarn build",
     "prestart": "cd server && tsc",
-    "start": "cd server && node ./bin/index"
+    "start": "cd server && node ./bin/server/src/index"
   },
   "browserslist": {
     "production": [
