@@ -18,7 +18,7 @@
     "three": "^0.125.0",
     "typescript": "^4.1.3",
     "unzipper": "^0.10.11",
-    "ws": "^7.4.1"
+    "ws": "^7.4.6"
   },
   "scripts": {
     "start-client-dev": "cd client && yarn start",
