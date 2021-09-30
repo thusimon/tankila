@@ -2,7 +2,7 @@ import { MessageListener } from '../data/Types';
 import { getWebSockedDomain } from './utils/urls';
 
 class Message {
-  ws: WebSocket;
+  ws!: WebSocket;
   id: string;
   constructor(id: string) {
     this.id = id;

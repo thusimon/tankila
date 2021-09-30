@@ -4,13 +4,13 @@ import Bullet3 from '../bullet/bullet3';
 import { BoxGeometry, Color, CylinderGeometry, Mesh, MeshBasicMaterial, Scene, Vector3, Euler, Texture, SpriteMaterial, Sprite } from 'three';
 
 class TankBase3 {
-  speedMove: number;
-  speedRotate: number;
-  speedBullet: number;
+  speedMove!: number;
+  speedRotate!: number;
+  speedBullet!: number;
   id: string;
   bullets: {[key: string]: Bullet3};
   allowShoot = true;
-  debug: boolean;
+  debug!: boolean;
   isLive = true;
   bodyGeometry: BoxGeometry;
   towerGeometry: CylinderGeometry;
@@ -23,9 +23,9 @@ class TankBase3 {
   transformStatus: TankTransformStatus;
   boundary: Vector3;
   score: number;
-  texture: Texture;
-  spriteMaterial: SpriteMaterial;
-  textSprite: Sprite;
+  texture!: Texture;
+  spriteMaterial!: SpriteMaterial;
+  textSprite!: Sprite;
   constructor(scene: Scene, id: string, initStatus: TankStatus3) {
     this.scene = scene;
     this.id = id;

@@ -13,11 +13,11 @@ import Message from '../message';
 class Game {
   config: GameConfig;
   p5: p5;
-  sketch: p5;
-  me: TankMe;
+  sketch!: p5;
+  me!: TankMe;
   robots: TankRobot[];
   players: {[key: string]: TankPlayer};
-  canvas: p5.Renderer;
+  canvas!: p5.Renderer;
   score: {[key: string]: number};
   message: Message;
   id: string;

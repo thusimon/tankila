@@ -1,5 +1,3 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
 import * as THREE from 'three';
 /* eslint-disable @typescript-eslint/no-var-requires */
 const Stats = require('stats-js');
@@ -7,7 +5,6 @@ const Stats = require('stats-js');
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
 import { DebugInfo, GameConfig, TankData3, TankStatus3 } from '../../data/Types';
 // import Debug from '../info/debug';
-import Score from '../info/score';
 import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
 import Message from '../message';
@@ -19,12 +16,12 @@ class Game3 {
   scene: Scene;
   camera: PerspectiveCamera;
   renderer: WebGLRenderer;
-  me: TankMe3;
+  me!: TankMe3;
   players: {[key: string]: TankBase3};
   clock: Clock;
   light: DirectionalLight;
   stats: Stats;
-  playBoundary: Vector3;
+  playBoundary!: Vector3;
   scoreContainer: HTMLDivElement;
   constructor(config: GameConfig) {
     this.config = config;
@@ -52,13 +49,10 @@ class Game3 {
     this.stats = new Stats();
     this.stats.showPanel(0);
 
-    const scoreJSX = React.createElement(Score, {scores: [], id: this.id});
-
     const gameContainer = document.getElementById(config.canvasParentId)!;
     const statContainer = document.getElementById('stat-container')!;
     this.scoreContainer = document.createElement('div');
     this.scoreContainer.id = 'score-containter';
-    ReactDOM.render(scoreJSX, this.scoreContainer);
     
     gameContainer.appendChild(this.renderer.domElement);
     this.stats.dom.style.removeProperty('position');
@@ -141,8 +135,6 @@ class Game3 {
     const playerScores = Object.values(this.players).map(player => ({id: player.id, score: player.score}));
     playerScores.push(myScore);
     playerScores.sort((a, b) => b.score - a.score);
-    const scoreJSX = React.createElement(Score, {scores: playerScores, id: myScore.id});
-    ReactDOM.render(scoreJSX, this.scoreContainer);
   }
 
   registerEvents(): void {
