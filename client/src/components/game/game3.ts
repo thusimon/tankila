@@ -1,7 +1,4 @@
 import * as THREE from 'three';
-/* eslint-disable @typescript-eslint/no-var-requires */
-const Stats = require('stats-js');
-/* eslint-enable @typescript-eslint/no-var-requires */
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
 import { DebugInfo, GameConfig, TankData3, TankStatus3 } from '../../data/Types';
 // import Debug from '../info/debug';
@@ -20,7 +17,6 @@ class Game3 {
   players: {[key: string]: TankBase3};
   clock: Clock;
   light: DirectionalLight;
-  stats: Stats;
   playBoundary!: Vector3;
   scoreContainer: HTMLDivElement;
   constructor(config: GameConfig) {
@@ -46,17 +42,12 @@ class Game3 {
     this.renderer = new WebGLRenderer({antialias: true});
     this.renderer.setSize( window.innerWidth, window.innerHeight );
 
-    this.stats = new Stats();
-    this.stats.showPanel(0);
-
     const gameContainer = document.getElementById(config.canvasParentId)!;
     const statContainer = document.getElementById('stat-container')!;
     this.scoreContainer = document.createElement('div');
     this.scoreContainer.id = 'score-containter';
     
     gameContainer.appendChild(this.renderer.domElement);
-    this.stats.dom.style.removeProperty('position');
-    statContainer.appendChild(this.stats.dom);
     gameContainer.appendChild(this.scoreContainer);
 
     this.registerEvents();
@@ -82,7 +73,6 @@ class Game3 {
   }
 
   animate(): void {
-    this.stats.begin();
     requestAnimationFrame(this.animate.bind(this));
     this.renderer.render(this.scene, this.camera);
     if (this.me) {
@@ -101,7 +91,6 @@ class Game3 {
       }
       this.updateScore();
     }
-    this.stats.end();
   }
 
   updateCamera(): void {
