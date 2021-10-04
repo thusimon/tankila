@@ -9,6 +9,8 @@ interface Configuration extends WebpackConfiguration {
   devServer?: WebpackDevServerConfiguration;
 }
 
+console.log(__dirname);
+
 export default merge<Configuration>(common, {
   mode: 'development',
   devtool: 'eval-source-map',

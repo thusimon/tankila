@@ -25,4 +25,5 @@ package-lock.json
 .eslintcache
 
 client/static/laserDefender
+client/build
 server/bin

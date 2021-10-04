@@ -82,7 +82,7 @@ const stats = Stats()
 document.body.appendChild(stats.dom)
 
 const loader = new GLTFLoader();
-loader.load('./models/styled_tank/scene.gltf', function(gltf){
+loader.load('./models/styled_tank/tank.glb', function(gltf){
   const tank = gltf.scene.children[0];
   tank.scale.set(0.3,0.3,0.3);
   tank.rotation.z += Math.PI / 2;

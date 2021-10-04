@@ -1,7 +1,8 @@
 import path from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default {
-  entry: path.join(__dirname, './client.ts'),
+  entry: path.join(__dirname, './src/client.ts'),
   module: {
     rules: [
       {
@@ -14,8 +15,9 @@ export default {
   resolve: {
     extensions: ['.ts', '.js'],
   },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, './static'),
-  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'client/static/index.html'
+    })
+  ]
 }
