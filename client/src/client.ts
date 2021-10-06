@@ -20,6 +20,7 @@ camera.position.y = 1.5
 camera.position.x = -2
 camera.lookAt(new THREE.Vector3(10, 0, 0));
 
+console.log(camera.position);
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
@@ -58,10 +59,12 @@ function onDocumentMouseMove(event: MouseEvent) {
   cameraRotationYOffset = y / height - 0.5;
   //cameraRotationYOffset = Math.max(Math.min(cameraRotationYOffset, 2.5), -2.5)
 
-  camera.lookAt(
-    camera.position.x + Math.cos(cameraRotationXZOffset),
-    camera.position.y - Math.atan(cameraRotationYOffset),
-    camera.position.z + Math.sin(cameraRotationXZOffset))
+  // init tank position 0, 0, 0
+  // camera position -2, 1.5, 0
+  // camera.lookAt(
+  //   tank.position.x + Math.cos(cameraRotationXZOffset),
+  //   tank.position.y - Math.atan(cameraRotationYOffset),
+  //   tank.position.z + Math.sin(cameraRotationXZOffset))
   //console.log(camera.rotation.x, camera.rotation.y,camera.rotation.z)
 }
 
@@ -82,37 +85,60 @@ scene.add(plane)
 const onKeyDown = function (event: KeyboardEvent) {
   const tank = scene.children[3] as THREE.Object3D;
   switch (event.code) {
-    case 'KeyW':
+    case 'KeyW': {
       //controls.moveForward(0.1);
-      tank.position.x += 0.1;
-      camera.position.x += 0.1;
+      const zr = tank.rotation.z - Math.PI / 2
+      const offsetX = 0.1 * Math.cos(zr);
+      const offsetZ = 0.1 * Math.sin(zr);
+      tank.position.x += offsetX;
+      tank.position.z -= offsetZ;
+      camera.position.x += offsetX;
+      camera.position.z -= offsetZ
       break
-    case 'KeyA':
+    }
+    case 'KeyA': {
       //controls.moveRight(-0.1)
       rotation += 0.02
       //tank.quaternion.setFromAxisAngle( new THREE.Vector3(0, 0, 1), rotation);
       tank.rotation.z += 0.02;
+      const zr = tank.rotation.z - Math.PI / 2
+      camera.position.x = tank.position.x - 2 * Math.cos(zr);
+      camera.position.z = tank.position.z + 2 * Math.sin(zr);
       camera.lookAt(
-        camera.position.x + Math.cos(cameraRotationXZOffset),
-        camera.position.y - Math.atan(cameraRotationYOffset),
-        camera.position.z + Math.sin(cameraRotationXZOffset + tank.rotation.z - Math.PI / 2))
+        tank.position.x + 10 * Math.cos(zr),
+        0,
+        tank.position.z - 10 * Math.sin(zr))
+      // camera.lookAt(
+      //   tank.position.x + Math.cos(cameraRotationXZOffset),
+      //   tank.position.y - Math.atan(cameraRotationYOffset),
+      //   tank.position.z + Math.sin(cameraRotationXZOffset - Math.PI / 2))
       break
+    }
     case 'KeyS':
       //controls.moveForward(-0.1)
       tank.position.x -= 0.1;
       camera.position.x -= 0.1
       break
-    case 'KeyD':
+    case 'KeyD': {
       //controls.moveRight(0.1)
       rotation -= 0.02
       //tank.quaternion.setFromAxisAngle( new THREE.Vector3(0, 0, 1), rotation);
       tank.rotation.z -= 0.02;
-      console.log(110, cameraRotationXZOffset, tank.rotation.z % Math.PI, Math.sin(cameraRotationXZOffset + tank.rotation.z % Math.PI))
+      const zr = tank.rotation.z - Math.PI / 2
+      camera.position.x = tank.position.x - 2 * Math.cos(zr);
+      camera.position.z = tank.position.z + 2 * Math.sin(zr);
       camera.lookAt(
-        camera.position.x + Math.cos(cameraRotationXZOffset),
-        camera.position.y - Math.atan(cameraRotationYOffset),
-        camera.position.z + Math.sin(cameraRotationXZOffset + tank.rotation.z - Math.PI / 2))
+        tank.position.x + 10 * Math.cos(zr),
+        0,
+        tank.position.z - 10 * Math.sin(zr))
+      //camera.rotation.z -= 0.02;
+      //console.log(110, cameraRotationXZOffset, tank.rotation.z % Math.PI, Math.sin(cameraRotationXZOffset + tank.rotation.z % Math.PI))
+      // camera.lookAt(
+      //   tank.position.x + Math.cos(cameraRotationXZOffset),
+      //   tank.position.y - Math.atan(cameraRotationYOffset),
+      //   tank.position.z + Math.sin(cameraRotationXZOffset - Math.PI / 2))
       break
+    }
   }
 }
 
