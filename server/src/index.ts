@@ -1,4 +1,4 @@
-require('dotenv').config();
+import dotenv from 'dotenv'
 import path from 'path';
 import express from 'express';
 import WebSocket from 'ws';
@@ -8,6 +8,10 @@ import { unzipToFolder } from '../tools/unzip';
 import TankBase3 from './TankBase3';
 import Bullet3 from './Bullet3';
 import { BulletData } from '../../client/src/data/Types';
+
+dotenv.config({
+  path: path.join(__dirname, `../../.env`)
+});
 
 const Schema = mongoose.Schema;
 mongoose.set('useFindAndModify', false);
@@ -168,7 +172,7 @@ wss.on('connection', (ws, req) => {
       broadcastMessage(`${MessageType.ext},${id}`);
     });
     ws.on('message', msg => {
-      handleMessage(id, msg as string);
+      handleMessage(id, msg as Buffer[]);
     });
   }
 });
@@ -365,8 +369,8 @@ const handleBulletPosition = (id: string, x: string, y: string, r: string) => {
   broadcastMessage(`${MessageType.blt},${id},${x},${y},${r}`);
 }
 
-const handleMessage = (id: string, message: string): void => {
-  const messageData = message.split(',');
+const handleMessage = (id: string, message: Buffer[]): void => {
+  const messageData = message.toString().split(',');
   const messageType = messageData.shift();
   switch (messageType) {
     case MessageType.pos:
