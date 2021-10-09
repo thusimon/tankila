@@ -1,5 +1,12 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-fs.copy(path.resolve(__dirname, '../static/models'), path.resolve(__dirname, '../build/models'));
-fs.copy(path.resolve(__dirname, '../static/favicon.ico'), path.resolve(__dirname, '../build/favicon.ico'));
+const staticResources = [
+  'models',
+  'textures',
+  'favicon.ico'
+]
+
+staticResources.forEach(resource => {
+  fs.copy(path.resolve(__dirname, `../static/${resource}`), path.resolve(__dirname, `../build/${resource}`));
+});

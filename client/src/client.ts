@@ -53,13 +53,21 @@ function onDocumentMouseMove(event: MouseEvent) {
     tank.position.z - 10 * Math.sin(zr))
 }
 
-const planeGeometry = new THREE.PlaneGeometry(100, 100, 50, 50)
+const ground_texture = new THREE.TextureLoader().load('textures/grass_ground.jpg')
 const material = new THREE.MeshBasicMaterial({
-  color: 0x00ff00,
-  wireframe: true,
+  map: ground_texture
 });
 
+const planeGeometry = new THREE.PlaneGeometry(100, 100, 50, 50)
+
 const plane = new THREE.Mesh(planeGeometry, material)
+
+ground_texture.minFilter = THREE.NearestMipmapLinearFilter
+ground_texture.magFilter = THREE.NearestMipmapLinearFilter
+ground_texture.wrapS = THREE.RepeatWrapping;
+ground_texture.wrapT = THREE.RepeatWrapping;
+ground_texture.repeat.set(16, 16); 
+
 plane.rotateX(-Math.PI / 2)
 scene.add(plane)
 
