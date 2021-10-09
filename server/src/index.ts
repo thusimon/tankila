@@ -103,7 +103,7 @@ router.get('/api/lasercredits', async (req, res) => {
     const laserScores = await LaserScore.find({}, {_id: 0, updatedAt: 0, createdAt: 0, __v: 0}).sort({credit: -1});
     return res.status(200).json({credits: laserScores});
   } catch (e) {
-    return res.status(400).json({err: e.message})
+    return res.status(400).json({err: e})
   }
 });
 
@@ -117,18 +117,19 @@ router.get('/api/lasercredit', async (req, res) => {
     const updateResult = await LaserScore.findOneAndUpdate({name}, {name, credit: creditInt}, {new: true, upsert: true});
     return res.status(200).json({credit: updateResult});
   } catch (e) {
-    return res.status(400).json({err: e.message});
+    return res.status(400).json({err: e});
   }
 });
 
-const tankilaClientPath = path.join(__dirname, '../../../../client/build');
+const tankilaClientPath = path.join(__dirname, '../../client/build');
 app.use(express.static(tankilaClientPath));
 
-const otherClientPath = path.join(__dirname, '../../../../client/static');
+console.log(127, __dirname)
+const otherClientPath = path.join(__dirname, '../../client/static');
 app.use('/laserdefender', express.static(path.join(otherClientPath, '/laserDefender')));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../../../client/build/index.html'));
+  res.sendFile(path.join(__dirname, '../../client/build/index.html'));
 });
 
 app.use(router);

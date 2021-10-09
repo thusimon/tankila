@@ -42,7 +42,7 @@ let cameraRotationXZOffset = 0;
 let cameraRotationYOffset = 0;
 function onDocumentMouseMove(event: MouseEvent) {
   const {x, y} = event;
-  const tank = scene.children[2] as THREE.Object3D;
+  const tank = getTank() as THREE.Object3D;
   cameraRotationXZOffset = (x / width - 0.5) * Math.PI / 2;
   cameraRotationYOffset = (y / height - 0.5) * Math.PI / 2;
 
@@ -53,26 +53,41 @@ function onDocumentMouseMove(event: MouseEvent) {
     tank.position.z - 10 * Math.sin(zr))
 }
 
-const ground_texture = new THREE.TextureLoader().load('textures/grass_ground.jpg')
+const groundTexture = new THREE.TextureLoader().load('textures/grass_ground.jpg')
 const material = new THREE.MeshBasicMaterial({
-  map: ground_texture
+  map: groundTexture
 });
 
-const planeGeometry = new THREE.PlaneGeometry(100, 100, 50, 50)
+const planeGeometry = new THREE.PlaneGeometry(200, 200, 50, 50)
 
 const plane = new THREE.Mesh(planeGeometry, material)
 
-ground_texture.minFilter = THREE.NearestMipmapLinearFilter
-ground_texture.magFilter = THREE.NearestMipmapLinearFilter
-ground_texture.wrapS = THREE.RepeatWrapping;
-ground_texture.wrapT = THREE.RepeatWrapping;
-ground_texture.repeat.set(16, 16); 
+groundTexture.minFilter = THREE.NearestMipmapLinearFilter
+groundTexture.magFilter = THREE.NearestMipmapLinearFilter
+groundTexture.wrapS = THREE.RepeatWrapping;
+groundTexture.wrapT = THREE.RepeatWrapping;
+groundTexture.repeat.set(32, 32); 
 
 plane.rotateX(-Math.PI / 2)
 scene.add(plane)
 
+const skyGeo = new THREE.SphereGeometry(200, 20, 20); 
+const skySphereLoader  = new THREE.TextureLoader()
+const skyTexture = skySphereLoader.load('textures/sky.jpg');
+const skyMaterial = new THREE.MeshPhongMaterial({ 
+  map: skyTexture,
+});
+const sky = new THREE.Mesh(skyGeo, skyMaterial);
+sky.material.side = THREE.BackSide;
+sky.position.y = -2
+scene.add(sky);
+
+const getTank = () => {
+  return scene.children.find(obj => obj.name === 'tank');
+}
+
 const onKeyDown = function (event: KeyboardEvent) {
-  const tank = scene.children[2] as THREE.Object3D;
+  const tank = getTank() as THREE.Object3D;
   switch (event.code) {
     case 'KeyW': {
       const zr = tank.rotation.z - Math.PI / 2

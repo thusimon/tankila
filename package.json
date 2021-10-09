@@ -22,7 +22,7 @@
     "client-dev": "webpack serve --config ./client/webpack.dev.ts",
     "client-prod": "webpack --config ./client/webpack.prod.ts && ts-node client/tools/copy-resources",
     "prestart": "npm run build-client",
-    "start": "cd server && ts-node ./src/index"
+    "server-dev": "cd server && ts-node ./src/index"
   },
   "browserslist": {
     "production": [
