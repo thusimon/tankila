@@ -2,6 +2,14 @@ import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 
+import * as CANNON from 'cannon-es'
+import CannonUtils from './components/utils/cannon'
+import CannonDebugRenderer from './components/utils/cannon-debug-render'
+
+declare var PRODUCTION: string;
+declare var PORT: string;
+console.log(PRODUCTION, PORT);
+
 const scene = new THREE.Scene()
 
 const light = new THREE.AmbientLight()
@@ -25,19 +33,94 @@ document.body.appendChild(renderer.domElement)
 const menuPanel = document.getElementById('menuPanel') as HTMLDivElement
 const startButton = document.getElementById('startButton') as HTMLInputElement
 
+let webSocket: WebSocket;
 startButton.addEventListener(
   'click',
   function () {
     menuPanel.style.display = 'none'
-    renderer.domElement.addEventListener(
-      'mousemove',
-      onDocumentMouseMove,
-      false)
+    let protocol = 'wss';
+    let port = '';
+    if (!PRODUCTION) {
+      protocol = 'ws';
+      port = `:${PORT}`;
+    }
+    webSocket = new WebSocket(`${protocol}://${window.location.hostname}${port}/websockets?id=test&name=lu`)
+    const loader = new GLTFLoader();
+    loader.load('./models/styled_tank/tank.glb', function(gltf){
+      const tank = gltf.scene.children[0];
+      tank.scale.set(0.3,0.3,0.3);
+      tank.rotation.z += Math.PI / 2;
+      scene.add(tank);
+      document.addEventListener('keydown', onKeyDown, false)
+      renderer.domElement.addEventListener(
+        'mousemove',
+        onDocumentMouseMove,
+        false);
+      webSocket.send(`st3,${tank.position.x},${tank.position.y},${tank.position.z},${tank.rotation.x},${tank.rotation.y},${tank.rotation.z}`);
+    });
   },
   false
 )
 
-const {width, height} = renderer.domElement;
+// physics
+const world = new CANNON.World()
+const bodies: { [id: string]: CANNON.Body } = {}
+const groundMaterial: CANNON.Material = new CANNON.Material('groundMaterial');
+const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
+groundMaterial.friction = 0.15
+groundMaterial.restitution = 0.25
+slipperyMaterial.friction = 0.15
+slipperyMaterial.restitution = 0.25
+
+world.gravity.set(0, -9.8, 0)
+
+const groundShape = new CANNON.Box(new CANNON.Vec3(100, 1, 100))
+const groundBody = new CANNON.Body({
+    mass: 0,
+    material: groundMaterial,
+})
+groundBody.addShape(groundShape)
+groundBody.position.x = 0
+groundBody.position.y = -1
+groundBody.position.z = 0
+world.addBody(groundBody)
+
+const sphereShape = new CANNON.Sphere(0.5)
+const sphereBody = new CANNON.Body({
+    mass: 1,
+    material: slipperyMaterial,
+}) //, angularDamping: .9 })
+sphereBody.addShape(sphereShape)
+sphereBody.addEventListener('collide', (e: any) => {
+  console.log(e);
+})
+sphereBody.position.x = 0
+sphereBody.position.y = 1
+sphereBody.position.z = 0
+world.addBody(sphereBody)
+
+
+const createPlayerTankSphere = (id: string, pos: CANNON.Vec3, dir: CANNON.Vec3) => {
+  const sphereShape = new CANNON.Sphere(0.5)
+  const sphereBody = new CANNON.Body({
+      mass: 1,
+      material: slipperyMaterial,
+  }) //, angularDamping: .9 })
+  sphereBody.addShape(sphereShape)
+  sphereBody.addEventListener('collide', (e: any) => {
+    console.log(e);
+  })
+  sphereBody.position.x = pos.x
+  sphereBody.position.y = pos.y
+  sphereBody.position.z = pos.z
+  world.addBody(sphereBody)
+
+  bodies[id] = sphereBody
+
+  return sphereBody.id
+}
+
+let {width, height} = renderer.domElement;
 let cameraRotationXZOffset = 0;
 let cameraRotationYOffset = 0;
 function onDocumentMouseMove(event: MouseEvent) {
@@ -90,6 +173,7 @@ const onKeyDown = function (event: KeyboardEvent) {
   const tank = getTank() as THREE.Object3D;
   switch (event.code) {
     case 'KeyW': {
+      sphereBody.force = new CANNON.Vec3(1,0,0);
       const zr = tank.rotation.z - Math.PI / 2
       const offsetX = 0.1 * Math.cos(zr);
       const offsetZ = 0.1 * Math.sin(zr);
@@ -100,6 +184,7 @@ const onKeyDown = function (event: KeyboardEvent) {
       break
     }
     case 'KeyA': {
+      console.log(186, sphereBody.angularVelocity)
       tank.rotation.z += 0.02
       const zr = tank.rotation.z - Math.PI / 2
       camera.position.x = tank.position.x - 2 * Math.cos(zr);
@@ -136,26 +221,40 @@ const onKeyDown = function (event: KeyboardEvent) {
 
 window.addEventListener('resize', onWindowResize, false)
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight
+  width = window.innerWidth;
+  height = window.innerHeight;
+  camera.aspect = width / height
   camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  renderer.setSize(width, height)
   render()
 }
 
 const stats = Stats()
 document.body.appendChild(stats.dom)
 
-const loader = new GLTFLoader();
-loader.load('./models/styled_tank/tank.glb', function(gltf){
-  const tank = gltf.scene.children[0];
-  tank.scale.set(0.3,0.3,0.3);
-  tank.rotation.z += Math.PI / 2;
-  scene.add(tank);
-  document.addEventListener('keydown', onKeyDown, false)
-});
-
+const clock = new THREE.Clock()
+let delta;
+const cannonDebugRenderer = new CannonDebugRenderer(scene, world)
 function animate() {
   requestAnimationFrame(animate)
+  
+  delta = Math.min(clock.getDelta(), 0.1)
+  world.step(delta)
+
+  cannonDebugRenderer.update()
+
+  // Copy coordinates from Cannon to Three.js
+  const tank = getTank() as THREE.Object3D;
+  if (tank) {
+    // tank.position.set(
+    //   sphereBody.position.x,
+    //   sphereBody.position.y,
+    //   sphereBody.position.z)
+    // sphereBody.position.set(
+    //   tank.position.x,
+    //   tank.position.y,
+    //   tank.position.z)
+  }
   render()
   stats.update()
 }
