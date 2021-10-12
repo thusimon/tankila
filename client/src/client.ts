@@ -10,6 +10,8 @@ declare var PRODUCTION: string;
 declare var PORT: string;
 console.log(PRODUCTION, PORT);
 
+const PI2 = 2 * Math.PI;
+
 const scene = new THREE.Scene()
 
 const light = new THREE.AmbientLight()
@@ -49,7 +51,7 @@ startButton.addEventListener(
     loader.load('./models/styled_tank/tank.glb', function(gltf){
       const tank = gltf.scene.children[0];
       tank.scale.set(0.3,0.3,0.3);
-      tank.rotation.z += Math.PI / 2;
+      //tank.rotation.z += Math.PI / 2;
       scene.add(tank);
       document.addEventListener('keydown', onKeyDown, false)
       renderer.domElement.addEventListener(
@@ -99,41 +101,21 @@ sphereBody.position.y = 1
 sphereBody.position.z = 0
 world.addBody(sphereBody)
 
-
-const createPlayerTankSphere = (id: string, pos: CANNON.Vec3, dir: CANNON.Vec3) => {
-  const sphereShape = new CANNON.Sphere(0.5)
-  const sphereBody = new CANNON.Body({
-      mass: 1,
-      material: slipperyMaterial,
-  }) //, angularDamping: .9 })
-  sphereBody.addShape(sphereShape)
-  sphereBody.addEventListener('collide', (e: any) => {
-    console.log(e);
-  })
-  sphereBody.position.x = pos.x
-  sphereBody.position.y = pos.y
-  sphereBody.position.z = pos.z
-  world.addBody(sphereBody)
-
-  bodies[id] = sphereBody
-
-  return sphereBody.id
-}
-
 let {width, height} = renderer.domElement;
 let cameraRotationXZOffset = 0;
 let cameraRotationYOffset = 0;
+let rotation = 0;
 function onDocumentMouseMove(event: MouseEvent) {
   const {x, y} = event;
-  const tank = getTank() as THREE.Object3D;
+  //const tank = getTank() as THREE.Object3D;
   cameraRotationXZOffset = (x / width - 0.5) * Math.PI / 2;
   cameraRotationYOffset = (y / height - 0.5) * Math.PI / 2;
 
-  const zr = tank.rotation.z - cameraRotationXZOffset - Math.PI / 2;
-  camera.lookAt(
-    tank.position.x + 10 * Math.cos(zr),
-    -10 * Math.atan(cameraRotationYOffset),
-    tank.position.z - 10 * Math.sin(zr))
+  // const zr = tank.rotation.z - cameraRotationXZOffset - Math.PI / 2;
+  // camera.lookAt(
+  //   tank.position.x + 10 * Math.cos(zr),
+  //   -10 * Math.atan(cameraRotationYOffset),
+  //   tank.position.z - 10 * Math.sin(zr))
 }
 
 const groundTexture = new THREE.TextureLoader().load('textures/grass_ground.jpg')
@@ -169,51 +151,83 @@ const getTank = () => {
   return scene.children.find(obj => obj.name === 'tank');
 }
 
+let speed = 0;
 const onKeyDown = function (event: KeyboardEvent) {
   const tank = getTank() as THREE.Object3D;
   switch (event.code) {
     case 'KeyW': {
-      sphereBody.force = new CANNON.Vec3(1,0,0);
-      const zr = tank.rotation.z - Math.PI / 2
-      const offsetX = 0.1 * Math.cos(zr);
-      const offsetZ = 0.1 * Math.sin(zr);
-      tank.position.x += offsetX;
-      tank.position.z -= offsetZ;
-      camera.position.x += offsetX;
-      camera.position.z -= offsetZ
+      //sphereBody.force = new CANNON.Vec3(1,0,0);
+      //const zr = tank.rotation.z - Math.PI / 2
+      // const zr = sphereBody.quaternion.y
+      // const offsetX = 0.1 * Math.cos(zr);
+      // const offsetZ = 0.1 * Math.sin(zr);
+      //tank.position.x += offsetX;
+      //tank.position.z -= offsetZ;
+      // camera.position.x += offsetX;
+      // camera.position.z -= offsetZ
+      //sphereBody.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
+      speed = 1;
       break
     }
     case 'KeyA': {
-      console.log(186, sphereBody.angularVelocity)
-      tank.rotation.z += 0.02
-      const zr = tank.rotation.z - Math.PI / 2
-      camera.position.x = tank.position.x - 2 * Math.cos(zr);
-      camera.position.z = tank.position.z + 2 * Math.sin(zr);
-      camera.lookAt(
-        tank.position.x + 10 * Math.cos(zr - cameraRotationXZOffset),
-        -10 * Math.atan(cameraRotationYOffset),
-        tank.position.z - 10 * Math.sin(zr - cameraRotationXZOffset))
+      //tank.rotation.z += 0.02
+      rotation += 0.01 ;
+      //rotation = rotation % PI2;
+      if (rotation >= Math.PI) {
+        rotation = rotation - PI2;
+      }
+      if (rotation < -Math.PI) {
+        rotation = rotation + PI2
+      }
+      console.log(rotation);
+      //sphereBody.quaternion.setFromEuler(0, rotation, 0);
+      sphereBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
+      //const zr = tank.rotation.z - Math.PI / 2
+      // camera.position.x = tank.position.x - 2 * Math.cos(zr);
+      // camera.position.z = tank.position.z + 2 * Math.sin(zr);
+      // camera.lookAt(
+      //   tank.position.x + 10 * Math.cos(zr - cameraRotationXZOffset),
+      //   -10 * Math.atan(cameraRotationYOffset),
+      //   tank.position.z - 10 * Math.sin(zr - cameraRotationXZOffset))
+      // console.log(186, sphereBody.quaternion)
+      
       break
     }
     case 'KeyS': {
-      const zr = tank.rotation.z - Math.PI / 2
-      const offsetX = -0.1 * Math.cos(zr);
-      const offsetZ = -0.1 * Math.sin(zr);
-      tank.position.x += offsetX;
-      tank.position.z -= offsetZ;
-      camera.position.x += offsetX;
-      camera.position.z -= offsetZ
+      //const zr = tank.rotation.z - Math.PI / 2
+      // const zr = sphereBody.quaternion.y
+      // const offsetX = -0.1 * Math.cos(zr);
+      // const offsetZ = -0.1 * Math.sin(zr);
+      //tank.position.x += offsetX;
+      //tank.position.z -= offsetZ;
+      // camera.position.x += offsetX;
+      // camera.position.z -= offsetZ;
+      //sphereBody.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
+      speed = -1;
       break;
     }
     case 'KeyD': {
-      tank.rotation.z -= 0.02
-      const zr = tank.rotation.z - Math.PI / 2
-      camera.position.x = tank.position.x - 2 * Math.cos(zr);
-      camera.position.z = tank.position.z + 2 * Math.sin(zr);
-      camera.lookAt(
-        tank.position.x + 10 * Math.cos(zr - cameraRotationXZOffset),
-        -10 * Math.atan(cameraRotationYOffset),
-        tank.position.z - 10 * Math.sin(zr - cameraRotationXZOffset))
+      //tank.rotation.z -= 0.02
+      //sphereBody.quaternion.z -= 0.02
+      //sphereBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,1,0), tank.rotation.z);
+      rotation -= 0.01;
+      if (rotation >= Math.PI) {
+        rotation = rotation - PI2;
+      }
+      if (rotation < -Math.PI) {
+        rotation = rotation + PI2
+      }
+      //rotation = rotation % PI2;
+      sphereBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
+      console.log(262, sphereBody.quaternion);
+      // sphereBody.quaternion.setFromEuler(0, tank.rotation.z, 0);
+      // const zr = tank.rotation.z - Math.PI / 2
+      // camera.position.x = tank.position.x - 2 * Math.cos(zr);
+      // camera.position.z = tank.position.z + 2 * Math.sin(zr);
+      // camera.lookAt(
+      //   tank.position.x + 10 * Math.cos(zr - cameraRotationXZOffset),
+      //   -10 * Math.atan(cameraRotationYOffset),
+      //   tank.position.z - 10 * Math.sin(zr - cameraRotationXZOffset))
       break
     }
   }
@@ -246,10 +260,26 @@ function animate() {
   // Copy coordinates from Cannon to Three.js
   const tank = getTank() as THREE.Object3D;
   if (tank) {
-    // tank.position.set(
-    //   sphereBody.position.x,
-    //   sphereBody.position.y,
-    //   sphereBody.position.z)
+    const zr = sphereBody.quaternion.y
+    tank.rotation.z = sphereBody.quaternion.y * Math.PI; // [-1, 1] => 
+    const offsetX = speed * 0.1 * Math.cos(zr);
+    const offsetZ = speed * 0.1 * Math.sin(zr);
+    sphereBody.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
+    tank.position.set(
+      sphereBody.position.x,
+      sphereBody.position.y - 0.5,
+      sphereBody.position.z)
+    // camera.position.x = tank.position.x - 2 * Math.cos(tank.rotation.z);
+    // camera.position.z = tank.position.z + 2 * Math.sin(tank.rotation.z);
+    camera.position.x = tank.position.x - 2 * Math.sin(tank.rotation.z);
+    camera.position.z = tank.position.z - 2 * Math.cos(tank.rotation.z);
+    // camera.position.x = tank.position.x;
+    // camera.position.z = tank.position.z;
+    // camera.position.y = 10;
+    camera.lookAt(
+      tank.position.x + 10 * Math.cos(tank.rotation.z - cameraRotationXZOffset),
+      -10 * Math.atan(cameraRotationYOffset),
+      tank.position.z - 10 * Math.sin(tank.rotation.z - cameraRotationXZOffset))
     // sphereBody.position.set(
     //   tank.position.x,
     //   tank.position.y,
