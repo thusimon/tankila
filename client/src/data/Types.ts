@@ -83,9 +83,15 @@ export interface TankCommands {
   blt: boolean,
 }
 
-export interface Move {
-  forward: number, // 1 forward, 0 stale, -1 backword
-  rotation: number // 1 right, 0 stale, -1 left
+export interface MoveStatus {
+  forwardStatus?: number, // 1 forward, 0 stale, -1 backword
+  rotationstatus?: number, // 1 right, 0 stale, -1 left
+  keyW?: number, // 1 pressed, 0 released
+  keyS?: number,
+  keyA?: number,
+  keyD?: number,
+  speed?: number,
+  rotation?: number
 }
 
 export interface MessageListener {

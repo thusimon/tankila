@@ -1,5 +1,5 @@
 import { MessageListener } from '../data/Types';
-import { getWebSockedDomain } from './utils/urls';
+import { getWebSockedDomain } from '../utils/urls';
 
 class Message {
   ws!: WebSocket;

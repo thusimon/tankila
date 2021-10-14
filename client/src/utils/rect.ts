@@ -1,5 +1,5 @@
-import Point from '../../data/Point';
-import Rect from '../../data/Rect';
+import Point from '../data/Point';
+import Rect from '../data/Rect';
 import { Euler, MathUtils, Vector3 } from 'three';
 export const getRectPoints = (rect: Rect):Point[] => {
   const {position, rotation, size} = rect;

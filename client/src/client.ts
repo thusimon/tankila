@@ -1,10 +1,11 @@
 import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-
+import {MoveStatus} from './data/Types'
 import * as CANNON from 'cannon-es'
-import CannonUtils from './components/utils/cannon'
-import CannonDebugRenderer from './components/utils/cannon-debug-render'
+import CannonUtils from './utils/cannon'
+import CannonDebugRenderer from './utils/cannon-debug-render'
+import {updateMoveStatus, updateMoveSpeed} from './utils/tankStatus'
 
 declare var PRODUCTION: string;
 declare var PORT: string;
@@ -50,6 +51,7 @@ startButton.addEventListener(
       tank.scale.set(0.3,0.3,0.3);
       scene.add(tank);
       document.addEventListener('keydown', onKeyDown, false)
+      document.addEventListener('keyup', onKeyUp, false)
       renderer.domElement.addEventListener(
         'mousemove',
         onDocumentMouseMove,
@@ -100,7 +102,18 @@ world.addBody(sphereBody)
 let {width, height} = renderer.domElement;
 let cameraRotationXZOffset = 0;
 let cameraRotationYOffset = 0;
-let rotation = 0;
+
+let tankStatus: MoveStatus = {
+  forwardStatus: 0,
+  rotationstatus: 0,
+  keyW: 0,
+  keyS: 0,
+  keyA: 0,
+  keyD: 0,
+  speed: 0,
+  rotation: 0
+}
+
 function onDocumentMouseMove(event: MouseEvent) {
   const {x, y} = event;
   cameraRotationXZOffset = (x / width - 0.5) * Math.PI / 2;
@@ -140,23 +153,43 @@ const getTank = () => {
   return scene.children.find(obj => obj.name === 'tank');
 }
 
-let speed = 0;
 const onKeyDown = function (event: KeyboardEvent) {
   switch (event.code) {
     case 'KeyW': {
-      speed = 1;
+      tankStatus = updateMoveStatus(tankStatus, {keyW: 1});
       break
     }
     case 'KeyA': {
-      rotation += 0.01 ;
+      tankStatus = updateMoveStatus(tankStatus, {keyA: 1});
       break
     }
     case 'KeyS': {
-      speed = -1;
+      tankStatus = updateMoveStatus(tankStatus, {keyS: 1});
       break;
     }
     case 'KeyD': {
-      rotation -= 0.01;
+      tankStatus = updateMoveStatus(tankStatus, {keyD: 1});
+      break
+    }
+  }
+}
+
+const onKeyUp = function(event: KeyboardEvent) {
+  switch (event.code) {
+    case 'KeyW': {
+      tankStatus = updateMoveStatus(tankStatus, {keyW: 0});
+      break
+    }
+    case 'KeyA': {
+      tankStatus = updateMoveStatus(tankStatus, {keyA: 0});
+      break
+    }
+    case 'KeyS': {
+      tankStatus = updateMoveStatus(tankStatus, {keyS: 0});
+      break;
+    }
+    case 'KeyD': {
+      tankStatus = updateMoveStatus(tankStatus, {keyD: 0});
       break
     }
   }
@@ -189,6 +222,7 @@ function animate() {
 }
 
 function render() {
+  const rotation = tankStatus.rotation || 0;
   sphereBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
   // Copy coordinates from Cannon to Three.js
   const tank = getTank() as THREE.Object3D;
@@ -197,6 +231,8 @@ function render() {
     sphereBody.quaternion.toEuler(euler);
     const eulerY = euler.y;
     tank.rotation.z = eulerY;
+    updateMoveSpeed(tankStatus);
+    const speed = tankStatus.speed || 0;
     const offsetX = speed * Math.sin(eulerY);
     const offsetZ = speed * Math.cos(eulerY);
     sphereBody.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
