@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { TankStatus3, BulletData, TankTransformStatus } from '../../data/Types';
+import { TankStatus3, BulletData, TankTransformStatus } from '../../types/Types';
 import Bullet3 from '../bullet/bullet3';
 import { BoxGeometry, Color, CylinderGeometry, Mesh, MeshBasicMaterial, Scene, Vector3, Euler, Texture, SpriteMaterial, Sprite } from 'three';
 

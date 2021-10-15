@@ -1,11 +1,12 @@
 import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {MoveStatus} from './data/Types'
+import {MoveStatus} from './types/Types'
 import * as CANNON from 'cannon-es'
 import CannonUtils from './utils/cannon'
 import CannonDebugRenderer from './utils/cannon-debug-render'
 import {updateMoveStatus, updateMoveSpeed} from './utils/tankStatus'
+import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 
 declare var PRODUCTION: string;
 declare var PORT: string;
@@ -227,11 +228,11 @@ function render() {
   // Copy coordinates from Cannon to Three.js
   const tank = getTank() as THREE.Object3D;
   if (tank) {
+    updateMoveSpeed(tankStatus);
     const euler = new CANNON.Vec3();
     sphereBody.quaternion.toEuler(euler);
     const eulerY = euler.y;
     tank.rotation.z = eulerY;
-    updateMoveSpeed(tankStatus);
     const speed = tankStatus.speed || 0;
     const offsetX = speed * Math.sin(eulerY);
     const offsetZ = speed * Math.cos(eulerY);

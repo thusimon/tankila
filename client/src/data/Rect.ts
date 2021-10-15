@@ -1,6 +1,6 @@
 import Point from './Point';
 import Size from './Size';
-import { Bound } from './Types';
+import { Bound } from '../types/Types';
 
 class Rect {
   position: Point;

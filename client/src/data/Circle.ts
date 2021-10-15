@@ -1,5 +1,5 @@
 import Point from './Point';
-import { Bound } from './Types';
+import { Bound } from '../types/Types';
 
 class Circle {
   center: Point;

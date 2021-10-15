@@ -1,5 +1,5 @@
 import {MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED} from './constants';
-import { MoveStatus } from '../data/Types';
+import { MoveStatus } from '../types/Types';
 
 
 export const accelerate = (speed: number) => {

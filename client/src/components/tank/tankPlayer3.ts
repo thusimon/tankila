@@ -1,5 +1,5 @@
-import { TankStatus3 } from '../../data/Types';
-import { TankCommands } from '../../data/Types';
+import { TankStatus3 } from '../../types/Types';
+import { TankCommands } from '../../types/Types';
 import TankBase3 from './tankBase3';
 import Message from '../message';
 import { Scene } from 'three';

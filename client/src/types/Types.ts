@@ -1,4 +1,4 @@
-import Point from './Point';
+import Point from '../data/Point';
 import { Vector3, Euler, Color } from 'three';
 
 export interface GameConfig {

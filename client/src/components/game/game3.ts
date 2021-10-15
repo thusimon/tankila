@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
-import { DebugInfo, GameConfig, TankData3, TankStatus3 } from '../../data/Types';
+import { DebugInfo, GameConfig, TankData3, TankStatus3 } from '../../types/Types';
 // import Debug from '../info/debug';
 import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
