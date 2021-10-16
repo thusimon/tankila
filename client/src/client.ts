@@ -1,11 +1,11 @@
 import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {MoveStatus, Bullet} from './types/Types'
+import {MoveStatus, Bullet, Bullets} from './types/Types'
 import * as CANNON from 'cannon-es'
 import CannonUtils from './utils/cannon'
 import CannonDebugRenderer from './utils/cannon-debug-render'
-import {updateMoveStatus, updateMoveSpeed} from './utils/tankStatus'
+import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from './utils/tankStatus'
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 import {GRAVITY, BULLET_SPEED} from './utils/constants';
 
@@ -36,6 +36,7 @@ const menuPanel = document.getElementById('menuPanel') as HTMLDivElement
 const startButton = document.getElementById('startButton') as HTMLInputElement
 
 let webSocket: WebSocket;
+const tank_id = 'TEST_1';
 startButton.addEventListener(
   'click',
   function () {
@@ -46,7 +47,7 @@ startButton.addEventListener(
       protocol = 'ws';
       port = `:${PORT}`;
     }
-    webSocket = new WebSocket(`${protocol}://${window.location.hostname}${port}/websockets?id=test&name=lu`)
+    webSocket = new WebSocket(`${protocol}://${window.location.hostname}${port}/websockets?id=${tank_id}&name=lu`)
     const loader = new GLTFLoader();
     loader.load('./models/styled_tank/tank.glb', function(gltf){
       const tank = gltf.scene.children[0];
@@ -67,7 +68,8 @@ startButton.addEventListener(
 
 // physics
 const world = new CANNON.World()
-const bullets: Bullet[] = []
+const bullets: Bullets = {}
+let bulletId = 0;
 const groundMaterial: CANNON.Material = new CANNON.Material('groundMaterial');
 const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
 groundMaterial.friction = 0.15
@@ -77,10 +79,14 @@ slipperyMaterial.restitution = 0.25
 
 world.gravity.set(0, GRAVITY, 0)
 
+if (!bullets[tank_id]) {
+  bullets[tank_id] = [];
+}
+
 const groundShape = new CANNON.Box(new CANNON.Vec3(100, 1, 100))
 const groundBody = new CANNON.Body({
     mass: 0,
-    material: groundMaterial,
+    material: groundMaterial
 })
 groundBody.addShape(groundShape)
 groundBody.position.x = 0
@@ -88,11 +94,56 @@ groundBody.position.y = -1
 groundBody.position.z = 0
 world.addBody(groundBody)
 
+// add walls
+const wallTopShape = new CANNON.Box(new CANNON.Vec3(100, 1, 1))
+const wallTopBody = new CANNON.Body({
+  mass: 0,
+  material: groundMaterial
+})
+wallTopBody.addShape(wallTopShape);
+wallTopBody.position.x = 0;
+wallTopBody.position.y = 1;
+wallTopBody.position.z = 100;
+world.addBody(wallTopBody);
+
+const wallBottomShape = new CANNON.Box(new CANNON.Vec3(100, 1, 1))
+const wallBottomBody = new CANNON.Body({
+  mass: 0,
+  material: groundMaterial
+})
+wallBottomBody.addShape(wallBottomShape);
+wallBottomBody.position.x = 0;
+wallBottomBody.position.y = 1;
+wallBottomBody.position.z = -100;
+world.addBody(wallBottomBody);
+
+const wallLeftShape = new CANNON.Box(new CANNON.Vec3(1, 1, 100))
+const wallLeftBody = new CANNON.Body({
+  mass: 0,
+  material: groundMaterial
+})
+wallLeftBody.addShape(wallLeftShape);
+wallLeftBody.position.x = -100;
+wallLeftBody.position.y = 1;
+wallLeftBody.position.z = 0;
+world.addBody(wallLeftBody);
+
+const wallRightShape = new CANNON.Box(new CANNON.Vec3(1, 1, 100))
+const wallRightBody = new CANNON.Body({
+  mass: 0,
+  material: groundMaterial
+})
+wallRightBody.addShape(wallRightShape);
+wallRightBody.position.x = 100;
+wallRightBody.position.y = 1;
+wallRightBody.position.z = 0;
+world.addBody(wallRightBody);
+
 const sphereShape = new CANNON.Sphere(0.5)
 const sphereBody = new CANNON.Body({
     mass: 1,
     material: slipperyMaterial,
-}) //, angularDamping: .9 })
+})
 sphereBody.addShape(sphereShape)
 sphereBody.addEventListener('collide', (e: any) => {
   console.log(e);
@@ -106,21 +157,48 @@ const createBullet = function(tank: THREE.Object3D) {
   const eulerY = tank.rotation.z;
   const offsetX = BULLET_SPEED * Math.sin(eulerY);
   const offsetZ = BULLET_SPEED * Math.cos(eulerY);
-  const bulletShape = new CANNON.Sphere(0.04)
+  const bulletShape = new CANNON.Sphere(0.08)
   const bulletBody = new CANNON.Body({
       mass: 0.1,
       material: slipperyMaterial,
   })
   bulletBody.addShape(bulletShape)
   bulletBody.addEventListener('collide', (e: any) => {
-    console.log(e);
+    console.log('bullet', e);
   })
-  bulletBody.position.x = tank.position.x + 0.6 * Math.sin(eulerY)
-  bulletBody.position.y = tank.position.y
-  bulletBody.position.z = tank.position.z + 0.6 * Math.cos(eulerY)
+  bulletBody.position.x = tank.position.x + 0.7 * Math.sin(eulerY)
+  bulletBody.position.y = tank.position.y + 0.5
+  bulletBody.position.z = tank.position.z + 0.7 * Math.cos(eulerY)
 
   bulletBody.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
   world.addBody(bulletBody)
+
+  const bulletGeo = new THREE.SphereGeometry(0.1, 8, 8); 
+  const bulletMaterial = new THREE.MeshBasicMaterial({ 
+    color: new THREE.Color(255, 255, 0)
+  });
+  const bulletSphere = new THREE.Mesh(bulletGeo, bulletMaterial);
+
+  bullets[tank_id].push({
+    id: bulletId,
+    body: bulletBody,
+    sphere: bulletSphere
+  });
+  bulletId++;
+  scene.add(bulletSphere);
+}
+
+const updateBullets = (bullets: Bullets) => {
+  for (const tank in bullets) {
+    const tankBullets = bullets[tank];
+    tankBullets.forEach(bullet => {
+      bullet.sphere.position.set(
+        bullet.body.position.x,
+        bullet.body.position.y,
+        bullet.body.position.z
+      );
+    })
+  }
 }
 
 let {width, height} = renderer.domElement;
@@ -249,18 +327,20 @@ function animate() {
   
   delta = Math.min(clock.getDelta(), 0.1)
   world.step(delta)
-  cannonDebugRenderer.update()
   render()
   stats.update()
 }
 
 function render() {
-  const rotation = tankStatus.rotation || 0;
-  sphereBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
-  // Copy coordinates from Cannon to Three.js
+  cannonDebugRenderer.update()
   const tank = getTank() as THREE.Object3D;
   if (tank) {
     updateMoveSpeed(tankStatus);
+    updateMoveRotation(tankStatus);
+    updateBullets(bullets);
+    const rotation = tankStatus.rotation || 0;
+    sphereBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
+    // Copy coordinates from Cannon to Three.js
     const euler = new CANNON.Vec3();
     sphereBody.quaternion.toEuler(euler);
     const eulerY = euler.y;

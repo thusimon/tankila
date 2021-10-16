@@ -41,6 +41,18 @@ export const updateMoveSpeed = (currentMoveStatus: MoveStatus) => {
     currentMoveStatus.speed = stop(currentSpeed);
   }
 }
+
+export const updateMoveRotation = (currentMoveStatus: MoveStatus) => {
+  const currentRotation = currentMoveStatus.rotation || 0;
+  if (currentMoveStatus.rotationstatus === 1) {
+    currentMoveStatus.rotation = currentRotation - ROTATE_SPEED;
+  } else if (currentMoveStatus.rotationstatus === -1) {
+    currentMoveStatus.rotation = currentRotation + ROTATE_SPEED;
+  } else {
+    // do nothing
+  }
+}
+
 export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: MoveStatus) => {
   if (Number.isInteger(newMoveStatus.keyW)) {
     if (newMoveStatus.keyW) {
@@ -77,12 +89,10 @@ export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: M
     if (newMoveStatus.keyA) {
       // keyA pressed
       currentMoveStatus.rotationstatus = -1;
-      currentMoveStatus.rotation = currentRotation + ROTATE_SPEED
     } else {
       // keyA released
       if (currentMoveStatus.keyD) {
         currentMoveStatus.rotationstatus = 1;
-        currentMoveStatus.rotation = currentRotation - ROTATE_SPEED
       } else {
         currentMoveStatus.rotationstatus = 0;
       }
@@ -94,12 +104,10 @@ export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: M
     if (newMoveStatus.keyD) {
       // keyD pressed
       currentMoveStatus.rotationstatus = 1;
-      currentMoveStatus.rotation = currentRotation - ROTATE_SPEED
     } else {
       // keyD released
       if (currentMoveStatus.keyA) {
         currentMoveStatus.rotationstatus = -1;
-        currentMoveStatus.rotation = currentRotation + ROTATE_SPEED
       } else {
         currentMoveStatus.rotationstatus = 0;
       }
