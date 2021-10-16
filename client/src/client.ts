@@ -1,12 +1,13 @@
 import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {MoveStatus} from './types/Types'
+import {MoveStatus, Bullet} from './types/Types'
 import * as CANNON from 'cannon-es'
 import CannonUtils from './utils/cannon'
 import CannonDebugRenderer from './utils/cannon-debug-render'
 import {updateMoveStatus, updateMoveSpeed} from './utils/tankStatus'
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
+import {GRAVITY, BULLET_SPEED} from './utils/constants';
 
 declare var PRODUCTION: string;
 declare var PORT: string;
@@ -53,6 +54,7 @@ startButton.addEventListener(
       scene.add(tank);
       document.addEventListener('keydown', onKeyDown, false)
       document.addEventListener('keyup', onKeyUp, false)
+      document.addEventListener('keypress', onKeyPress, false)
       renderer.domElement.addEventListener(
         'mousemove',
         onDocumentMouseMove,
@@ -65,7 +67,7 @@ startButton.addEventListener(
 
 // physics
 const world = new CANNON.World()
-const bodies: { [id: string]: CANNON.Body } = {}
+const bullets: Bullet[] = []
 const groundMaterial: CANNON.Material = new CANNON.Material('groundMaterial');
 const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
 groundMaterial.friction = 0.15
@@ -73,7 +75,7 @@ groundMaterial.restitution = 0.25
 slipperyMaterial.friction = 0.15
 slipperyMaterial.restitution = 0.25
 
-world.gravity.set(0, -9.8, 0)
+world.gravity.set(0, GRAVITY, 0)
 
 const groundShape = new CANNON.Box(new CANNON.Vec3(100, 1, 100))
 const groundBody = new CANNON.Body({
@@ -96,9 +98,30 @@ sphereBody.addEventListener('collide', (e: any) => {
   console.log(e);
 })
 sphereBody.position.x = 0
-sphereBody.position.y = 0.6
+sphereBody.position.y = 0.5
 sphereBody.position.z = 0
 world.addBody(sphereBody)
+
+const createBullet = function(tank: THREE.Object3D) {
+  const eulerY = tank.rotation.z;
+  const offsetX = BULLET_SPEED * Math.sin(eulerY);
+  const offsetZ = BULLET_SPEED * Math.cos(eulerY);
+  const bulletShape = new CANNON.Sphere(0.04)
+  const bulletBody = new CANNON.Body({
+      mass: 0.1,
+      material: slipperyMaterial,
+  })
+  bulletBody.addShape(bulletShape)
+  bulletBody.addEventListener('collide', (e: any) => {
+    console.log(e);
+  })
+  bulletBody.position.x = tank.position.x + 0.6 * Math.sin(eulerY)
+  bulletBody.position.y = tank.position.y
+  bulletBody.position.z = tank.position.z + 0.6 * Math.cos(eulerY)
+
+  bulletBody.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
+  world.addBody(bulletBody)
+}
 
 let {width, height} = renderer.domElement;
 let cameraRotationXZOffset = 0;
@@ -193,6 +216,15 @@ const onKeyUp = function(event: KeyboardEvent) {
       tankStatus = updateMoveStatus(tankStatus, {keyD: 0});
       break
     }
+  }
+}
+
+const onKeyPress = function(event: KeyboardEvent) {
+  const tank = getTank() as THREE.Object3D;
+  switch (event.code) {
+    case 'Space':
+      createBullet(tank);
+      break;
   }
 }
 

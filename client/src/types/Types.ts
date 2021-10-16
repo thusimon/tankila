@@ -1,5 +1,6 @@
 import Point from '../data/Point';
 import { Vector3, Euler, Color } from 'three';
+import * as CANNON from 'cannon-es'
 
 export interface GameConfig {
   width: number;
@@ -19,6 +20,11 @@ export interface BulletData {
   rot: number;
   hit: boolean;
   idx: number;
+}
+
+export interface Bullet {
+  id: number,
+  body: CANNON.Body
 }
 
 export interface TankData3 {
