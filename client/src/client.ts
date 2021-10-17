@@ -1,13 +1,14 @@
 import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {MoveStatus, Bullet, Bullets} from './types/Types'
+import {MoveStatus, Bullet, Bullets, UserBody} from './types/Types'
 import * as CANNON from 'cannon-es'
 import CannonUtils from './utils/cannon'
 import CannonDebugRenderer from './utils/cannon-debug-render'
 import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from './utils/tankStatus'
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 import {GRAVITY, BULLET_SPEED} from './utils/constants';
+import Explosion from './components/bullet/explosion';
 
 declare var PRODUCTION: string;
 declare var PORT: string;
@@ -69,11 +70,17 @@ startButton.addEventListener(
 // physics
 const world = new CANNON.World()
 const bullets: Bullets = {}
-let bulletId = 0;
+const explosions: Explosion[] = [
+  new Explosion(new THREE.Color(0xffff00), scene)
+];
+let bulletIdx = 0;
 const groundMaterial: CANNON.Material = new CANNON.Material('groundMaterial');
+const wallMaterial: CANNON.Material = new CANNON.Material('wallMaterial');
 const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
-groundMaterial.friction = 0.15
+groundMaterial.friction = 0.5
 groundMaterial.restitution = 0.25
+wallMaterial.friction = 0.5
+wallMaterial.restitution = 0.25
 slipperyMaterial.friction = 0.15
 slipperyMaterial.restitution = 0.25
 
@@ -84,70 +91,80 @@ if (!bullets[tank_id]) {
 }
 
 const groundShape = new CANNON.Box(new CANNON.Vec3(100, 1, 100))
-const groundBody = new CANNON.Body({
+const groundBody: UserBody = new CANNON.Body({
     mass: 0,
-    material: groundMaterial
+    material: groundMaterial,
+    type: CANNON.Body.STATIC
 })
 groundBody.addShape(groundShape)
 groundBody.position.x = 0
 groundBody.position.y = -1
 groundBody.position.z = 0
+groundBody.userData = 'ground'
 world.addBody(groundBody)
 
 // add walls
 const wallTopShape = new CANNON.Box(new CANNON.Vec3(100, 1, 1))
-const wallTopBody = new CANNON.Body({
+const wallTopBody: UserBody = new CANNON.Body({
   mass: 0,
-  material: groundMaterial
+  material: wallMaterial,
+  type: CANNON.Body.STATIC
 })
 wallTopBody.addShape(wallTopShape);
 wallTopBody.position.x = 0;
 wallTopBody.position.y = 1;
 wallTopBody.position.z = 100;
+wallTopBody.userData = 'wall-top'
 world.addBody(wallTopBody);
 
 const wallBottomShape = new CANNON.Box(new CANNON.Vec3(100, 1, 1))
-const wallBottomBody = new CANNON.Body({
+const wallBottomBody: UserBody = new CANNON.Body({
   mass: 0,
-  material: groundMaterial
+  material: wallMaterial,
+  type: CANNON.Body.STATIC
 })
 wallBottomBody.addShape(wallBottomShape);
 wallBottomBody.position.x = 0;
 wallBottomBody.position.y = 1;
 wallBottomBody.position.z = -100;
+wallBottomBody.userData = 'wall-bottom'
 world.addBody(wallBottomBody);
 
 const wallLeftShape = new CANNON.Box(new CANNON.Vec3(1, 1, 100))
-const wallLeftBody = new CANNON.Body({
+const wallLeftBody: UserBody = new CANNON.Body({
   mass: 0,
-  material: groundMaterial
+  material: wallMaterial,
+  type: CANNON.Body.STATIC
 })
 wallLeftBody.addShape(wallLeftShape);
 wallLeftBody.position.x = -100;
 wallLeftBody.position.y = 1;
 wallLeftBody.position.z = 0;
+wallLeftBody.userData = 'wall-left'
 world.addBody(wallLeftBody);
 
 const wallRightShape = new CANNON.Box(new CANNON.Vec3(1, 1, 100))
-const wallRightBody = new CANNON.Body({
+const wallRightBody: UserBody = new CANNON.Body({
   mass: 0,
-  material: groundMaterial
+  material: wallMaterial,
+  type: CANNON.Body.STATIC
 })
 wallRightBody.addShape(wallRightShape);
 wallRightBody.position.x = 100;
 wallRightBody.position.y = 1;
 wallRightBody.position.z = 0;
+wallRightBody.userData = 'wall-right'
 world.addBody(wallRightBody);
 
 const sphereShape = new CANNON.Sphere(0.5)
-const sphereBody = new CANNON.Body({
+const sphereBody: UserBody = new CANNON.Body({
     mass: 1,
     material: slipperyMaterial,
+    type: CANNON.Body.DYNAMIC
 })
 sphereBody.addShape(sphereShape)
-sphereBody.addEventListener('collide', (e: any) => {
-  console.log(e);
-})
+sphereBody.userData = 'tank_sphere'
+
 sphereBody.position.x = 0
 sphereBody.position.y = 0.5
 sphereBody.position.z = 0
@@ -158,14 +175,15 @@ const createBullet = function(tank: THREE.Object3D) {
   const offsetX = BULLET_SPEED * Math.sin(eulerY);
   const offsetZ = BULLET_SPEED * Math.cos(eulerY);
   const bulletShape = new CANNON.Sphere(0.08)
-  const bulletBody = new CANNON.Body({
+  const bulletBody: UserBody = new CANNON.Body({
       mass: 0.1,
       material: slipperyMaterial,
+      type: CANNON.Body.DYNAMIC
   })
+  //bulletBody.tankId = tank_id;
+  //bulletBody.bulletIdx = bulletIdx;
+  bulletBody.userData = `tank_bullet_${tank_id}`;
   bulletBody.addShape(bulletShape)
-  bulletBody.addEventListener('collide', (e: any) => {
-    console.log('bullet', e);
-  })
   bulletBody.position.x = tank.position.x + 0.7 * Math.sin(eulerY)
   bulletBody.position.y = tank.position.y + 0.5
   bulletBody.position.z = tank.position.z + 0.7 * Math.cos(eulerY)
@@ -180,12 +198,19 @@ const createBullet = function(tank: THREE.Object3D) {
   const bulletSphere = new THREE.Mesh(bulletGeo, bulletMaterial);
 
   bullets[tank_id].push({
-    id: bulletId,
+    idx: bulletIdx,
     body: bulletBody,
     sphere: bulletSphere
   });
-  bulletId++;
+  bulletIdx++;
   scene.add(bulletSphere);
+
+  bulletBody.addEventListener('collide', (evt: any) => {
+    console.log('bullet', evt);
+    explosions.forEach((explosion) => {
+      explosion.explode(new THREE.Vector3(evt.body.position.x, evt.body.position.y, evt.body.position.z))
+    })
+  })
 }
 
 const updateBullets = (bullets: Bullets) => {

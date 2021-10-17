@@ -23,13 +23,17 @@ export interface BulletData {
 }
 
 export interface Bullet {
-  id: number;
+  idx: number;
   body: CANNON.Body;
   sphere: THREE.Object3D;
 }
 
 export interface Bullets {
   [key:string]: Bullet[]
+}
+
+export interface UserBody extends CANNON.Body {
+  userData?: any;
 }
 
 export interface TankData3 {
