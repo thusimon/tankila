@@ -8,7 +8,9 @@ import CannonDebugRenderer from './utils/cannon-debug-render'
 import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from './utils/tankStatus'
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 import {GRAVITY, BULLET_SPEED} from './utils/constants';
+import Arena from './components/game/arena';
 import Explosion from './components/bullet/explosion';
+import {isColideWith} from './utils/collision'
 
 declare var PRODUCTION: string;
 declare var PORT: string;
@@ -70,115 +72,21 @@ startButton.addEventListener(
 // physics
 const world = new CANNON.World()
 const bullets: Bullets = {}
+if (!bullets[tank_id]) {
+  bullets[tank_id] = [];
+}
 const explosions: Explosion[] = [
   new Explosion(new THREE.Color(0xffff00), scene)
 ];
 let bulletIdx = 0;
-const groundMaterial: CANNON.Material = new CANNON.Material('groundMaterial');
-const wallMaterial: CANNON.Material = new CANNON.Material('wallMaterial');
-const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
-groundMaterial.friction = 0.5
-groundMaterial.restitution = 0.25
-wallMaterial.friction = 0.5
-wallMaterial.restitution = 0.25
-slipperyMaterial.friction = 0.15
-slipperyMaterial.restitution = 0.25
 
 world.gravity.set(0, GRAVITY, 0)
 
-if (!bullets[tank_id]) {
-  bullets[tank_id] = [];
-}
+const arena = new Arena(scene, world);
 
-const groundShape = new CANNON.Box(new CANNON.Vec3(100, 1, 100))
-const groundBody: UserBody = new CANNON.Body({
-    mass: 0,
-    material: groundMaterial,
-    type: CANNON.Body.STATIC
-})
-groundBody.addShape(groundShape)
-groundBody.position.x = 0
-groundBody.position.y = -1
-groundBody.position.z = 0
-groundBody.userData = 'ground'
-world.addBody(groundBody)
-
-// add walls
-const wallTopShape = new CANNON.Box(new CANNON.Vec3(100, 1, 1))
-const wallTopBody: UserBody = new CANNON.Body({
-  mass: 0,
-  material: wallMaterial,
-  type: CANNON.Body.STATIC,
-  isTrigger: true
-})
-wallTopBody.addShape(wallTopShape);
-wallTopBody.position.x = 0;
-wallTopBody.position.y = 1;
-wallTopBody.position.z = 100;
-wallTopBody.userData = 'wall-top'
-wallTopBody.addEventListener('collide', (evt: any) => {
-  if (evt.body.userData === `tank_bullet_${tank_id}`) {
-    console.log('bullet hit wall-top')
-  }
-})
-world.addBody(wallTopBody);
-
-const wallBottomShape = new CANNON.Box(new CANNON.Vec3(100, 1, 1))
-const wallBottomBody: UserBody = new CANNON.Body({
-  mass: 0,
-  material: wallMaterial,
-  type: CANNON.Body.STATIC,
-  isTrigger: true
-})
-wallBottomBody.addShape(wallBottomShape);
-wallBottomBody.position.x = 0;
-wallBottomBody.position.y = 1;
-wallBottomBody.position.z = -100;
-wallBottomBody.userData = 'wall-bottom'
-wallBottomBody.addEventListener('collide', (evt: any) => {
-  if (evt.body.userData === `tank_bullet_${tank_id}`) {
-    console.log('bullet hit wall-bottom')
-  }
-})
-world.addBody(wallBottomBody);
-
-const wallLeftShape = new CANNON.Box(new CANNON.Vec3(1, 1, 100))
-const wallLeftBody: UserBody = new CANNON.Body({
-  mass: 0,
-  material: wallMaterial,
-  type: CANNON.Body.STATIC,
-  isTrigger: true
-})
-wallLeftBody.addShape(wallLeftShape);
-wallLeftBody.position.x = -100;
-wallLeftBody.position.y = 1;
-wallLeftBody.position.z = 0;
-wallLeftBody.userData = 'wall-left'
-wallLeftBody.addEventListener('collide', (evt: any) => {
-  if (evt.body.userData === `tank_bullet_${tank_id}`) {
-    console.log('bullet hit wall-left')
-  }
-})
-world.addBody(wallLeftBody);
-
-const wallRightShape = new CANNON.Box(new CANNON.Vec3(1, 1, 100))
-const wallRightBody: UserBody = new CANNON.Body({
-  mass: 0,
-  material: wallMaterial,
-  type: CANNON.Body.STATIC,
-  isTrigger: true
-})
-wallRightBody.addShape(wallRightShape);
-wallRightBody.position.x = 100;
-wallRightBody.position.y = 1;
-wallRightBody.position.z = 0;
-wallRightBody.userData = 'wall-right'
-wallRightBody.addEventListener('collide', (evt: any) => {
-  if (evt.body.userData === `tank_bullet_${tank_id}`) {
-    console.log('bullet hit wall-right')
-  }
-})
-world.addBody(wallRightBody);
+const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
+slipperyMaterial.friction = 0.15
+slipperyMaterial.restitution = 0.25
 
 const sphereShape = new CANNON.Sphere(0.5)
 const sphereBody: UserBody = new CANNON.Body({
@@ -202,7 +110,8 @@ const createBullet = function(tank: THREE.Object3D) {
   const bulletBody: UserBody = new CANNON.Body({
       mass: 0.1,
       material: slipperyMaterial,
-      type: CANNON.Body.DYNAMIC
+      type: CANNON.Body.DYNAMIC,
+      isTrigger: true
   })
   //bulletBody.tankId = tank_id;
   //bulletBody.bulletIdx = bulletIdx;
@@ -229,12 +138,12 @@ const createBullet = function(tank: THREE.Object3D) {
   bulletIdx++;
   scene.add(bulletSphere);
 
-  // bulletBody.addEventListener('collide', (evt: any) => {
-  //   console.log('bullet', evt);
-  //   explosions.forEach((explosion) => {
-  //     explosion.explode(new THREE.Vector3(evt.body.position.x, evt.body.position.y, evt.body.position.z))
-  //   })
-  // })
+  bulletBody.addEventListener('collide', (evt: any) => {
+    console.log(`yoyo clide with ${evt.body.userData}`);
+    // explosions.forEach((explosion) => {
+    //   explosion.explode(new THREE.Vector3(evt.body.position.x, evt.body.position.y, evt.body.position.z))
+    // })
+  })
 }
 
 const updateBullets = (bullets: Bullets) => {

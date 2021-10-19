@@ -33,7 +33,7 @@ export interface Bullets {
 }
 
 export interface UserBody extends CANNON.Body {
-  userData?: any;
+  userData?: string;
 }
 
 export interface TankData3 {

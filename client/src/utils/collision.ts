@@ -28,3 +28,7 @@ export const isCircleHitRect = (circle: Circle, rect: Rect): boolean => {
   const area = getTriangleArea(p1, p2, cp) + getTriangleArea(p2, p3, cp) + getTriangleArea(p3, p4, cp) + getTriangleArea(p4, p1, cp);
   return area <= rectArea;
 };
+
+export const isColideWith = (userData: string, namePrefix: string): boolean => {
+  return userData.startsWith(namePrefix);
+}
