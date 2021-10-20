@@ -1,6 +1,7 @@
 import Point from '../data/Point';
 import { Vector3, Euler, Color } from 'three';
 import * as CANNON from 'cannon-es'
+import Bullet from '../components/bullet/bullet';
 
 export interface GameConfig {
   width: number;
@@ -22,13 +23,13 @@ export interface BulletData {
   idx: number;
 }
 
-export interface Bullet {
+export interface BulletType {
   idx: number;
   body: CANNON.Body;
   sphere: THREE.Object3D;
 }
 
-export interface Bullets {
+export interface BulletsType {
   [key:string]: Bullet[]
 }
 

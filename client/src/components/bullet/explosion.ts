@@ -14,7 +14,7 @@ class Explosion {
     particleGeometry.setFromPoints(vertices)
     const pMaterial = new THREE.PointsMaterial({
       color: color,
-      size: 1,
+      size: 0.02,
     })
     this.particles = new THREE.Points(particleGeometry, pMaterial)
     scene.add(this.particles)

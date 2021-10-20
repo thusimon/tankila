@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {MoveStatus, Bullet, Bullets, UserBody} from './types/Types'
+import {MoveStatus, BulletType, BulletsType, UserBody} from './types/Types'
 import * as CANNON from 'cannon-es'
 import CannonUtils from './utils/cannon'
 import CannonDebugRenderer from './utils/cannon-debug-render'
@@ -10,6 +10,7 @@ import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 import {GRAVITY, BULLET_SPEED} from './utils/constants';
 import Arena from './components/game/arena';
 import Explosion from './components/bullet/explosion';
+import Bullet from './components/bullet/bullet'
 import {isColideWith} from './utils/collision'
 
 declare var PRODUCTION: string;
@@ -71,7 +72,7 @@ startButton.addEventListener(
 
 // physics
 const world = new CANNON.World()
-const bullets: Bullets = {}
+const bullets: BulletsType = {}
 if (!bullets[tank_id]) {
   bullets[tank_id] = [];
 }
@@ -102,59 +103,11 @@ sphereBody.position.y = 0.5
 sphereBody.position.z = 0
 world.addBody(sphereBody)
 
-const createBullet = function(tank: THREE.Object3D) {
-  const eulerY = tank.rotation.z;
-  const offsetX = BULLET_SPEED * Math.sin(eulerY);
-  const offsetZ = BULLET_SPEED * Math.cos(eulerY);
-  const bulletShape = new CANNON.Sphere(0.08)
-  const bulletBody: UserBody = new CANNON.Body({
-      mass: 0.1,
-      material: slipperyMaterial,
-      type: CANNON.Body.DYNAMIC,
-      isTrigger: true
-  })
-  //bulletBody.tankId = tank_id;
-  //bulletBody.bulletIdx = bulletIdx;
-  bulletBody.userData = `tank_bullet_${tank_id}`;
-  bulletBody.addShape(bulletShape)
-  bulletBody.position.x = tank.position.x + 0.7 * Math.sin(eulerY)
-  bulletBody.position.y = tank.position.y + 0.5
-  bulletBody.position.z = tank.position.z + 0.7 * Math.cos(eulerY)
-
-  bulletBody.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
-  world.addBody(bulletBody)
-
-  const bulletGeo = new THREE.SphereGeometry(0.1, 8, 8); 
-  const bulletMaterial = new THREE.MeshBasicMaterial({ 
-    color: new THREE.Color(255, 255, 0)
-  });
-  const bulletSphere = new THREE.Mesh(bulletGeo, bulletMaterial);
-
-  bullets[tank_id].push({
-    idx: bulletIdx,
-    body: bulletBody,
-    sphere: bulletSphere
-  });
-  bulletIdx++;
-  scene.add(bulletSphere);
-
-  bulletBody.addEventListener('collide', (evt: any) => {
-    console.log(`yoyo clide with ${evt.body.userData}`);
-    // explosions.forEach((explosion) => {
-    //   explosion.explode(new THREE.Vector3(evt.body.position.x, evt.body.position.y, evt.body.position.z))
-    // })
-  })
-}
-
-const updateBullets = (bullets: Bullets) => {
+const updateBullets = (bullets: BulletsType) => {
   for (const tank in bullets) {
     const tankBullets = bullets[tank];
     tankBullets.forEach(bullet => {
-      bullet.sphere.position.set(
-        bullet.body.position.x,
-        bullet.body.position.y,
-        bullet.body.position.z
-      );
+      bullet.updateSphere();
     })
   }
 }
@@ -259,7 +212,8 @@ const onKeyPress = function(event: KeyboardEvent) {
   const tank = getTank() as THREE.Object3D;
   switch (event.code) {
     case 'Space':
-      createBullet(tank);
+      const bullet = new Bullet(scene, world, tank, tank_id);
+      bullets[tank_id].push(bullet);
       break;
   }
 }
