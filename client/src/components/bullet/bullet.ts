@@ -3,13 +3,14 @@ import * as CANNON from 'cannon-es'
 import {BULLET_SPEED} from '../../utils/constants';
 import { UserBody } from '../../types/Types';
 import Explosion from './explosion';
+import Tank from '../tank/tank';
 
 class Bullet {
   bulletBody: UserBody;
   bulletSphere: THREE.Mesh;
   scene: THREE.Scene
   world: CANNON.World
-  constructor(scene: THREE.Scene, world: CANNON.World, tank: THREE.Object3D, tankId: string) {
+  constructor(scene: THREE.Scene, world: CANNON.World, tank: Tank) {
     this.scene = scene;
     this.world = world;
     const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
@@ -22,14 +23,15 @@ class Bullet {
         type: CANNON.Body.DYNAMIC,
         isTrigger: true
     })
-    this.bulletBody.userData = `tank_bullet_${tankId}`;
+    this.bulletBody.userData = `tank_bullet_${tank.tankId}`;
     this.bulletBody.addShape(bulletShape)
-    const eulerY = tank.rotation.z;
+    const model = tank.model;
+    const eulerY = model.rotation.z;
     const offsetX = BULLET_SPEED * Math.sin(eulerY);
     const offsetZ = BULLET_SPEED * Math.cos(eulerY);
-    this.bulletBody.position.x = tank.position.x + 0.7 * Math.sin(eulerY)
-    this.bulletBody.position.y = tank.position.y + 0.5
-    this.bulletBody.position.z = tank.position.z + 0.7 * Math.cos(eulerY)
+    this.bulletBody.position.x = model.position.x + 0.7 * Math.sin(eulerY)
+    this.bulletBody.position.y = model.position.y + 0.5
+    this.bulletBody.position.z = model.position.z + 0.7 * Math.cos(eulerY)
 
     this.bulletBody.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
     world.addBody(this.bulletBody)

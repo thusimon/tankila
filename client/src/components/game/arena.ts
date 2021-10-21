@@ -82,6 +82,35 @@ class Arena {
     wallRightBody.position.z = 0;
     wallRightBody.userData = 'wall-right'
     world.addBody(wallRightBody);
+
+    const groundTexture = new THREE.TextureLoader().load('./textures/grass_ground.jpg')
+    const material = new THREE.MeshBasicMaterial({
+      map: groundTexture
+    });
+
+    const planeGeometry = new THREE.PlaneGeometry(200, 200, 50, 50)
+
+    const plane = new THREE.Mesh(planeGeometry, material)
+
+    groundTexture.minFilter = THREE.NearestMipmapLinearFilter
+    groundTexture.magFilter = THREE.NearestMipmapLinearFilter
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(32, 32); 
+
+    plane.rotateX(-Math.PI / 2)
+    scene.add(plane)
+
+    const skyGeo = new THREE.SphereGeometry(200, 20, 20); 
+    const skySphereLoader  = new THREE.TextureLoader()
+    const skyTexture = skySphereLoader.load('./textures/sky.jpg');
+    const skyMaterial = new THREE.MeshPhongMaterial({ 
+      map: skyTexture,
+    });
+    const sky = new THREE.Mesh(skyGeo, skyMaterial);
+    sky.material.side = THREE.BackSide;
+    sky.position.y = -2
+    scene.add(sky);
   }
 }
 
