@@ -103,6 +103,11 @@ function render() {
       -10 * Math.atan(cameraRotationYOffset),
       model.position.z + 10 * Math.cos(eulerY - cameraRotationXZOffset))
   }
+  const bulletsToRemove = game.bulletsToRemove;
+  bulletsToRemove.forEach(bullet => {
+    bullet.bulletExplode();
+    bullet.removeBullet();
+  })
   renderer.render(scene, camera)
 }
 

@@ -10,9 +10,11 @@ class Bullet {
   bulletSphere: THREE.Mesh;
   scene: THREE.Scene
   world: CANNON.World
-  constructor(scene: THREE.Scene, world: CANNON.World, tank: Tank) {
+  bulletsToRemove: Bullet[];
+  constructor(scene: THREE.Scene, world: CANNON.World, tank: Tank, bulletsToRemove: Bullet[]) {
     this.scene = scene;
     this.world = world;
+    this.bulletsToRemove = bulletsToRemove;
     const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
     slipperyMaterial.friction = 0.15
     slipperyMaterial.restitution = 0.25
@@ -46,8 +48,7 @@ class Bullet {
 
     this.bulletBody.addEventListener('collide', (evt: any) => {
       console.log(`yoyo clide with ${evt.body.userData}`);
-      this.bulletExplode();
-      //this.removeBullet();
+      this.bulletsToRemove.push(this);
     })
   }
 

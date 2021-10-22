@@ -20,6 +20,7 @@ class Game {
   arena: Arena;
   renderer: THREE.WebGLRenderer;
   bullets: BulletsType = {};
+  bulletsToRemove: Bullet[] = [];
   tanks: Tank[] = [];
   cameraRotationXZOffset: number = 0;
   cameraRotationYOffset: number = 0;
@@ -123,7 +124,7 @@ class Game {
   onKeyPress(event: KeyboardEvent, tank: Tank) {
     switch (event.code) {
       case 'Space':
-        const bullet = new Bullet(this.scene, this.world, tank);
+        const bullet = new Bullet(this.scene, this.world, tank, this.bulletsToRemove);
         this.bullets[tank.tankId].push(bullet);
         break;
     }
