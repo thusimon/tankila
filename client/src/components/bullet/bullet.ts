@@ -11,10 +11,13 @@ class Bullet {
   scene: THREE.Scene
   world: CANNON.World
   bulletsToRemove: Bullet[];
-  constructor(scene: THREE.Scene, world: CANNON.World, tank: Tank, bulletsToRemove: Bullet[]) {
+  explosions: Explosion[] = [];
+  removeFlag: boolean = false;
+  constructor(scene: THREE.Scene, world: CANNON.World, tank: Tank, bulletsToRemove: Bullet[], explosions: Explosion[]) {
     this.scene = scene;
     this.world = world;
     this.bulletsToRemove = bulletsToRemove;
+    this.explosions = explosions;
     const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
     slipperyMaterial.friction = 0.15
     slipperyMaterial.restitution = 0.25
@@ -55,15 +58,13 @@ class Bullet {
   removeBullet() {
     this.world.removeBody(this.bulletBody);
     this.scene.remove(this.bulletSphere);
+    this.removeFlag = true;
   }
 
   bulletExplode() {
-    const explosions: Explosion[] = [
-      new Explosion(new THREE.Color(0xffff00), this.scene)
-    ];
-    explosions.forEach((explosion) => {
-      explosion.explode(new THREE.Vector3(this.bulletBody.position.x, this.bulletBody.position.y, this.bulletBody.position.z))
-    })
+    const explosion = new Explosion(new THREE.Color(0xffff00), this.scene);
+    this.explosions.push(explosion);
+    explosion.explode(new THREE.Vector3(this.bulletBody.position.x, this.bulletBody.position.y, this.bulletBody.position.z));
   }
 
   updateSphere() {

@@ -1,20 +1,22 @@
 import * as THREE from 'three'
 
 class Explosion {
-  private particleCount = 20
-  private particles: THREE.Points
-
+  private particleCount = 10;
+  private particles: THREE.Points;
+  private scene: THREE.Scene;
+  public removeFlag: boolean = false;
   constructor(color: THREE.Color, scene: THREE.Scene) {
+    this.scene = scene;
     const particleGeometry = new THREE.BufferGeometry()
     const vertices = []
-    for (let j = 0; j < this.particleCount; j++) {
+    for (let i = 0; i < this.particleCount; i++) {
       let vertex = new THREE.Vector3()
       vertices.push(vertex)
     }
     particleGeometry.setFromPoints(vertices)
     const pMaterial = new THREE.PointsMaterial({
       color: color,
-      size: 0.02,
+      size: 0.03,
     })
     this.particles = new THREE.Points(particleGeometry, pMaterial)
     scene.add(this.particles)
@@ -28,19 +30,16 @@ class Explosion {
 
     const positions = (this.particles.geometry as THREE.BufferGeometry)
       .attributes.position.array as Array<number>
-    for (let j = 0; j < this.particleCount * 3; j = j + 3) {
+    for (let i = 0; i < this.particleCount * 3; i = i + 3) {
       let v = new THREE.Vector3(
-        Math.random() * 0.5 - 0.25,
-        Math.random() * 0.25,
-        Math.random() * 0.5 - 0.25
-      )
-      positions[j] = v.x
-      positions[j + 1] = v.y
-      positions[j + 2] = v.z
+        Math.random() - 0.5,
+        Math.random() - 0.5,
+        Math.random() - 0.5)
+      positions[i] = v.x
+      positions[i + 1] = v.y
+      positions[i + 2] = v.z
     }
-    (this.particles.geometry as THREE.BufferGeometry)
-      .attributes.position.needsUpdate = true
-
+    (this.particles.geometry as THREE.BufferGeometry).attributes.position.needsUpdate = true
     this.particles.userData.explosionPower = 1.2
     this.particles.visible = true
   }
@@ -49,23 +48,27 @@ class Explosion {
     if (!this.particles.visible) return
     const positions = (this.particles.geometry as THREE.BufferGeometry)
       .attributes.position.array as Array<number>
-    for (let j = 0; j < this.particleCount * 3; j = j + 3) {
+    for (let i = 0; i < this.particleCount * 3; i = i + 3) {
       const v = new THREE.Vector3(
-        positions[j],
-        positions[j + 1],
-        positions[j + 2]
-      ).multiplyScalar(this.particles.userData.explosionPower)
-      positions[j] = v.x
-      positions[j + 1] = v.y
-      positions[j + 2] = v.z
+        positions[i],
+        positions[i + 1],
+        positions[i + 2]).multiplyScalar(this.particles.userData.explosionPower)
+      positions[i] = v.x
+      positions[i + 1] = v.y
+      positions[i + 2] = v.z
     }
-    if (this.particles.userData.explosionPower > 1.15) {
-      this.particles.userData.explosionPower -= 0.001
+    if (this.particles.userData.explosionPower > 1.1) {
+      this.particles.userData.explosionPower -= 0.004;
+      (this.particles.geometry as THREE.BufferGeometry).attributes.position.needsUpdate = true
     } else {
       this.particles.visible = false
+      this.removeFlag = true;
+      (this.particles.geometry as THREE.BufferGeometry).attributes.position.needsUpdate = false
     }
-    (this.particles.geometry as THREE.BufferGeometry)
-      .attributes.position.needsUpdate = true
+  }
+
+  public remove() {
+    this.scene.remove(this.particles)
   }
 }
 

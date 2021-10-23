@@ -9,6 +9,7 @@ import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType } from '../.
 // import Debug from '../info/debug';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
+import Explosion from '../bullet/explosion';
 import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
 import Message from '../message';
@@ -21,6 +22,7 @@ class Game {
   renderer: THREE.WebGLRenderer;
   bullets: BulletsType = {};
   bulletsToRemove: Bullet[] = [];
+  explosions: Explosion[] =[];
   tanks: Tank[] = [];
   cameraRotationXZOffset: number = 0;
   cameraRotationYOffset: number = 0;
@@ -124,7 +126,7 @@ class Game {
   onKeyPress(event: KeyboardEvent, tank: Tank) {
     switch (event.code) {
       case 'Space':
-        const bullet = new Bullet(this.scene, this.world, tank, this.bulletsToRemove);
+        const bullet = new Bullet(this.scene, this.world, tank, this.bulletsToRemove, this.explosions);
         this.bullets[tank.tankId].push(bullet);
         break;
     }
