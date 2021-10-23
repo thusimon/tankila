@@ -105,21 +105,13 @@ function render() {
   }
   const bulletsToRemove = game.bulletsToRemove;
   bulletsToRemove.forEach(bullet => {
-    bullet.bulletExplode();
     bullet.removeBullet();
   })
   
-  // find explosions needs to update
-  const activeExplosions = game.explosions.filter(explosion => !explosion.removeFlag);
-  const removeExplosions = game.explosions.filter(explosion => explosion.removeFlag);
+  // TODO need to clean up the explosions array
   game.explosions.forEach(explosion => {
     explosion.update();
   });
-  //console.log(removeExplosions)
-  // removeExplosions.forEach(explosion => {
-  //   explosion.remove();
-  // });
-  // game.explosions = activeExplosions;
   renderer.render(scene, camera)
 }
 

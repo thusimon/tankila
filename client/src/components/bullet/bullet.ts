@@ -52,6 +52,7 @@ class Bullet {
     this.bulletBody.addEventListener('collide', (evt: any) => {
       console.log(`yoyo clide with ${evt.body.userData}`);
       this.bulletsToRemove.push(this);
+      this.bulletExplode();
     })
   }
 

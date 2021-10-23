@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 class Explosion {
-  private particleCount = 10;
+  private particleCount = 20;
   private particles: THREE.Points;
   private scene: THREE.Scene;
   public removeFlag: boolean = false;
@@ -16,7 +16,7 @@ class Explosion {
     particleGeometry.setFromPoints(vertices)
     const pMaterial = new THREE.PointsMaterial({
       color: color,
-      size: 0.03,
+      size: 0.08,
     })
     this.particles = new THREE.Points(particleGeometry, pMaterial)
     scene.add(this.particles)
