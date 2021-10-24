@@ -35,10 +35,9 @@ startButton.addEventListener(
   async function () {
     menuPanel.style.display = 'none'
     let protocol = 'wss';
-    let port = '';
+    let port = `:${PORT}`;
     if (!PRODUCTION) {
       protocol = 'ws';
-      port = `:${PORT}`;
     }
     webSocket = new WebSocket(`${protocol}://${window.location.hostname}${port}/websockets?id=${tankId}&name=${tankName}`)
     const tank = await game.addTank(tankId, tankName);
