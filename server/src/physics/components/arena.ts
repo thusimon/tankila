@@ -1,9 +1,13 @@
-import * as THREE from 'three'
 import * as CANNON from 'cannon-es'
-import {UserBody} from '../../types/Types'
+import {UserBody} from '../../../../client/src/types/Types'
+import {ARENA_WIDTH, ARENA_HEIGHT} from '../../constants';
 
 class Arena {
-  constructor(scene: THREE.Scene, world: CANNON.World) {
+  width: number;
+  height: number;
+  constructor(world: CANNON.World) {
+    this.width = ARENA_WIDTH;
+    this.height = ARENA_HEIGHT;
     const groundMaterial: CANNON.Material = new CANNON.Material('groundMaterial');
     const wallMaterial: CANNON.Material = new CANNON.Material('wallMaterial');
     groundMaterial.friction = 0.5
@@ -12,7 +16,7 @@ class Arena {
     wallMaterial.restitution = 0.25
 
     // add ground
-    const groundShape = new CANNON.Box(new CANNON.Vec3(100, 1, 100))
+    const groundShape = new CANNON.Box(new CANNON.Vec3(ARENA_WIDTH, 1, ARENA_HEIGHT))
     const groundBody: UserBody = new CANNON.Body({
       mass: 0,
       material: groundMaterial,
@@ -27,7 +31,7 @@ class Arena {
 
     // add walls
     // add top wall
-    const wallTopShape = new CANNON.Box(new CANNON.Vec3(100, 1, 1))
+    const wallTopShape = new CANNON.Box(new CANNON.Vec3(ARENA_WIDTH, 1, 1))
     const wallTopBody: UserBody = new CANNON.Body({
       mass: 0,
       material: wallMaterial,
@@ -36,12 +40,12 @@ class Arena {
     wallTopBody.addShape(wallTopShape);
     wallTopBody.position.x = 0;
     wallTopBody.position.y = 1;
-    wallTopBody.position.z = 100;
+    wallTopBody.position.z = ARENA_HEIGHT;
     wallTopBody.userData = 'wall-top'
     world.addBody(wallTopBody);
 
     // add bottom wall
-    const wallBottomShape = new CANNON.Box(new CANNON.Vec3(100, 1, 1))
+    const wallBottomShape = new CANNON.Box(new CANNON.Vec3(ARENA_WIDTH, 1, 1))
     const wallBottomBody: UserBody = new CANNON.Body({
       mass: 0,
       material: wallMaterial,
@@ -50,66 +54,37 @@ class Arena {
     wallBottomBody.addShape(wallBottomShape);
     wallBottomBody.position.x = 0;
     wallBottomBody.position.y = 1;
-    wallBottomBody.position.z = -100;
+    wallBottomBody.position.z = -ARENA_HEIGHT;
     wallBottomBody.userData = 'wall-bottom'
     world.addBody(wallBottomBody);
 
     // add wall left
-    const wallLeftShape = new CANNON.Box(new CANNON.Vec3(1, 1, 100))
+    const wallLeftShape = new CANNON.Box(new CANNON.Vec3(1, 1, ARENA_HEIGHT))
     const wallLeftBody: UserBody = new CANNON.Body({
       mass: 0,
       material: wallMaterial,
       type: CANNON.Body.STATIC,
     })
     wallLeftBody.addShape(wallLeftShape);
-    wallLeftBody.position.x = -100;
+    wallLeftBody.position.x = -ARENA_WIDTH;
     wallLeftBody.position.y = 1;
     wallLeftBody.position.z = 0;
     wallLeftBody.userData = 'wall-left'
     world.addBody(wallLeftBody);
 
     // add wall right
-    const wallRightShape = new CANNON.Box(new CANNON.Vec3(1, 1, 100))
+    const wallRightShape = new CANNON.Box(new CANNON.Vec3(1, 1, ARENA_HEIGHT))
     const wallRightBody: UserBody = new CANNON.Body({
       mass: 0,
       material: wallMaterial,
       type: CANNON.Body.STATIC
     })
     wallRightBody.addShape(wallRightShape);
-    wallRightBody.position.x = 100;
+    wallRightBody.position.x = ARENA_WIDTH;
     wallRightBody.position.y = 1;
     wallRightBody.position.z = 0;
     wallRightBody.userData = 'wall-right'
     world.addBody(wallRightBody);
-
-    const groundTexture = new THREE.TextureLoader().load('./textures/grass_ground.jpg')
-    const material = new THREE.MeshBasicMaterial({
-      map: groundTexture
-    });
-
-    const planeGeometry = new THREE.PlaneGeometry(200, 200, 50, 50)
-
-    const plane = new THREE.Mesh(planeGeometry, material)
-
-    groundTexture.minFilter = THREE.NearestMipmapLinearFilter
-    groundTexture.magFilter = THREE.NearestMipmapLinearFilter
-    groundTexture.wrapS = THREE.RepeatWrapping;
-    groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(32, 32); 
-
-    plane.rotateX(-Math.PI / 2)
-    scene.add(plane)
-
-    const skyGeo = new THREE.SphereGeometry(200, 20, 20); 
-    const skySphereLoader  = new THREE.TextureLoader()
-    const skyTexture = skySphereLoader.load('./textures/sky.jpg');
-    const skyMaterial = new THREE.MeshPhongMaterial({ 
-      map: skyTexture,
-    });
-    const sky = new THREE.Mesh(skyGeo, skyMaterial);
-    sky.material.side = THREE.BackSide;
-    sky.position.y = -2
-    scene.add(sky);
   }
 }
 

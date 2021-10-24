@@ -1,16 +1,12 @@
-import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { MoveStatus } from '../../types/Types';
-import {UserBody} from '../../types/Types';
+import { MoveStatus, UserBody } from '../../../../client/src/types/Types';
 
 class Tank {
-  model: THREE.Object3D;
   body: UserBody;
   moveStatus: MoveStatus;
   tankId: string;
   tankName: string;
-  constructor(tankModel: THREE.Object3D, tankId: string, tankName: string) {
-    this.model = tankModel;
+  constructor(tankId: string, tankName: string, initPosition: CANNON.Vec3) {
     this.moveStatus = {
       forwardStatus: 0,
       rotationstatus: 0,
@@ -31,10 +27,8 @@ class Tank {
         type: CANNON.Body.DYNAMIC
     })
     this.body.addShape(sphereShape)
-    this.body.userData = 'tank_body'
-    this.body.position.x = 0
-    this.body.position.y = 0.5
-    this.body.position.z = 0
+    this.body.userData = `tank_${tankId}_${tankName}`;
+    this.body.position.set(initPosition.x, initPosition.y, initPosition.z);
     
     this.tankId = tankId;
     this.tankName = tankName;

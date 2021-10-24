@@ -8,6 +8,7 @@ import Bullet3 from './Bullet3';
 import { BulletData } from '../../client/src/types/Types';
 import * as CANNON from 'cannon-es'
 import {getQueryFromUrl} from './utils/url'
+import World from './physics/world';
 
 dotenv.config({
   path: path.join(__dirname, '../../.env')
@@ -141,8 +142,10 @@ const server = app.listen(PORT, () => {
   });
 });
 
+/* ------physics------ */
+const world = new World();
 
-/* ------websocket------- */
+/* ------websocket------ */
 const wss = new WebSocket.Server({
   server,
   path: '/websockets'
@@ -159,11 +162,12 @@ wss.on('connection', (ws, req) => {
   const name = getQueryFromUrl('name', req.url!);
   console.log(`${id}-${name} tank enters`);
   if(id && name) {
+    world.addTank(id, name);
     score[id] = 0;
     broadcastMessage(`${MessageType.hit},${JSON.stringify(score)}`);
     ws.on('close', () => {
       console.log(`${id} tank exits`);
-      delete tanks3[id];
+      world.removeTank(id);
       delete score[id];
       broadcastMessage(`${MessageType.ext},${id}`);
     });
@@ -202,49 +206,6 @@ const score: ScoreData = {};
 //   }
 //   return tanksMessage;
 // }
-
-// physics
-const world = new CANNON.World()
-const bodies: { [id: string]: CANNON.Body } = {}
-const groundMaterial: CANNON.Material = new CANNON.Material('groundMaterial');
-const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
-groundMaterial.friction = 0.15
-groundMaterial.restitution = 0.25
-slipperyMaterial.friction = 0.15
-slipperyMaterial.restitution = 0.25
-
-world.gravity.set(0, -9.8, 0)
-
-const groundShape = new CANNON.Box(new CANNON.Vec3(100, 1, 100))
-const groundBody = new CANNON.Body({
-    mass: 0,
-    material: groundMaterial,
-})
-groundBody.addShape(groundShape)
-groundBody.position.x = 0
-groundBody.position.y = -1
-groundBody.position.z = 0
-world.addBody(groundBody)
-
-const createPlayerTankSphere = (id: string, pos: CANNON.Vec3, dir: CANNON.Vec3) => {
-  const sphereShape = new CANNON.Sphere(1)
-  const sphereBody = new CANNON.Body({
-      mass: 1,
-      material: slipperyMaterial,
-  }) //, angularDamping: .9 })
-  sphereBody.addShape(sphereShape)
-  sphereBody.addEventListener('collide', (e: any) => {
-    console.log(e);
-  })
-  sphereBody.position.x = pos.x
-  sphereBody.position.y = pos.y
-  sphereBody.position.z = pos.z
-  world.addBody(sphereBody)
-
-  bodies[id] = sphereBody
-
-  return sphereBody.id
-}
 
 const updateRate = 1000 / 50;
 setInterval(() => {

@@ -22,6 +22,10 @@
             #startButton {
                 height: 50px;
                 width: 200px;
+            }
+            #start-game {
+                height: 50px;
+                width: 200px;
                 margin: -25px -100px;
                 position: relative;
                 top: 50%;
@@ -33,7 +37,11 @@
 
     <body>
         <div id="menuPanel">
-            <button id="startButton">Click to Start</button>
+            <div id="start-game">
+                <label for="tank-name">Please enter your name:</label>
+                <input id="tank-name" type="text"></input>
+                <button id="startButton">Start</button>
+            </div>
         </div>
     </body>
 </html>
