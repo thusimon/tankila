@@ -18,6 +18,14 @@ const envParsed: DotenvParseOutput = env.parsed!;
 export default merge<Configuration>(common, {
   mode: 'development',
   devtool: 'eval-source-map',
+  module: {
+    rules: [
+      {
+        test: /\.(s(a|c)ss)$/,
+        use: ['style-loader','css-loader', 'sass-loader'],
+      }
+    ],
+  },
   devServer: {
     static: {
       directory: path.join(__dirname, './static'),

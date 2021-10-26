@@ -9,11 +9,11 @@ export default {
         test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/,
-      },
+      }
     ],
   },
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.ts', '.js', '.scss'],
   },
   plugins: [
     new HtmlWebpackPlugin({

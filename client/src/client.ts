@@ -14,6 +14,8 @@ import Bullet from './components/bullet/bullet'
 import {isColideWith} from './utils/collision'
 import Game from './components/game/game';
 
+import './style/welcome.scss';
+
 declare var PRODUCTION: string;
 declare var PORT: string;
 
@@ -23,8 +25,8 @@ document.body.appendChild(renderer.domElement)
 
 const game = new Game(renderer);
 
-const menuPanel = document.getElementById('menuPanel') as HTMLDivElement
-const startButton = document.getElementById('startButton') as HTMLInputElement
+const menuPanel = document.getElementById('menu-panel') as HTMLDivElement
+const startButton = document.getElementById('start-button') as HTMLInputElement
 
 let webSocket: WebSocket;
 const tankId = 'TEST_1';
