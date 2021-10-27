@@ -15,7 +15,7 @@
     "client-dev": "webpack serve --config ./client/webpack.dev.ts",
     "client-prod": "webpack --config ./client/webpack.prod.ts && ts-node -T client/tools/copy-resources && ts-node -T client/tools/unzip",
     "prestart": "npm run build-client",
-    "server-dev": "cd server && nodemon --watch 'src/**' --ext 'ts,json' --exec ts-node ./src/index",
+    "server-dev": "cd server && nodemon --watch src/** --ext ts,json --exec ts-node ./src/index",
     "server-prod": "cd server && ts-node -T ./src/index.ts",
     "start": "npm run client-prod && npm run server-prod",
     "lint": "eslint ."

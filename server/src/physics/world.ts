@@ -9,6 +9,7 @@ class World {
   tanks: {[key: string]: Tank} = {};
   constructor() {
     this.world = new CANNON.World();
+    this.world.gravity.set(0, -1, 0)
     this.arena = new Arena(this.world);
   }
 
@@ -18,10 +19,15 @@ class World {
     const initPosition = generateRandomPosition(lowerBound, upperBound);
     const tank = new Tank(id, name, initPosition);
     this.tanks[id] = tank;
+    this.world.addBody(tank.body);
   }
 
   removeTank(id: string) {
-    delete this.tanks[id];
+    const tank = this.tanks[id];
+    if (tank) {
+      this.world.removeBody(tank.body);
+      delete this.tanks[id];
+    }
   }
 }
 

@@ -128,8 +128,6 @@ router.get('/api/lasercredit', async (req, res) => {
 const clientBuildPath = path.join(__dirname, '../../client/build');
 app.use(express.static(clientBuildPath));
 
-const otherClientPath = path.join(__dirname, '../../client/static');
-
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../../client/build/index.html'));
 });
@@ -181,37 +179,40 @@ const tanks: TankData = {};
 const tanks3: TanksData3 = {};
 const score: ScoreData = {};
 
-// const extractTanksMessage = () => {
-//   const tanksMessage: {[key: string]: object} = {};
-//   for (const tankId in tanks3) {
-//     const tank = tanks3[tankId];
-//     const tankBlts: BulletData[] = Object.values(tank.tank.bullets).map(blt => {
-//       return {
-//         pos: blt.position,
-//         rot: blt.rotation.z,
-//         hit: blt.isHit,
-//         idx: blt.idx
-//       }
-//     });
-//     const tankMessage = {
-//       pos: {
-//         x: tank.tank.position.x,
-//         y: tank.tank.position.y,
-//         r: tank.tank.rotation.z
-//       },
-//       blt: tankBlts,
-//       scor: tank.scor
-//     }
-//     tanksMessage[tankId] = tankMessage;
-//   }
-//   return tanksMessage;
-// }
+const extractTanksMessage = () => {
+  const tanks = world.tanks;
+  const tanksMessage: {[key: string]: object} = {};
+  for (const tankId in tanks) {
+    const tank = tanks[tankId];
+    // const tankBlts: BulletData[] = Object.values(tank.tank.bullets).map(blt => {
+    //   return {
+    //     pos: blt.position,
+    //     rot: blt.rotation.z,
+    //     hit: blt.isHit,
+    //     idx: blt.idx
+    //   }
+    // });
+    const tankMessage = {
+      pos: {
+        x: tank.body.position.x,
+        y: tank.body.position.y,
+        z: tank.body.position.z
+      },
+      //blt: tankBlts,
+      //scor: tank.scor
+    }
+    tanksMessage[tankId] = tankMessage;
+  }
+  return tanksMessage;
+}
 
-const updateRate = 1000 / 50;
+const updateRate = 1000 / 10;
+const worldStep = updateRate / 1000;
 setInterval(() => {
+  world.world.step(worldStep);
   //updateTanks3Position();
-  // const tanksMessage = extractTanksMessage();
-  // broadcastMessage(`${MessageType.pos3},${JSON.stringify(tanksMessage)}`);
+  const tanksMessage = extractTanksMessage();
+  broadcastMessage(`${MessageType.pos3},${JSON.stringify(tanksMessage)}`);
   // postProcessTanksAndBults();
 }, updateRate);
 
