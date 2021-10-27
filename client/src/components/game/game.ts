@@ -5,7 +5,7 @@ import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import {updateMoveStatus} from '../../utils/tankStatus';
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
-import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType } from '../../types/Types';
+import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType } from '../../types/Types';
 // import Debug from '../info/debug';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
@@ -28,9 +28,17 @@ class Game {
   cameraRotationYOffset: number = 0;
   width: number = 1;
   height: number = 1;
-  constructor(renderer: THREE.WebGLRenderer) {
+  production: string;
+  port: string;
+  messager: Message;
+  tankId: string = '';
+  tankName: string = '';
+  constructor(renderer: THREE.WebGLRenderer, production: string, port: string) {
     this.renderer = renderer;
     this.scene = new THREE.Scene();
+    this.production = production;
+    this.port = port;
+    this.messager = new Message(production, port);
     const light = new THREE.AmbientLight()
     this.scene.add(light)
     this.camera = new THREE.PerspectiveCamera(
@@ -52,7 +60,26 @@ class Game {
     this.onKeyDown.bind(this);
     this.onKeyUp.bind(this);
     this.onKeyPress.bind(this);
-    window.addEventListener('resize', () => this.onWindowResize(), false)
+    this.messageHandler.bind(this);
+    this.connectToServer.bind(this);
+    this.addTank.bind(this);
+    window.addEventListener('resize', () => this.onWindowResize(), true);
+  }
+
+  async connectToServer(tankId: string, tankName: string) {
+    this.tankId = tankId;
+    this.tankName = tankName;
+    const connected = await this.messager.getConnection(tankId, tankName);
+    if (connected) {
+      this.messager.listenOnMessage(this.messageHandler);
+      this.messager.sendMessage(`${MessageType.TANK_START}`);
+    } else {
+      console.log('failed to open web socket');
+    }
+  }
+
+  messageHandler(message:string) {
+    console.log(message);
   }
 
   async addTank(tankId: string, tankName: string) {

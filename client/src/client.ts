@@ -13,7 +13,7 @@ import Explosion from './components/bullet/explosion';
 import Bullet from './components/bullet/bullet'
 import {isColideWith} from './utils/collision'
 import Game from './components/game/game';
-
+import Welcome from './welcome';
 import './style/welcome.scss';
 
 declare var PRODUCTION: string;
@@ -23,34 +23,9 @@ const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
-const game = new Game(renderer);
+const game = new Game(renderer, PRODUCTION, PORT);
 
-const menuPanel = document.getElementById('menu-panel') as HTMLDivElement
-const startButton = document.getElementById('start-button') as HTMLInputElement
-
-let webSocket: WebSocket;
-const tankId = 'TEST_1';
-const tankName = 'Lu';
-
-startButton.addEventListener(
-  'click',
-  async function () {
-    menuPanel.style.display = 'none'
-    let protocol = 'wss';
-    let port = '';
-    if (!PRODUCTION) {
-      protocol = 'ws';
-    }
-    if (PORT) {
-      port = `:${PORT}`;
-    }
-    webSocket = new WebSocket(`${protocol}://${window.location.hostname}${port}/websockets?id=${tankId}&name=${tankName}`)
-    const tank = await game.addTank(tankId, tankName);
-    const model = tank.model;
-    webSocket.send(`st3,${model.position.x},${model.position.y},${model.position.z},${model.rotation.x},${model.rotation.y},${model.rotation.z}`);
-  },
-  false
-)
+const welcome = new Welcome(game);
 
 const updateBullets = (bullets: BulletsType) => {
   for (const tank in bullets) {

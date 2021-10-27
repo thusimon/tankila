@@ -3,14 +3,16 @@ import { getWebSockedDomain } from '../utils/urls';
 
 class Message {
   ws!: WebSocket;
-  id: string;
-  constructor(id: string) {
-    this.id = id;
+  production: string;
+  port: string;
+  constructor(production: string, port: string) {
+    this.production = production;
+    this.port = port;
   }
 
-  async getConnection(): Promise<boolean> {
-    const wsUri = getWebSockedDomain();
-    this.ws = new WebSocket(`${wsUri}/websockets?id=${encodeURIComponent(this.id)}`);
+  async getConnection(id: string, name: string): Promise<boolean> {
+    const wsUri = getWebSockedDomain(this.production, this.port);
+    this.ws = new WebSocket(`${wsUri}/websockets?id=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}`);
 
     return new Promise((resolve) => {
       // Connection opened

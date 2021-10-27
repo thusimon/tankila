@@ -113,3 +113,7 @@ export interface MoveStatus {
 export interface MessageListener {
   (data: string): void;
 }
+
+export enum MessageType {
+  TANK_START = 0,
+};
