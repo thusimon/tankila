@@ -1,5 +1,5 @@
-import { MessageListener } from '../types/Types';
-import { getWebSockedDomain } from '../utils/urls';
+import { MessageListener } from '../../types/Types';
+import { getWebSockedDomain } from '../../utils/urls';
 
 class Message {
   ws!: WebSocket;
@@ -27,7 +27,11 @@ class Message {
 
   listenOnMessage(callback: MessageListener): void {
     this.ws.addEventListener('message', evt => {
-      callback(evt.data);
+      // TODO use array buffer as raw message instead of string
+      const message = evt.data as string;
+      const messageType = message.substring(0, 2);
+      const messageData = JSON.parse(message.substring(3));
+      callback(messageType, messageData);
     });
   }
 

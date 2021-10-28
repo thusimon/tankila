@@ -54,43 +54,45 @@ function animate() {
 function render() {
   cannonDebugRenderer.update();
   const {cameraRotationXZOffset, cameraRotationYOffset, camera, scene} = game;
-  const tank = game.tanks[0];
-  if (tank) {
-    const {moveStatus, model, body} = tank;
-    updateMoveSpeed(moveStatus);
-    updateMoveRotation(moveStatus);
-    updateBullets(game.bullets);
-    const rotation = moveStatus.rotation || 0;
-    body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
-    // Copy coordinates from Cannon to Three.js
-    const euler = new CANNON.Vec3();
-    body.quaternion.toEuler(euler);
-    const eulerY = euler.y;
-    model.rotation.z = eulerY;
-    const speed = moveStatus.speed || 0;
-    const offsetX = speed * Math.sin(eulerY);
-    const offsetZ = speed * Math.cos(eulerY);
-    body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
-    model.position.set(
-      body.position.x,
-      body.position.y - 0.5,
-      body.position.z)
-    camera.position.x = body.position.x - 2 * Math.sin(eulerY);
-    camera.position.z = body.position.z - 2 * Math.cos(eulerY);
-    camera.lookAt(
-      model.position.x + 10 * Math.sin(eulerY - cameraRotationXZOffset),
-      -10 * Math.atan(cameraRotationYOffset),
-      model.position.z + 10 * Math.cos(eulerY - cameraRotationXZOffset))
-  }
-  const bulletsToRemove = game.bulletsToRemove;
-  bulletsToRemove.forEach(bullet => {
-    bullet.removeBullet();
-  })
+  //const tank = game.tanks[0];
+  // if (tank) {
+  //   const {moveStatus, model} = tank;
+  //   updateMoveSpeed(moveStatus);
+  //   updateMoveRotation(moveStatus);
+  //   updateBullets(game.bullets);
+  //   const rotation = moveStatus.rotation || 0;
+  //   const body = tank.body;
+  //   body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
+  //   //Copy coordinates from Cannon to Three.js
+  //   const euler = new CANNON.Vec3();
+  //   body.quaternion.toEuler(euler);
+  //   const eulerY = euler.y;
+  //   model.rotation.z = eulerY;
+  //   const speed = moveStatus.speed || 0;
+  //   const offsetX = speed * Math.sin(eulerY);
+  //   const offsetZ = speed * Math.cos(eulerY);
+  //   body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
+  //   model.position.set(
+  //     body.position.x,
+  //     body.position.y - 0.5,
+  //     body.position.z)
+  //   camera.position.x = body.position.x - 2 * Math.sin(eulerY);
+  //   camera.position.z = body.position.z - 2 * Math.cos(eulerY);
+  //   camera.lookAt(
+  //     model.position.x + 10 * Math.sin(eulerY - cameraRotationXZOffset),
+  //     -10 * Math.atan(cameraRotationYOffset),
+  //     model.position.z + 10 * Math.cos(eulerY - cameraRotationXZOffset))
+  // }
+
+  // const bulletsToRemove = game.bulletsToRemove;
+  // bulletsToRemove.forEach(bullet => {
+  //   bullet.removeBullet();
+  // })
   
   // TODO need to clean up the explosions array
-  game.explosions.forEach(explosion => {
-    explosion.update();
-  });
+  // game.explosions.forEach(explosion => {
+  //   explosion.update();
+  // });
   renderer.render(scene, camera)
 }
 

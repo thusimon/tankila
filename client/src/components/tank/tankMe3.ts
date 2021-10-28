@@ -1,6 +1,6 @@
 import { TankStatus3 } from '../../types/Types';
 import TankBase3 from './tankBase3';
-import Message from '../message';
+import Message from '../game/message';
 import { Scene, Vector3 } from 'three';
 
 class TankMe3 extends TankBase3 {

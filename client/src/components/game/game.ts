@@ -5,14 +5,14 @@ import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import {updateMoveStatus} from '../../utils/tankStatus';
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
-import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType } from '../../types/Types';
+import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, TankPosition, TankPositions } from '../../types/Types';
 // import Debug from '../info/debug';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
 import Explosion from '../bullet/explosion';
 import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
-import Message from '../message';
+import Message from './message';
 
 class Game {
   scene: THREE.Scene;
@@ -23,7 +23,7 @@ class Game {
   bullets: BulletsType = {};
   bulletsToRemove: Bullet[] = [];
   explosions: Explosion[] =[];
-  tanks: Tank[] = [];
+  tanks: {[key: string]: Tank} = {};
   cameraRotationXZOffset: number = 0;
   cameraRotationYOffset: number = 0;
   width: number = 1;
@@ -56,6 +56,7 @@ class Game {
     this.width = this.renderer.domElement.width;
     this.height = this.renderer.domElement.height;
     this.onWindowResize.bind(this);
+    this.registerUserInteraction.bind(this);
     this.onDocumentMouseMove.bind(this);
     this.onKeyDown.bind(this);
     this.onKeyUp.bind(this);
@@ -63,6 +64,8 @@ class Game {
     this.messageHandler.bind(this);
     this.connectToServer.bind(this);
     this.addTank.bind(this);
+    this.updateTankPosition.bind(this);
+    this.updateCamera.bind(this);
     window.addEventListener('resize', () => this.onWindowResize(), true);
   }
 
@@ -71,15 +74,25 @@ class Game {
     this.tankName = tankName;
     const connected = await this.messager.getConnection(tankId, tankName);
     if (connected) {
-      this.messager.listenOnMessage(this.messageHandler);
+      this.messager.listenOnMessage(this.messageHandler.bind(this));
       this.messager.sendMessage(`${MessageType.TANK_START}`);
     } else {
       console.log('failed to open web socket');
     }
   }
 
-  messageHandler(message:string) {
-    console.log(message);
+  messageHandler(type:string, data: object) {
+    switch (type) {
+      case MessageType.TANK_POS: {
+        const tankPositionData = data as TankPositions;
+        this.updateTankPosition(tankPositionData);
+        break;
+      }
+      default: {
+        console.log('unknown message type');
+        break;
+      }
+    }
   }
 
   async addTank(tankId: string, tankName: string) {
@@ -89,13 +102,13 @@ class Game {
         const tankModel = gltf.scene.children[0];
         tankModel.scale.set(0.3,0.3,0.3);
         const tank = new Tank(tankModel, tankId, tankName);
+        tank.ready = true;
         this.scene.add(tank.model);
-        this.world.addBody(tank.body);
         this.registerUserInteraction(tank);
         if (!this.bullets[tankId]) {
           this.bullets[tankId] = [];
         }
-        this.tanks.push(tank);
+        this.tanks[tankId] = tank;
         resolve(tank);
       });
     });
@@ -108,6 +121,44 @@ class Game {
     document.addEventListener('mousemove', evt => this.onDocumentMouseMove(evt), false);
   }
 
+
+  updateTankPosition(tankData: TankPositions) {
+    for (const tankId in tankData) {
+      if (!this.tanks[tankId]) {
+        // use a fake tank to hold the place, just in case the same tank is added multiple times 
+        this.tanks[tankId] = new Tank(new THREE.Object3D(), this.tankId, this.tankName);
+        this.addTank(this.tankId, this.tankName)
+        .then(() => {
+          console.log(`tank ${this.tankName} added`);
+        });
+      } else {
+        const tank = this.tanks[tankId];
+        const data = tankData[tankId];
+        if (tank.ready) {
+          const model = tank.model;
+          model.position.set(data.x, data.y, data.z);
+        }
+        if (tank.tankId === this.tankId) {
+          // this is my tank
+          this.updateCamera(tank);
+        }
+      }
+    }
+  }
+
+  updateCamera(myTank: Tank) {
+    const model = myTank.model;
+    this.camera.position.x = model.position.x
+    this.camera.position.z = model.position.z - 2;
+    this.camera.lookAt(
+      //model.position.x + 10 * Math.sin(eulerY - cameraRotationXZOffset),
+      //-10 * Math.atan(cameraRotationYOffset),
+      //model.position.z + 10 * Math.cos(eulerY - cameraRotationXZOffset)
+      model.position.x,
+      0,
+      model.position.z + 10
+    )
+  }
   onKeyDown (event: KeyboardEvent, tank: Tank) {
     switch (event.code) {
       case 'KeyW': {

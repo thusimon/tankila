@@ -1,7 +1,7 @@
 import { TankStatus3 } from '../../types/Types';
 import { TankCommands } from '../../types/Types';
 import TankBase3 from './tankBase3';
-import Message from '../message';
+import Message from '../game/message';
 import { Scene } from 'three';
 
 class TankPlayer3 extends TankBase3 {

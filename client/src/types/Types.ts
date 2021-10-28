@@ -46,6 +46,17 @@ export interface TankData3 {
   scor: number;
 }
 
+export interface TankPosition {
+  x: number,
+  y: number,
+  z: number,
+  r: number,
+}
+
+export interface TankPositions {
+  [key: string]: TankPosition
+}
+
 export interface DebugInfo {
   playerPosition: Vector3;
   playerRotation: Euler;
@@ -111,9 +122,11 @@ export interface MoveStatus {
 }
 
 export interface MessageListener {
-  (data: string): void;
+  (type: string, data: object): void;
 }
 
 export enum MessageType {
-  TANK_START = 0,
+  TANK_START = '00',
+  TANK_POS = '01',
+  TANK_EXIT = '02',
 };

@@ -7,6 +7,6 @@ export const generateRandomPosition = (lowerBound: CANNON.Vec3, upperBound: CANN
   const upperZ = upperBound.z;
   const x = (upperX - lowerX) * Math.random() + lowerX;
   const z = (upperZ - lowerZ) * Math.random() + lowerZ;
-  const y = 100 + 0.01;
+  const y = Math.random() + 0.5;
   return new CANNON.Vec3(x, y, z);
 }
