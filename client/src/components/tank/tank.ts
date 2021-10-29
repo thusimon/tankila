@@ -10,12 +10,8 @@ class Tank {
   constructor(tankModel: THREE.Object3D, tankId: string, tankName: string) {
     this.model = tankModel;
     this.moveStatus = {
-      forwardStatus: 0,
-      rotationstatus: 0,
-      keyW: 0,
-      keyS: 0,
-      keyA: 0,
-      keyD: 0,
+      forward: 0,
+      direction: 0,
       speed: 0,
       rotation: 0
     }

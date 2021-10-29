@@ -5,7 +5,7 @@ import WebSocket from 'ws';
 import mongoose from 'mongoose';
 import {Euler, Vector3} from 'three';
 import Bullet3 from './Bullet3';
-import { BulletData, MessageType } from '../../client/src/types/Types';
+import { BulletData, MessageType, MoveStatus } from '../../client/src/types/Types';
 import * as CANNON from 'cannon-es'
 import {getQueryFromUrl} from './utils/url'
 import World from './physics/world';
@@ -169,7 +169,7 @@ wss.on('connection', (ws, req) => {
       broadcastMessage(`${MessageType.TANK_EXIT},${id}`);
     });
     ws.on('message', msg => {
-      //handleMessage(id, msg as Buffer[]);
+      handleMessage(id, msg.toString());
     });
   }
 });
@@ -191,12 +191,13 @@ const extractTanksMessage = () => {
     //     idx: blt.idx
     //   }
     // });
+    const euler = new CANNON.Vec3();
+    tank.body.quaternion.toEuler(euler);
     const tankMessage = {
       x: tank.body.position.x,
       y: tank.body.position.y,
-      z: tank.body.position.z
-      //blt: tankBlts,
-      //scor: tank.scor
+      z: tank.body.position.z,
+      r: euler.y
     }
     tanksMessage[tankId] = tankMessage;
   }
@@ -359,44 +360,46 @@ const handleTankCommand = (id: string, commandType: string, command: string) => 
 //   broadcastMessage(`${MessageType.hit},${JSON.stringify(score)}`);
 // }
 
-// const handleTanksPosition = (id: string, x: string, y: string, r: string) => {
-//   tanks[id] = `${x},${y},${r}`;
-// }
+const handleTanksPosition = (id: string, x: string, y: string, r: string) => {
+  tanks[id] = `${x},${y},${r}`;
+}
 
 // const handleBulletPosition = (id: string, x: string, y: string, r: string) => {
 //   broadcastMessage(`${MessageType.blt},${id},${x},${y},${r}`);
 // }
 
-// const handleMessage = (id: string, message: Buffer[]): void => {
-//   const messageData = message.toString().split(',');
-//   const messageType = messageData.shift();
-//   switch (messageType) {
-//     case MessageType.pos:
-//       handleTanksPosition(id, messageData[0], messageData[1], messageData[2])
-//       break;
-//     case MessageType.fwd:
-//     case MessageType.bwd:
-//     case MessageType.rl:
-//     case MessageType.rr:
-//       handleTankCommand(id, messageType, messageData[0]);
-//       break;
-//     case MessageType.hit:
-//       handleScoreUpdate(id);
-//       break;
-//     case MessageType.blt:
-//       handleBulletPosition(id, messageData[0], messageData[1], messageData[2]);
-//       break;
-//     // Engine version
-//     case MessageType.st3:
-//     case MessageType.bon:
-//     case MessageType.dir:
-//     case MessageType.rot:
-//     case MessageType.blt3:
-//     case MessageType.stup:
-//     case MessageType.hit3:
-//       //handleTankCommand3(id, messageType, messageData)
-//       break;
-//     default:
-//       break;
-//   }
-// }
+const handleMessage = (id: string, message: string): void => {
+  const messageType = message.substring(0, 2);
+  switch (messageType) {
+    case MessageType.TANK_MOVE_FORWARD: {
+      const keyActive = message.substring(3);
+      const newMoveStatus: MoveStatus = {keyW: keyActive};
+      world.updateTankStatus(id, newMoveStatus);
+      break;
+    }
+    // case MessageType.fwd:
+    // case MessageType.bwd:
+    // case MessageType.rl:
+    // case MessageType.rr:
+    //   handleTankCommand(id, messageType, messageData[0]);
+    //   break;
+    // case MessageType.hit:
+    //   handleScoreUpdate(id);
+    //   break;
+    // case MessageType.blt:
+    //   handleBulletPosition(id, messageData[0], messageData[1], messageData[2]);
+    //   break;
+    // // Engine version
+    // case MessageType.st3:
+    // case MessageType.bon:
+    // case MessageType.dir:
+    // case MessageType.rot:
+    // case MessageType.blt3:
+    // case MessageType.stup:
+    // case MessageType.hit3:
+    //   //handleTankCommand3(id, messageType, messageData)
+    //   break;
+    default:
+      break;
+  }
+}

@@ -6,16 +6,12 @@ class Tank {
   moveStatus: MoveStatus;
   tankId: string;
   tankName: string;
-  constructor(tankId: string, tankName: string, initPosition: CANNON.Vec3) {
+  constructor(tankId: string, tankName: string) {
     this.moveStatus = {
-      forwardStatus: 0,
-      rotationstatus: 0,
-      keyW: 0,
-      keyS: 0,
-      keyA: 0,
-      keyD: 0,
+      forward: 0,
+      rotation: 0,
       speed: 0,
-      rotation: 0
+      direction: 0
     }
     const sphereShape = new CANNON.Sphere(0.5)
     const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
@@ -28,7 +24,6 @@ class Tank {
     })
     this.body.addShape(sphereShape)
     this.body.userData = `tank_${tankId}_${tankName}`;
-    this.body.position.set(initPosition.x, initPosition.y, initPosition.z);
     
     this.tankId = tankId;
     this.tankName = tankName;

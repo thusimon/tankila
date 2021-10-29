@@ -111,14 +111,14 @@ export interface TankCommands {
 }
 
 export interface MoveStatus {
-  forwardStatus?: number, // 1 forward, 0 stale, -1 backword
-  rotationstatus?: number, // 1 right, 0 stale, -1 left
-  keyW?: number, // 1 pressed, 0 released
-  keyS?: number,
-  keyA?: number,
-  keyD?: number,
+  keyW?: string, // 1 active, 0 non-active
+  keyS?: string,
+  keyA?: string,
+  keyD?: string,
+  forward?: number, // 1 forward, 0 stop, -1 backward
+  rotation?: number, // 1 right, 0 stop, -1 left
   speed?: number,
-  rotation?: number
+  direction?: number
 }
 
 export interface MessageListener {
@@ -129,4 +129,9 @@ export enum MessageType {
   TANK_START = '00',
   TANK_POS = '01',
   TANK_EXIT = '02',
+  TANK_MOVE_FORWARD = '03',
+  TANK_MOVE_BACKWARD = '04',
+  TANK_ROTATE_LEFT = '05',
+  TANK_ROTATE_RIGHT = '06',
+  TANK_SHOOT = '07',
 };

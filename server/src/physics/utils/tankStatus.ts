@@ -1,5 +1,5 @@
-import {MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED} from './constants';
-import { MoveStatus } from '../types/Types';
+import {MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED} from '../../../../client/src/utils/constants';
+import { MoveStatus } from '../../../../client/src/types/Types';
 
 
 export const accelerate = (speed: number) => {
@@ -33,9 +33,9 @@ export const stop = (speed: number) => {
 
 export const updateMoveSpeed = (currentMoveStatus: MoveStatus) => {
   const currentSpeed = currentMoveStatus.speed || 0;
-  if (currentMoveStatus.forwardStatus === 1) {
+  if (currentMoveStatus.forward === 1) {
     currentMoveStatus.speed = accelerate(currentSpeed);
-  } else if (currentMoveStatus.forwardStatus === -1) {
+  } else if (currentMoveStatus.forward === -1) {
     currentMoveStatus.speed = deaccelerate(currentSpeed);
   } else {
     currentMoveStatus.speed = stop(currentSpeed);
@@ -43,73 +43,72 @@ export const updateMoveSpeed = (currentMoveStatus: MoveStatus) => {
 }
 
 export const updateMoveRotation = (currentMoveStatus: MoveStatus) => {
-  const currentRotation = currentMoveStatus.rotation || 0;
-  if (currentMoveStatus.rotationstatus === 1) {
-    currentMoveStatus.rotation = currentRotation - ROTATE_SPEED;
-  } else if (currentMoveStatus.rotationstatus === -1) {
-    currentMoveStatus.rotation = currentRotation + ROTATE_SPEED;
+  const currentDirection = currentMoveStatus.direction || 0;
+  if (currentMoveStatus.rotation === 1) {
+    currentMoveStatus.direction = currentDirection - ROTATE_SPEED;
+  } else if (currentMoveStatus.rotation === -1) {
+    currentMoveStatus.direction = currentDirection + ROTATE_SPEED;
   } else {
     // do nothing
   }
 }
 
 export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: MoveStatus) => {
-  if (Number.isInteger(newMoveStatus.keyW)) {
-    if (newMoveStatus.keyW) {
+  if (newMoveStatus.keyW) {
+    if (newMoveStatus.keyW === '1') {
       // keyW pressed
-      currentMoveStatus.forwardStatus = 1;
+      currentMoveStatus.forward = 1;
     } else {
       // keyW released
-      if (currentMoveStatus.keyS) {
-        currentMoveStatus.forwardStatus = -1;
+      if (currentMoveStatus.keyS === '1') {
+        currentMoveStatus.forward = -1;
       } else {
-        currentMoveStatus.forwardStatus = 0;
+        currentMoveStatus.forward = 0;
       }
     }
     currentMoveStatus.keyW = newMoveStatus.keyW
   }
 
-  if (Number.isInteger(newMoveStatus.keyS)) {
-    if (newMoveStatus.keyS) {
+  if (newMoveStatus.keyS) {
+    if (newMoveStatus.keyS === '1') {
       // keyS pressed
-      currentMoveStatus.forwardStatus = -1;
+      currentMoveStatus.forward = -1;
     } else {
       // keyS released
-      if (currentMoveStatus.keyW) {
-        currentMoveStatus.forwardStatus = 1;
+      if (currentMoveStatus.keyW === '1') {
+        currentMoveStatus.forward = 1;
       } else {
-        currentMoveStatus.forwardStatus = 0;
+        currentMoveStatus.forward = 0;
       }
     }
     currentMoveStatus.keyS = newMoveStatus.keyS
   }
 
-  const currentRotation = currentMoveStatus.rotation || 0;
-  if (Number.isInteger(newMoveStatus.keyA)) {
-    if (newMoveStatus.keyA) {
+  if (newMoveStatus.keyA) {
+    if (newMoveStatus.keyA === '1') {
       // keyA pressed
-      currentMoveStatus.rotationstatus = -1;
+      currentMoveStatus.rotation = -1;
     } else {
       // keyA released
-      if (currentMoveStatus.keyD) {
-        currentMoveStatus.rotationstatus = 1;
+      if (currentMoveStatus.keyD === '1') {
+        currentMoveStatus.rotation = 1;
       } else {
-        currentMoveStatus.rotationstatus = 0;
+        currentMoveStatus.rotation = 0;
       }
     }
     currentMoveStatus.keyA = newMoveStatus.keyA
   }
 
-  if (Number.isInteger(newMoveStatus.keyD)) {
-    if (newMoveStatus.keyD) {
+  if (newMoveStatus.keyD) {
+    if (newMoveStatus.keyD === '1') {
       // keyD pressed
-      currentMoveStatus.rotationstatus = 1;
+      currentMoveStatus.rotation = 1;
     } else {
       // keyD released
-      if (currentMoveStatus.keyA) {
-        currentMoveStatus.rotationstatus = -1;
+      if (currentMoveStatus.keyA === '1') {
+        currentMoveStatus.rotation = -1;
       } else {
-        currentMoveStatus.rotationstatus = 0;
+        currentMoveStatus.rotation = 0;
       }
     }
     currentMoveStatus.keyD = newMoveStatus.keyD

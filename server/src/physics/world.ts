@@ -2,6 +2,8 @@ import * as CANNON from 'cannon-es'
 import Arena from './components/arena';
 import Tank from './components/tank';
 import {generateRandomPosition} from '../utils/dynamics';
+import { MoveStatus } from '../../../client/src/types/Types';
+import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from './utils/tankStatus';
 
 class World {
   world: CANNON.World;
@@ -17,7 +19,11 @@ class World {
     const lowerBound = new CANNON.Vec3(-this.arena.width + 10, 0, -this.arena.height + 10);
     const upperBound = new CANNON.Vec3(this.arena.width - 10, 0, this.arena.height - 10);
     const initPosition = generateRandomPosition(lowerBound, upperBound);
-    const tank = new Tank(id, name, initPosition);
+    const initDirection = (Math.random() * 2 - 1) * Math.PI
+    const tank = new Tank(id, name);
+    tank.body.position.set(initPosition.x, initPosition.y, initPosition.z);
+    tank.body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), initDirection);
+    tank.moveStatus.direction = initDirection;
     this.tanks[id] = tank;
     this.world.addBody(tank.body);
   }
@@ -27,6 +33,16 @@ class World {
     if (tank) {
       this.world.removeBody(tank.body);
       delete this.tanks[id];
+    }
+  }
+
+  updateTankStatus(id: string, newMoveStatus: MoveStatus) {
+    const tank = this.tanks[id];
+    if (tank) {
+      const currentTankStatus = tank.moveStatus;
+      updateMoveStatus(currentTankStatus, newMoveStatus);
+      updateMoveSpeed(currentTankStatus);
+      updateMoveRotation(currentTankStatus);
     }
   }
 }
