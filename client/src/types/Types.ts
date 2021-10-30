@@ -51,6 +51,14 @@ export interface TankPosition {
   y: number,
   z: number,
   r: number,
+  b: BulletPosition[],
+  e: BulletPosition[],
+}
+
+export interface BulletPosition {
+  x: number,
+  y: number,
+  z: number,
 }
 
 export interface TankPositions {
@@ -115,6 +123,7 @@ export interface MoveStatus {
   keyS?: string,
   keyA?: string,
   keyD?: string,
+  keySpace?: string,
   forward?: number, // 1 forward, 0 stop, -1 backward
   rotation?: number, // 1 right, 0 stop, -1 left
   speed?: number,

@@ -180,26 +180,39 @@ const score: ScoreData = {};
 
 const extractTanksMessage = () => {
   const tanks = world.tanks;
+  const bullets = world.bullets;
+  const bullestToRemove = world.bulletsToRemove;
   const tanksMessage: {[key: string]: object} = {};
   for (const tankId in tanks) {
     const tank = tanks[tankId];
-    // const tankBlts: BulletData[] = Object.values(tank.tank.bullets).map(blt => {
-    //   return {
-    //     pos: blt.position,
-    //     rot: blt.rotation.z,
-    //     hit: blt.isHit,
-    //     idx: blt.idx
-    //   }
-    // });
+    const tankBullets = bullets[tankId] || [];
+    const tankBulletsToRmove = bullestToRemove[tankId] || [];
+    const tankBulletsMessage = tankBullets.map(blt => ({
+      x: blt.body.position.x,
+      y: blt.body.position.y,
+      z: blt.body.position.z
+    }));
+    const tankBulletsToRemoveMessage = tankBulletsToRmove.map(blt => {
+      // remove bullet from world
+      world.world.removeBody(blt.body);
+      return {
+        x: blt.body.position.x,
+        y: blt.body.position.y,
+        z: blt.body.position.z
+      }
+    });
     const euler = new CANNON.Vec3();
     tank.body.quaternion.toEuler(euler);
     const tankMessage = {
       x: tank.body.position.x,
       y: tank.body.position.y,
       z: tank.body.position.z,
-      r: euler.y
+      r: euler.y,
+      b: tankBulletsMessage,
+      e: tankBulletsToRemoveMessage,
     }
     tanksMessage[tankId] = tankMessage;
+    world.bulletsToRemove[tankId] = [];
   }
   return tanksMessage;
 }
@@ -393,6 +406,10 @@ const handleMessage = (id: string, message: string): void => {
       const keyActive = message.substring(3);
       const newMoveStatus: MoveStatus = {keyD: keyActive};
       world.updateTankStatus(id, newMoveStatus);
+      break;
+    }
+    case MessageType.TANK_SHOOT: {
+      world.shootBullet(id);
       break;
     }
     // case MessageType.fwd:

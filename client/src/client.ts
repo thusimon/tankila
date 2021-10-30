@@ -31,7 +31,7 @@ const updateBullets = (bullets: BulletsType) => {
   for (const tank in bullets) {
     const tankBullets = bullets[tank];
     tankBullets.forEach(bullet => {
-      bullet.updateSphere();
+      //bullet.updateSphere();
     })
   }
 }
@@ -88,11 +88,10 @@ function render() {
   // bulletsToRemove.forEach(bullet => {
   //   bullet.removeBullet();
   // })
-  
-  // TODO need to clean up the explosions array
-  // game.explosions.forEach(explosion => {
-  //   explosion.update();
-  // });
+
+  game.explosions.forEach(explosion => {
+    explosion.update();
+  });
   renderer.render(scene, camera)
 }
 

@@ -38,6 +38,7 @@ class Game {
     keyS: '0',
     keyA: '0',
     keyD: '0',
+    keySpace: '0',
     forward: 0,
     rotation: 0,
     speed: 0,
@@ -70,6 +71,8 @@ class Game {
     this.connectToServer.bind(this);
     this.addTank.bind(this);
     this.updateTankPosition.bind(this);
+    this.updateBullets.bind(this);
+    this.updateExplosion.bind(this);
     this.updateCamera.bind(this);
     window.addEventListener('resize', this.onWindowResize.bind(this), true);
   }
@@ -92,6 +95,8 @@ class Game {
       case MessageType.TANK_POS: {
         const tankPositionData = data as TankPositions;
         this.updateTankPosition(tankPositionData);
+        this.updateBullets(tankPositionData);
+        this.updateExplosion(tankPositionData);
         break;
       }
       default: {
@@ -151,6 +156,38 @@ class Game {
     }
   }
 
+  updateBullets(tankData: TankPositions) {
+    // remove all the existing bullets
+    for(const tankId in this.bullets) {
+      const tankBullets = this.bullets[tankId];
+      tankBullets.forEach(blt => {
+        blt.removeBullet();
+      });
+    }
+    for(const tankId in tankData) {
+      const tankBulletsData = tankData[tankId].b;
+      const tankBullets = tankBulletsData.map(data => {
+        const blt = new Bullet(this.scene, data.x, data.y, data.z);
+        blt.addBullet();
+        return blt;
+      });
+      this.bullets[tankId] = tankBullets;
+    }
+  }
+
+  updateExplosion(tankData: TankPositions) {
+    // TODO clear game.explosions array
+    for(const tankId in tankData) {
+      const explosionsData = tankData[tankId].e;
+      explosionsData.forEach(exp => {
+        const explosion = new Explosion(new THREE.Color(0xffff00), this.scene);
+        this.explosions.push(explosion);
+        explosion.explode(new THREE.Vector3(exp.x, exp.y, exp.z));
+        return explosion;
+      });
+    }
+  }
+
   updateCamera(myTank: Tank) {
     const {position, rotation} = myTank.model;
 
@@ -192,6 +229,10 @@ class Game {
         this.moveStatus.keyD = '1';
         break
       }
+      case 'Space': {
+        this.moveStatus.keySpace = '1';
+        break;
+      }
     }
   }
 
@@ -226,7 +267,10 @@ class Game {
         break
       }
       case 'Space':
-        this.messager.sendMessage(MessageType.TANK_SHOOT);
+        if (this.moveStatus.keySpace != '0') {
+          this.messager.sendMessage(MessageType.TANK_SHOOT);
+        }
+        this.moveStatus.keySpace = '0';
         // const bullet = new Bullet(this.scene, this.world, tank, this.bulletsToRemove, this.explosions);
         // this.bullets[tank.tankId].push(bullet);
         // break;

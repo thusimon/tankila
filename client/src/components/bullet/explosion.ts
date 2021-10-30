@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 class Explosion {
-  private particleCount = 20;
+  private particleCount = 30;
   private particles: THREE.Points;
   private scene: THREE.Scene;
   public removeFlag: boolean = false;

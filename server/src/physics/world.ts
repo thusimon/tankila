@@ -1,6 +1,7 @@
 import * as CANNON from 'cannon-es'
 import Arena from './components/arena';
 import Tank from './components/tank';
+import Bullet from './components/bullet';
 import {generateRandomPosition} from '../utils/dynamics';
 import { MoveStatus } from '../../../client/src/types/Types';
 import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from './utils/tankStatus';
@@ -9,6 +10,8 @@ class World {
   world: CANNON.World;
   arena: Arena;
   tanks: {[key: string]: Tank} = {};
+  bullets: {[key: string]: Bullet[]} = {};
+  bulletsToRemove: {[key: string]: Bullet[]} = {};
   constructor() {
     this.world = new CANNON.World();
     this.world.gravity.set(0, -1, 0)
@@ -25,6 +28,8 @@ class World {
     tank.body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), initDirection);
     tank.moveStatus.direction = initDirection;
     this.tanks[id] = tank;
+    this.bullets[id] = [];
+    this.bulletsToRemove[id] = [];
     this.world.addBody(tank.body);
   }
 
@@ -61,6 +66,22 @@ class World {
       const offsetZ = speed * Math.cos(eulerY);
       body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
     }
+  }
+
+  shootBullet(tankId: string) {
+    const tank = this.tanks[tankId];
+    if (!tank) {
+      // no tank found, bail
+      return;
+    }
+    const bullet = new Bullet(this.world, tank, this.bulletExplode.bind(this));
+    this.bullets[tankId].push(bullet);
+  }
+
+  bulletExplode(tankId: string, bullet: Bullet) {
+    this.bulletsToRemove[tankId].push(bullet);
+    const tanksBullet = this.bullets[tankId];
+    this.bullets[tankId] = tanksBullet.filter(blt => blt != bullet);
   }
 }
 
