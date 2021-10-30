@@ -50,9 +50,9 @@ class World {
       const moveStatus = tank.moveStatus;
       updateMoveSpeed(moveStatus);
       updateMoveRotation(moveStatus);
-      const rotation = moveStatus.rotation || 0;
+      const direction = moveStatus.direction || 0;
       const body = tank.body;
-      body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
+      body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), direction);
       const euler = new CANNON.Vec3();
       body.quaternion.toEuler(euler);
       const eulerY = euler.y;

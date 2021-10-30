@@ -172,15 +172,24 @@ class Game {
         break
       }
       case 'KeyA': {
-        this.messager.sendMessage(`${MessageType.TANK_ROTATE_LEFT},1`);
+        if (this.moveStatus.keyA != '1') {
+          this.messager.sendMessage(`${MessageType.TANK_ROTATE_LEFT},1`);
+        }
+        this.moveStatus.keyA = '1';
         break
       }
       case 'KeyS': {
-        this.messager.sendMessage(`${MessageType.TANK_MOVE_BACKWARD},1`);
+        if (this.moveStatus.keyS != '1') {
+          this.messager.sendMessage(`${MessageType.TANK_MOVE_BACKWARD},1`);
+        }
+        this.moveStatus.keyS = '1';
         break;
       }
       case 'KeyD': {
-        this.messager.sendMessage(`${MessageType.TANK_ROTATE_RIGHT},1`);
+        if (this.moveStatus.keyD != '1') {
+          this.messager.sendMessage(`${MessageType.TANK_ROTATE_RIGHT},1`);
+        }
+        this.moveStatus.keyD = '1';
         break
       }
     }
@@ -196,15 +205,24 @@ class Game {
         break
       }
       case 'KeyA': {
-        this.messager.sendMessage(`${MessageType.TANK_ROTATE_LEFT},0`);
+        if (this.moveStatus.keyA != '0') {
+          this.messager.sendMessage(`${MessageType.TANK_ROTATE_LEFT},0`);
+        }
+        this.moveStatus.keyA = '0';
         break
       }
       case 'KeyS': {
-        this.messager.sendMessage(`${MessageType.TANK_MOVE_BACKWARD},0`);
+        if (this.moveStatus.keyS != '0') {
+          this.messager.sendMessage(`${MessageType.TANK_MOVE_BACKWARD},0`);
+        }
+        this.moveStatus.keyS = '0';
         break;
       }
       case 'KeyD': {
-        this.messager.sendMessage(`${MessageType.TANK_ROTATE_RIGHT},0`);
+        if (this.moveStatus.keyD != '0') {
+          this.messager.sendMessage(`${MessageType.TANK_ROTATE_RIGHT},0`);
+        }
+        this.moveStatus.keyD = '0';
         break
       }
       case 'Space':

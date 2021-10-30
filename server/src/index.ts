@@ -377,6 +377,24 @@ const handleMessage = (id: string, message: string): void => {
       world.updateTankStatus(id, newMoveStatus);
       break;
     }
+    case MessageType.TANK_MOVE_BACKWARD: {
+      const keyActive = message.substring(3);
+      const newMoveStatus: MoveStatus = {keyS: keyActive};
+      world.updateTankStatus(id, newMoveStatus);
+      break;
+    }
+    case MessageType.TANK_ROTATE_LEFT: {
+      const keyActive = message.substring(3);
+      const newMoveStatus: MoveStatus = {keyA: keyActive};
+      world.updateTankStatus(id, newMoveStatus);
+      break;
+    }
+    case MessageType.TANK_ROTATE_RIGHT: {
+      const keyActive = message.substring(3);
+      const newMoveStatus: MoveStatus = {keyD: keyActive};
+      world.updateTankStatus(id, newMoveStatus);
+      break;
+    }
     // case MessageType.fwd:
     // case MessageType.bwd:
     // case MessageType.rl:
