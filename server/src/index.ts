@@ -207,8 +207,8 @@ const extractTanksMessage = () => {
 const updateRate = 1000 / 60;
 const worldStep = updateRate / 1000;
 setInterval(() => {
+  world.updateTanksPosition();
   world.world.step(worldStep);
-  //updateTanks3Position();
   const tanksMessage = extractTanksMessage();
   broadcastMessage(`${MessageType.TANK_POS},${JSON.stringify(tanksMessage)}`);
   // postProcessTanksAndBults();

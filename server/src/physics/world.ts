@@ -41,8 +41,25 @@ class World {
     if (tank) {
       const currentTankStatus = tank.moveStatus;
       updateMoveStatus(currentTankStatus, newMoveStatus);
-      updateMoveSpeed(currentTankStatus);
-      updateMoveRotation(currentTankStatus);
+    }
+  }
+
+  updateTanksPosition() {
+    for (const tankId in this.tanks) {
+      const tank = this.tanks[tankId];
+      const moveStatus = tank.moveStatus;
+      updateMoveSpeed(moveStatus);
+      updateMoveRotation(moveStatus);
+      const rotation = moveStatus.rotation || 0;
+      const body = tank.body;
+      body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotation);
+      const euler = new CANNON.Vec3();
+      body.quaternion.toEuler(euler);
+      const eulerY = euler.y;
+      const speed = moveStatus.speed || 0;
+      const offsetX = speed * Math.sin(eulerY);
+      const offsetZ = speed * Math.cos(eulerY);
+      body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
     }
   }
 }

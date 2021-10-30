@@ -5,7 +5,7 @@ import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import {updateMoveStatus} from '../../../../server/src/physics/utils/tankStatus';
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
-import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, TankPosition, TankPositions } from '../../types/Types';
+import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, TankPosition, TankPositions, MoveStatus } from '../../types/Types';
 // import Debug from '../info/debug';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
@@ -33,6 +33,16 @@ class Game {
   messager: Message;
   tankId: string = '';
   tankName: string = '';
+  moveStatus: MoveStatus = {
+    keyW: '0',
+    keyS: '0',
+    keyA: '0',
+    keyD: '0',
+    forward: 0,
+    rotation: 0,
+    speed: 0,
+    direction: 0
+  }
   constructor(renderer: THREE.WebGLRenderer, production: string, port: string) {
     this.renderer = renderer;
     this.scene = new THREE.Scene();
@@ -55,17 +65,13 @@ class Game {
     this.arena = new Arena(this.scene, this.world);
     this.width = this.renderer.domElement.width;
     this.height = this.renderer.domElement.height;
-    this.onWindowResize.bind(this);
     this.registerUserInteraction.bind(this);
-    this.onDocumentMouseMove.bind(this);
-    this.onKeyDown.bind(this);
-    this.onKeyUp.bind(this);
     this.messageHandler.bind(this);
     this.connectToServer.bind(this);
     this.addTank.bind(this);
     this.updateTankPosition.bind(this);
     this.updateCamera.bind(this);
-    window.addEventListener('resize', () => this.onWindowResize(), true);
+    window.addEventListener('resize', this.onWindowResize.bind(this), true);
   }
 
   async connectToServer(tankId: string, tankName: string) {
@@ -75,6 +81,7 @@ class Game {
     if (connected) {
       this.messager.listenOnMessage(this.messageHandler.bind(this));
       this.messager.sendMessage(`${MessageType.TANK_START}`);
+      this.registerUserInteraction();
     } else {
       console.log('failed to open web socket');
     }
@@ -112,10 +119,10 @@ class Game {
     });
   }
 
-  registerUserInteraction(tank: Tank) {
-    document.addEventListener('keydown', this.onKeyDown, true);
-    document.addEventListener('keyup', this.onKeyUp, true);
-    document.addEventListener('mousemove', this.onDocumentMouseMove, true);
+  registerUserInteraction() {
+    document.addEventListener('keydown', this.onKeyDown.bind(this), true);
+    document.addEventListener('keyup', this.onKeyUp.bind(this), true);
+    document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), true);
   }
 
 
@@ -139,9 +146,6 @@ class Game {
         if (tank.tankId === this.tankId) {
           // this is my tank
           this.updateCamera(tank);
-          if (tank.ready) {
-            this.registerUserInteraction(tank);
-          }
         }
       }
     }
@@ -161,7 +165,10 @@ class Game {
   onKeyDown (event: KeyboardEvent) {
     switch (event.code) {
       case 'KeyW': {
-        this.messager.sendMessage(`${MessageType.TANK_MOVE_FORWARD},1`);
+        if (this.moveStatus.keyW != '1') {
+          this.messager.sendMessage(`${MessageType.TANK_MOVE_FORWARD},1`);
+        }
+        this.moveStatus.keyW = '1';
         break
       }
       case 'KeyA': {
@@ -182,7 +189,10 @@ class Game {
   onKeyUp(event: KeyboardEvent) {
     switch (event.code) {
       case 'KeyW': {
-        this.messager.sendMessage(`${MessageType.TANK_MOVE_FORWARD},0`);
+        if (this.moveStatus.keyW != '0') {
+          this.messager.sendMessage(`${MessageType.TANK_MOVE_FORWARD},0`);
+        }
+        this.moveStatus.keyW = '0';
         break
       }
       case 'KeyA': {
