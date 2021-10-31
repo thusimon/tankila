@@ -5,7 +5,7 @@ import {MoveStatus, BulletType, BulletsType, UserBody} from './types/Types'
 import * as CANNON from 'cannon-es'
 import CannonUtils from './utils/cannon'
 import CannonDebugRenderer from './utils/cannon-debug-render'
-import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from '../../server/src/physics/utils/tankStatus'
+import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from '../../server/src/utils/tankStatus'
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 import {GRAVITY, BULLET_SPEED} from './utils/constants';
 import Arena from './components/game/arena';

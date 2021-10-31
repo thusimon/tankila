@@ -4,7 +4,7 @@ import Tank from './components/tank';
 import Bullet from './components/bullet';
 import {generateRandomPosition} from '../utils/dynamics';
 import { MoveStatus } from '../../../client/src/types/Types';
-import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from './utils/tankStatus';
+import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from '../utils/tankStatus';
 
 class World {
   world: CANNON.World;

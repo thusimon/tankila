@@ -3,7 +3,7 @@ import * as CANNON from 'cannon-es';
 import {GRAVITY, BULLET_SPEED} from '../../utils/constants';
 import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {updateMoveStatus} from '../../../../server/src/physics/utils/tankStatus';
+import {updateMoveStatus} from '../../../../server/src/utils/tankStatus';
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
 import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, TankPosition, TankPositions, MoveStatus } from '../../types/Types';
 // import Debug from '../info/debug';
@@ -63,7 +63,7 @@ class Game {
     this.camera.lookAt(new THREE.Vector3(10, 0, 0));
     this.world = new CANNON.World()
     this.world.gravity.set(0, GRAVITY, 0)
-    this.arena = new Arena(this.scene, this.world);
+    this.arena = new Arena(this.scene);
     this.width = this.renderer.domElement.width;
     this.height = this.renderer.domElement.height;
     this.registerUserInteraction.bind(this);

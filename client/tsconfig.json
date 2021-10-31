@@ -70,5 +70,5 @@
     // "skipLibCheck": true,                     /* Skip type checking of declaration files. */
     // "forceConsistentCasingInFileNames": true  /* Disallow inconsistently-cased references to the same file. */
   },
-  "include": ["**/*.ts", "../server/src/physics/utils/tankStatus.ts"]
+  "include": ["**/*.ts", "../server/src/utils/tankStatus.ts"]
 }
