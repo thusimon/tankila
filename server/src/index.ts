@@ -166,7 +166,7 @@ wss.on('connection', (ws, req) => {
       console.log(`${id}-${name} tank exits`);
       world.removeTank(id);
       delete score[id];
-      broadcastMessage(`${MessageType.TANK_EXIT},${id}`);
+      broadcastMessage(`${MessageType.TANK_EXIT},["${id}"]`);
     });
     ws.on('message', msg => {
       handleMessage(id, msg.toString());
@@ -204,6 +204,7 @@ const extractTanksMessage = () => {
     const euler = new CANNON.Vec3();
     tank.body.quaternion.toEuler(euler);
     const tankMessage = {
+      n: tank.tankName,
       x: tank.body.position.x,
       y: tank.body.position.y,
       z: tank.body.position.z,

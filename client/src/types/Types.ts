@@ -47,6 +47,7 @@ export interface TankData3 {
 }
 
 export interface TankPosition {
+  n: string,
   x: number,
   y: number,
   z: number,

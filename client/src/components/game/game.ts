@@ -70,6 +70,7 @@ class Game {
     this.messageHandler.bind(this);
     this.connectToServer.bind(this);
     this.addTank.bind(this);
+    this.removeTank.bind(this);
     this.updateTankPosition.bind(this);
     this.updateBullets.bind(this);
     this.updateExplosion.bind(this);
@@ -90,7 +91,7 @@ class Game {
     }
   }
 
-  messageHandler(type:string, data: object) {
+  messageHandler(type:string, data: any) {
     switch (type) {
       case MessageType.TANK_POS: {
         const tankPositionData = data as TankPositions;
@@ -98,6 +99,11 @@ class Game {
         this.updateBullets(tankPositionData);
         this.updateExplosion(tankPositionData);
         break;
+      }
+      case MessageType.TANK_EXIT: {
+        const exitData = data as Array<string>;
+        const exitTankId = exitData[0];
+        this.removeTank(exitTankId);
       }
       default: {
         console.log('unknown message type');
@@ -124,6 +130,14 @@ class Game {
     });
   }
 
+  removeTank(tankId: string) {
+    if (this.tanks[tankId]) {
+      const tankToRemove = this.tanks[tankId];
+      this.scene.remove(tankToRemove.model);
+      delete this.tanks[tankId];
+    }
+  }
+
   registerUserInteraction() {
     document.addEventListener('keydown', this.onKeyDown.bind(this), true);
     document.addEventListener('keyup', this.onKeyUp.bind(this), true);
@@ -135,17 +149,19 @@ class Game {
     for (const tankId in tankData) {
       if (!this.tanks[tankId]) {
         // use a fake tank to hold the place, just in case the same tank is added multiple times 
-        this.tanks[tankId] = new Tank(new THREE.Object3D(), this.tankId, this.tankName);
-        this.addTank(this.tankId, this.tankName)
+        const thisTankData = tankData[tankId];
+        const tankName = thisTankData.n;
+        this.tanks[tankId] = new Tank(new THREE.Object3D(), tankId, tankName);
+        this.addTank(tankId, tankName)
         .then(() => {
-          console.log(`tank ${this.tankName} added`);
+          console.log(`tank ${tankName} added`);
         });
       } else {
         const tank = this.tanks[tankId];
         const data = tankData[tankId];
         if (tank.ready) {
           const model = tank.model;
-          model.position.set(data.x, data.y, data.z);
+          model.position.set(data.x, data.y - 0.5, data.z);
           model.rotation.z = data.r;
         }
         if (tank.tankId === this.tankId) {

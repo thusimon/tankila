@@ -29,17 +29,16 @@ class Bullet {
     const eulerY = euler.y;
     const offsetX = BULLET_SPEED * Math.sin(eulerY);
     const offsetZ = BULLET_SPEED * Math.cos(eulerY);
-    this.body.position.set(tankBody.position.x + 0.7 * Math.sin(eulerY),
-      tankBody.position.y + 0.5,
-      tankBody.position.z + 0.7 * Math.cos(eulerY));
+    console.log(tankBody.position);
+    this.body.position.set(tankBody.position.x + 0.6 * Math.sin(eulerY),
+      tankBody.position.y,
+      tankBody.position.z + 0.6 * Math.cos(eulerY));
 
     this.body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
     world.addBody(this.body)
 
     this.body.addEventListener('collide', (evt: any) => {
       this.bulletExplodeCallback(this.tankId, this);
-      //this.bulletsToRemove.push(this);
-      //this.bulletExplode();
     })
   }
 

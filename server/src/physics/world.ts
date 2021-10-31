@@ -14,7 +14,7 @@ class World {
   bulletsToRemove: {[key: string]: Bullet[]} = {};
   constructor() {
     this.world = new CANNON.World();
-    this.world.gravity.set(0, -1, 0)
+    this.world.gravity.set(0, -0.25, 0)
     this.arena = new Arena(this.world);
   }
 
