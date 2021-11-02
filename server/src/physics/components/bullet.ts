@@ -29,7 +29,6 @@ class Bullet {
     const eulerY = euler.y;
     const offsetX = BULLET_SPEED * Math.sin(eulerY);
     const offsetZ = BULLET_SPEED * Math.cos(eulerY);
-    console.log(tankBody.position);
     this.body.position.set(tankBody.position.x + 0.6 * Math.sin(eulerY),
       tankBody.position.y,
       tankBody.position.z + 0.6 * Math.cos(eulerY));

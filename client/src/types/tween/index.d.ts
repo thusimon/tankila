@@ -1,3 +1,4 @@
+/* author Sean Bradley */
 export class tween {
   Tween: typeof Tween
   update(time?: number): boolean

@@ -39,18 +39,37 @@ const updateBullets = (bullets: BulletsType) => {
 const stats = Stats()
 document.body.appendChild(stats.dom)
 
-const clock = new THREE.Clock()
+const clock = new THREE.Clock();
 let delta;
 const cannonDebugRenderer = new CannonDebugRenderer(game.scene, game.world)
 function animate() {
   requestAnimationFrame(animate)
   
   delta = Math.min(clock.getDelta(), 0.1)
-  game.world.step(delta)
+  //game.world.step(delta)
+  //tweenTankPositions(delta);
+  //TWEEN.update();
   render()
   stats.update()
+
 }
 
+function tweenTankPositions(deltaTime: number) {
+  const tanks = game.tanks;
+  for (const tankId in tanks) {
+    const tank = tanks[tankId];
+    const model = tank.model;
+    new TWEEN.Tween(model.position)
+    .to(tank.currPos, deltaTime)
+    .easing(TWEEN.Easing.Linear.None)
+    .start()
+    // new TWEEN.Tween(model.rotation)
+    // .to({x: 0, y: 0, z: tank.currDir}, deltaTime)
+    // .easing(TWEEN.Easing.Linear.None)
+    // .start();
+    model.rotation.z = tank.currDir;
+  }
+}
 function render() {
   cannonDebugRenderer.update();
   const {cameraRotationXZOffset, cameraRotationYOffset, camera, scene} = game;
@@ -88,7 +107,6 @@ function render() {
   // bulletsToRemove.forEach(bullet => {
   //   bullet.removeBullet();
   // })
-
   game.explosions.forEach(explosion => {
     explosion.update();
   });

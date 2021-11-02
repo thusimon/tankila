@@ -1,7 +1,10 @@
 export const getWebSockedDomain = (production: string, port: string): string => {
   const loc = window.location;
   let wsUri = 'ws:';
-  if (production) {
+  // if (production) {
+  //   wsUri = 'wss:';
+  // }
+  if (loc.protocol === 'https:') {
     wsUri = 'wss:';
   }
   wsUri += '//' + loc.hostname;

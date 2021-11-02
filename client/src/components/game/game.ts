@@ -13,6 +13,7 @@ import Explosion from '../bullet/explosion';
 import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
 import Message from './message';
+import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 
 class Game {
   scene: THREE.Scene;
@@ -161,6 +162,20 @@ class Game {
         const data = tankData[tankId];
         if (tank.ready) {
           const model = tank.model;
+          const targetPosition = {x: data.x, y: data.y - 0.5, z: data.z};
+          const targetRotation = {z: data.r};
+          tank.prevPos = tank.currPos;
+          tank.currPos = new THREE.Vector3(data.x, data.y - 0.5, data.z);
+          tank.prevDir = tank.currDir;
+          tank.currDir = data.r;
+          // new TWEEN.Tween(model.position)
+          // .to(targetPosition)
+          // .easing(TWEEN.Easing.Linear.None)
+          // .start()
+          // new TWEEN.Tween(model.rotation)
+          // .to(targetRotation)
+          // .easing(TWEEN.Easing.Linear.None)
+          // .start();
           model.position.set(data.x, data.y - 0.5, data.z);
           model.rotation.z = data.r;
         }
