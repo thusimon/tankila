@@ -9,6 +9,7 @@ import { BulletData, MessageType, MoveStatus } from '../../client/src/types/Type
 import * as CANNON from 'cannon-es'
 import {getQueryFromUrl} from './utils/url'
 import World from './physics/world';
+import { setInterval } from 'timers';
 
 dotenv.config({
   path: path.join(__dirname, '../../.env')
@@ -218,15 +219,18 @@ const extractTanksMessage = () => {
   return tanksMessage;
 }
 
-const updateRate = 1000 / 60;
+const updateRate = 1000 / 100;
 const worldStep = updateRate / 1000;
 setInterval(() => {
   world.updateTanksPosition();
   world.world.step(worldStep);
-  const tanksMessage = extractTanksMessage();
-  broadcastMessage(`${MessageType.TANK_POS},${JSON.stringify(tanksMessage)}`);
   // postProcessTanksAndBults();
 }, updateRate);
+
+setInterval(() => {
+  const tanksMessage = extractTanksMessage();
+  broadcastMessage(`${MessageType.TANK_POS},${JSON.stringify(tanksMessage)}`);
+}, updateRate*2);
 
 // const updateTanks3Position = () => {
 //   const tanksArr = Object.values(tanks3);

@@ -62,6 +62,11 @@ export interface BulletPosition {
   z: number,
 }
 
+export interface PositionQueue {
+  pos: THREE.Vector3;
+  time: number;
+}
+
 export interface TankPositions {
   [key: string]: TankPosition
 }

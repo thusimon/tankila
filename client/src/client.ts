@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {MoveStatus, BulletType, BulletsType, UserBody} from './types/Types'
+import {MoveStatus, BulletType, BulletsType, UserBody, PositionQueue} from './types/Types'
 import * as CANNON from 'cannon-es'
 import CannonUtils from './utils/cannon'
 import CannonDebugRenderer from './utils/cannon-debug-render'
@@ -46,12 +46,9 @@ function animate() {
   requestAnimationFrame(animate)
   
   delta = Math.min(clock.getDelta(), 0.1)
-  //game.world.step(delta)
-  //tweenTankPositions(delta);
-  //TWEEN.update();
-  render()
-  stats.update()
-
+  tweenTankPositions(delta);
+  TWEEN.update();
+  stats.update();
 }
 
 function tweenTankPositions(deltaTime: number) {
@@ -59,16 +56,18 @@ function tweenTankPositions(deltaTime: number) {
   for (const tankId in tanks) {
     const tank = tanks[tankId];
     const model = tank.model;
+    const curPos = tank.curPos;
     new TWEEN.Tween(model.position)
-    .to(tank.currPos, deltaTime)
+      .to(curPos, deltaTime)
+      .easing(TWEEN.Easing.Linear.None)
+      .start();
+    const curDir = tank.curDir;
+    new TWEEN.Tween(model.rotation)
+    .to({z: curDir}, deltaTime)
     .easing(TWEEN.Easing.Linear.None)
-    .start()
-    // new TWEEN.Tween(model.rotation)
-    // .to({x: 0, y: 0, z: tank.currDir}, deltaTime)
-    // .easing(TWEEN.Easing.Linear.None)
-    // .start();
-    model.rotation.z = tank.currDir;
+    .start();
   }
+  render();
 }
 function render() {
   cannonDebugRenderer.update();

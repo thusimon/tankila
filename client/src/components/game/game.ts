@@ -5,7 +5,7 @@ import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import {updateMoveStatus} from '../../../../server/src/utils/tankStatus';
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
-import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, TankPosition, TankPositions, MoveStatus } from '../../types/Types';
+import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, TankPosition, TankPositions, MoveStatus, PositionQueue } from '../../types/Types';
 // import Debug from '../info/debug';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
@@ -45,6 +45,7 @@ class Game {
     speed: 0,
     direction: 0
   }
+  timer = 0;
   constructor(renderer: THREE.WebGLRenderer, production: string, port: string) {
     this.renderer = renderer;
     this.scene = new THREE.Scene();
@@ -95,6 +96,9 @@ class Game {
   messageHandler(type:string, data: any) {
     switch (type) {
       case MessageType.TANK_POS: {
+        const now = Date.now();
+        //console.log(now - this.timer);
+        this.timer = now;
         const tankPositionData = data as TankPositions;
         this.updateTankPosition(tankPositionData);
         this.updateBullets(tankPositionData);
@@ -161,23 +165,8 @@ class Game {
         const tank = this.tanks[tankId];
         const data = tankData[tankId];
         if (tank.ready) {
-          const model = tank.model;
-          const targetPosition = {x: data.x, y: data.y - 0.5, z: data.z};
-          const targetRotation = {z: data.r};
-          tank.prevPos = tank.currPos;
-          tank.currPos = new THREE.Vector3(data.x, data.y - 0.5, data.z);
-          tank.prevDir = tank.currDir;
-          tank.currDir = data.r;
-          // new TWEEN.Tween(model.position)
-          // .to(targetPosition)
-          // .easing(TWEEN.Easing.Linear.None)
-          // .start()
-          // new TWEEN.Tween(model.rotation)
-          // .to(targetRotation)
-          // .easing(TWEEN.Easing.Linear.None)
-          // .start();
-          model.position.set(data.x, data.y - 0.5, data.z);
-          model.rotation.z = data.r;
+          tank.curPos.set(data.x, data.y - 0.5, data.z);
+          tank.curDir = data.r;
         }
         if (tank.tankId === this.tankId) {
           // this is my tank
