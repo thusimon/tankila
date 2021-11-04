@@ -143,6 +143,10 @@ class Game {
     }
   }
 
+  getMyTank() {
+    return this.tanks[this.tankId];
+  }
+
   registerUserInteraction() {
     document.addEventListener('keydown', this.onKeyDown.bind(this), true);
     document.addEventListener('keyup', this.onKeyUp.bind(this), true);
@@ -165,12 +169,9 @@ class Game {
         const tank = this.tanks[tankId];
         const data = tankData[tankId];
         if (tank.ready) {
-          tank.curPos.set(data.x, data.y - 0.5, data.z);
+          const targetPos = new THREE.Vector3(data.x, data.y - 0.5, data.z);
+          tank.curPos.copy(targetPos);
           tank.curDir = data.r;
-        }
-        if (tank.tankId === this.tankId) {
-          // this is my tank
-          this.updateCamera(tank);
         }
       }
     }
@@ -208,7 +209,7 @@ class Game {
     }
   }
 
-  updateCamera(myTank: Tank) {
+  updateCameraToTank(myTank: Tank) {
     const {position, rotation} = myTank.model;
 
     this.camera.position.x = position.x - 2 * Math.sin(rotation.z);
@@ -217,6 +218,13 @@ class Game {
       position.x + 10 * Math.sin(rotation.z - this.cameraRotationXZOffset),
       -10 * Math.atan(this.cameraRotationYOffset),
       position.z + 10 * Math.cos(rotation.z - this.cameraRotationXZOffset));
+  }
+
+  updateCamera() {
+    const myTank = this.getMyTank();
+    if (myTank) {
+      this.updateCameraToTank(myTank);
+    }
   }
 
   onKeyDown (event: KeyboardEvent) {

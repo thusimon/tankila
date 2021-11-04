@@ -225,12 +225,9 @@ setInterval(() => {
   world.updateTanksPosition();
   world.world.step(worldStep);
   // postProcessTanksAndBults();
-}, updateRate);
-
-setInterval(() => {
   const tanksMessage = extractTanksMessage();
   broadcastMessage(`${MessageType.TANK_POS},${JSON.stringify(tanksMessage)}`);
-}, updateRate*2);
+}, updateRate);
 
 // const updateTanks3Position = () => {
 //   const tanksArr = Object.values(tanks3);
