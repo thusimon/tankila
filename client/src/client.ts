@@ -64,4 +64,6 @@ function render() {
   renderer.render(game.scene, game.camera)
 }
 
-animate()
+animate();
+
+welcome.showPanel();
