@@ -44,8 +44,15 @@ function updateAndTweenScene(deltaTime: number) {
   for (const tankId in tanks) {
     const tank = tanks[tankId];
     const model = tank.model;
+    const tankName = tank.tankNameMesh;
     new TWEEN.Tween(model.position)
       .to(tank.curPos, deltaTime)
+      .easing(TWEEN.Easing.Linear.None)
+      .start();
+    const tankNamePos = new THREE.Vector3().copy(tank.curPos);
+    tankNamePos.y += 1;
+    new TWEEN.Tween(tankName.position)
+      .to(tankNamePos, deltaTime)
       .easing(TWEEN.Easing.Linear.None)
       .start();
     new TWEEN.Tween(model.rotation)

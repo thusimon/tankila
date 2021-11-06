@@ -4,7 +4,7 @@ import {GRAVITY, BULLET_SPEED} from '../../utils/constants';
 import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import {updateMoveStatus} from '../../../../server/src/utils/tankStatus';
-import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils } from 'three';
+import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils, FontLoader } from 'three';
 import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, TankPosition, TankPositions, MoveStatus, PositionQueue } from '../../types/Types';
 // import Debug from '../info/debug';
 import Tank from '../tank/tank';
@@ -97,7 +97,6 @@ class Game {
     switch (type) {
       case MessageType.TANK_POS: {
         const now = Date.now();
-        //console.log(now - this.timer);
         this.timer = now;
         const tankPositionData = data as TankPositions;
         this.updateTankPosition(tankPositionData);
@@ -118,9 +117,10 @@ class Game {
   }
 
   async addTank(tankId: string, tankName: string) {
-    const loader = new GLTFLoader();
-    return new Promise<Tank>(resolve => {
-      loader.load('./models/styled_tank/tank.glb', (gltf) => {
+    const tankLoader = new GLTFLoader();
+    const fontLoader = new THREE.FontLoader();
+    const tankModelPromise = new Promise<Tank>(resolve => {
+      tankLoader.load('./models/styled_tank/tank.glb', (gltf) => {
         const tankModel = gltf.scene.children[0];
         tankModel.scale.set(0.3,0.3,0.3);
         const tank = new Tank(tankModel, tankId, tankName);
@@ -133,12 +133,32 @@ class Game {
         resolve(tank);
       });
     });
+    const tankNamePromise = new Promise<THREE.Mesh>(resolve => {
+      fontLoader.load('./fonts/OpenSans_Bold.json', (font) => {
+        const fontGeo = new THREE.TextGeometry(tankName, {
+          font,
+          size: 0.15,
+          height: 0.01
+        });
+        const fontMesh = new THREE.Mesh(fontGeo, [
+          new THREE.MeshBasicMaterial({color: new THREE.Color(0, 1, 0)}),
+          new THREE.MeshBasicMaterial({color: new THREE.Color(1, 1, 0)})
+        ]);
+        this.scene.add(fontMesh);
+        resolve(fontMesh);
+      })
+    });
+    return Promise.all([tankModelPromise, tankNamePromise])
+    .then(([tank, fontMesh]) => {
+      tank.tankNameMesh = fontMesh;
+    });
   }
 
   removeTank(tankId: string) {
     if (this.tanks[tankId]) {
       const tankToRemove = this.tanks[tankId];
       this.scene.remove(tankToRemove.model);
+      this.scene.remove(tankToRemove.tankNameMesh);
       delete this.tanks[tankId];
     }
   }

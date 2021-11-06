@@ -4,6 +4,7 @@ import path from 'path';
 const staticResources = [
   'models',
   'textures',
+  'fonts',
   'favicon.ico'
 ]
 

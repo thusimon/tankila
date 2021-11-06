@@ -6,6 +6,7 @@ class Tank {
   moveStatus: MoveStatus;
   tankId: string;
   tankName: string;
+  tankNameMesh: THREE.Mesh;
   ready: boolean = false;
   curPos: THREE.Vector3 = new THREE.Vector3(0,0,0);
   curDir: number = 0;
@@ -19,6 +20,7 @@ class Tank {
     }
     this.tankId = tankId;
     this.tankName = tankName;
+    this.tankNameMesh = new THREE.Mesh();
   }
 }
 
