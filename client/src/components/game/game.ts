@@ -138,12 +138,16 @@ class Game {
         const fontGeo = new THREE.TextGeometry(tankName, {
           font,
           size: 0.15,
-          height: 0.01
+          height: 0.02
         });
         const fontMesh = new THREE.Mesh(fontGeo, [
           new THREE.MeshBasicMaterial({color: new THREE.Color(0, 1, 0)}),
           new THREE.MeshBasicMaterial({color: new THREE.Color(1, 1, 0)})
         ]);
+        const box = new THREE.Box3().setFromObject(fontMesh);
+        const fontSizeVec = new THREE.Vector3();
+        box.getSize(fontSizeVec);
+        fontMesh.geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(-fontSizeVec.x / 2, 1, 0.5));
         this.scene.add(fontMesh);
         resolve(fontMesh);
       })
