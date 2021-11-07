@@ -12,6 +12,7 @@ class Chat {
 
     const chatArea = document.createElement('textarea');
     chatArea.id = 'chat-area';
+    chatArea.readOnly = true;
     this.chatArea = chatArea;
 
     const chatInputArea = document.createElement('div');
@@ -25,7 +26,10 @@ class Chat {
     chatInputArea.append(chatInput, enterKey);
 
     chatPanel.append(chatArea, chatInputArea);
+    this.showChat = this.showChat.bind(this);
     this.hideChat = this.hideChat.bind(this);
+    this.getChatInputContent = this.getChatInputContent.bind(this);
+
     this.hideChat();
     document.body.append(chatPanel);
   }
@@ -36,6 +40,23 @@ class Chat {
 
   hideChat() {
     this.chatPanel.style.display = 'none';
+  }
+
+  getChatInputContent() {
+    return this.chatInput.value;
+  }
+
+  clearChatInputContent() {
+    this.chatInput.value = '';
+  }
+
+  appendChat(name: string, content: string) {
+    const now = new Date();
+    const hour = `0${now.getHours()}`.substr(-2);
+    const minute = `0${now.getMinutes()}`.substr(-2);
+    const message = `[${hour}:${minute}]${name}: ${content}\n`;
+    this.chatArea.value += message;
+    this.chatArea.scrollTop = this.chatArea.scrollHeight;
   }
 }
 

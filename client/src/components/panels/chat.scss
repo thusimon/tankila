@@ -36,6 +36,11 @@
       width: 30px;
       line-height: 44px;
       text-align: center;
+      user-select: none;
+      cursor: pointer;
+    }
+    #chat-enter-key:hover {
+      color: lightgray;
     }
   }
 }

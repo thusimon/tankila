@@ -35,6 +35,7 @@ class Game {
   tankId: string = '';
   tankName: string = '';
   chat: Chat;
+  chatReady: boolean = false;
   moveStatus: MoveStatus = {
     keyW: '0',
     keyS: '0',
@@ -109,6 +110,12 @@ class Game {
         const exitData = data as Array<string>;
         const exitTankId = exitData[0];
         this.removeTank(exitTankId);
+        break;
+      }
+      case MessageType.CHAT_RECEIVE: {
+        const chatData = data as Array<string>;
+        const [chatName, chatContent] = chatData;
+        this.chat.appendChat(chatName, chatContent);
       }
       default: {
         console.log('unknown message type');
@@ -176,6 +183,14 @@ class Game {
     document.addEventListener('keydown', this.onKeyDown.bind(this), true);
     document.addEventListener('keyup', this.onKeyUp.bind(this), true);
     document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), true);
+    const chatInput = document.getElementById('chat-input');
+    const chatInputEnter = document.getElementById('chat-enter-key');
+    if (chatInput && chatInputEnter) {
+      chatInput.addEventListener('keyup', this.onSendChat.bind(this), true);
+      chatInput.addEventListener('focus', this.onActiveChat.bind(this), true);
+      chatInput.addEventListener('blur', this.onDeactiveChat.bind(this), true);
+      chatInputEnter.addEventListener('click', this.sendChat.bind(this), true);
+    }
   }
 
 
@@ -253,6 +268,9 @@ class Game {
   }
 
   onKeyDown (event: KeyboardEvent) {
+    if (this.chatReady) {
+      return;
+    }
     switch (event.code) {
       case 'KeyW': {
         if (this.moveStatus.keyW != '1') {
@@ -290,6 +308,9 @@ class Game {
   }
 
   onKeyUp(event: KeyboardEvent) {
+    if (this.chatReady) {
+      return;
+    }
     switch (event.code) {
       case 'KeyW': {
         if (this.moveStatus.keyW != '0') {
@@ -327,6 +348,30 @@ class Game {
         break;
       }
     }
+  }
+
+  sendChat() {
+    const chatContent = this.chat.getChatInputContent();
+    if (!chatContent) {
+      return;
+    }
+    this.messager.sendMessage(`${MessageType.CHAT_SEND},${chatContent}`);
+    this.chat.clearChatInputContent();
+  }
+
+  onSendChat(event: KeyboardEvent) {
+    if (event.code !== 'Enter') {
+      return;
+    }
+    this.sendChat();
+  }
+
+  onActiveChat() {
+    this.chatReady = true;
+  }
+
+  onDeactiveChat() {
+    this.chatReady = false;
   }
 
   onDocumentMouseMove(event: MouseEvent) {

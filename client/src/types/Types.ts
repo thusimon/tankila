@@ -149,4 +149,6 @@ export enum MessageType {
   TANK_ROTATE_LEFT = '05',
   TANK_ROTATE_RIGHT = '06',
   TANK_SHOOT = '07',
+  CHAT_SEND = '08',
+  CHAT_RECEIVE = '09',
 };
