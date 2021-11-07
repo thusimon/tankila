@@ -1,0 +1,41 @@
+#chat-panel {
+  display: none;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  width: 20vw;
+  #chat-area {
+    height: 200px;
+    width: 100%;
+    display: block;
+    resize: none;
+    background-color: rgba(100, 100, 200, 0.3);
+    border: none;
+    outline: none;
+    color: white;
+    padding: 0px;
+  }
+  #chat-input-area {
+    display: flex;
+    #chat-input {
+      height: 40px;
+      width: calc(100% - 30px);
+      padding: 2px 4px;
+      margin: 0px;
+      border: none;
+      outline: none;
+      background-color: rgba(20, 20, 95, 0.95);
+      color: white;
+      font-size: 1.2rem;
+    }
+    #chat-enter-key {
+      font-size: 2rem;
+      color: grey;
+      background-color: rgba(20, 20, 95, 0.95);
+      border-left: 1px solid grey;
+      width: 30px;
+      line-height: 44px;
+      text-align: center;
+    }
+  }
+}

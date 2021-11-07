@@ -1,5 +1,7 @@
-import Game from './components/game/game';
-import {uuidv4} from './utils/urls';
+import Game from '../game/game';
+import {uuidv4} from '../../utils/urls';
+import './welcome.scss';
+
 class Welcome {
   menuPanel: HTMLDivElement;
   constructor(game: Game) {

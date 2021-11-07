@@ -13,11 +13,11 @@ import Explosion from '../bullet/explosion';
 import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
 import Message from './message';
+import Chat from '../panels/chat';
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 
 class Game {
   scene: THREE.Scene;
-  world: CANNON.World;
   camera: THREE.PerspectiveCamera;
   arena: Arena;
   renderer: THREE.WebGLRenderer;
@@ -34,6 +34,7 @@ class Game {
   messager: Message;
   tankId: string = '';
   tankName: string = '';
+  chat: Chat;
   moveStatus: MoveStatus = {
     keyW: '0',
     keyS: '0',
@@ -52,6 +53,7 @@ class Game {
     this.production = production;
     this.port = port;
     this.messager = new Message(production, port);
+    this.chat = new Chat();
     const light = new THREE.AmbientLight()
     this.scene.add(light)
     this.camera = new THREE.PerspectiveCamera(
@@ -59,12 +61,10 @@ class Game {
       window.innerWidth / window.innerHeight,
       0.1,
       1000
-    )
+    );
     this.camera.position.y = 2
     this.camera.position.x = -2
     this.camera.lookAt(new THREE.Vector3(10, 0, 0));
-    this.world = new CANNON.World()
-    this.world.gravity.set(0, GRAVITY, 0)
     this.arena = new Arena(this.scene);
     this.width = this.renderer.domElement.width;
     this.height = this.renderer.domElement.height;
@@ -88,6 +88,7 @@ class Game {
       this.messager.listenOnMessage(this.messageHandler.bind(this));
       this.messager.sendMessage(`${MessageType.TANK_START}`);
       this.registerUserInteraction();
+      this.chat.showChat();
     } else {
       console.log('failed to open web socket');
     }
@@ -318,14 +319,13 @@ class Game {
         this.moveStatus.keyD = '0';
         break
       }
-      case 'Space':
+      case 'Space': {
         if (this.moveStatus.keySpace != '0') {
           this.messager.sendMessage(MessageType.TANK_SHOOT);
         }
         this.moveStatus.keySpace = '0';
-        // const bullet = new Bullet(this.scene, this.world, tank, this.bulletsToRemove, this.explosions);
-        // this.bullets[tank.tankId].push(bullet);
-        // break;
+        break;
+      }
     }
   }
 

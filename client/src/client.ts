@@ -3,8 +3,8 @@ import Stats from 'three/examples/jsm/libs/stats.module'
 import {BulletsType} from './types/Types'
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 import Game from './components/game/game';
-import Welcome from './welcome';
-import './style/welcome.scss';
+import Welcome from './components/panels/welcome';
+import './client.scss';
 
 declare var PRODUCTION: string;
 declare var PORT: string;
