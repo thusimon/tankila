@@ -1,4 +1,3 @@
-import Game from '../game/game';
 import './chat.scss';
 
 class Chat {

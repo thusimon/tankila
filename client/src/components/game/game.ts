@@ -5,7 +5,7 @@ import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import {updateMoveStatus} from '../../../../server/src/utils/tankStatus';
 import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils, FontLoader } from 'three';
-import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, TankPosition, TankPositions, MoveStatus, PositionQueue } from '../../types/Types';
+import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, Tanks, TankPosition, TankPositions, MoveStatus, PositionQueue, ScoresData } from '../../types/Types';
 // import Debug from '../info/debug';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
@@ -14,6 +14,7 @@ import TankMe3 from '../tank/tankMe3';
 import TankBase3 from '../tank/tankBase3';
 import Message from './message';
 import Chat from '../panels/chat';
+import Score from '../panels/score';
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 
 class Game {
@@ -24,7 +25,7 @@ class Game {
   bullets: BulletsType = {};
   bulletsToRemove: Bullet[] = [];
   explosions: Explosion[] =[];
-  tanks: {[key: string]: Tank} = {};
+  tanks: Tanks = {};
   cameraRotationXZOffset: number = 0;
   cameraRotationYOffset: number = 0;
   width: number = 1;
@@ -35,6 +36,7 @@ class Game {
   tankId: string = '';
   tankName: string = '';
   chat: Chat;
+  score: Score;
   chatReady: boolean = false;
   moveStatus: MoveStatus = {
     keyW: '0',
@@ -47,7 +49,6 @@ class Game {
     speed: 0,
     direction: 0
   }
-  timer = 0;
   constructor(renderer: THREE.WebGLRenderer, production: string, port: string) {
     this.renderer = renderer;
     this.scene = new THREE.Scene();
@@ -55,6 +56,7 @@ class Game {
     this.port = port;
     this.messager = new Message(production, port);
     this.chat = new Chat();
+    this.score = new Score();
     const light = new THREE.AmbientLight()
     this.scene.add(light)
     this.camera = new THREE.PerspectiveCamera(
@@ -90,6 +92,7 @@ class Game {
       this.messager.sendMessage(`${MessageType.TANK_START}`);
       this.registerUserInteraction();
       this.chat.showChat();
+      this.score.showScore();
     } else {
       console.log('failed to open web socket');
     }
@@ -98,8 +101,6 @@ class Game {
   messageHandler(type:string, data: any) {
     switch (type) {
       case MessageType.TANK_POS: {
-        const now = Date.now();
-        this.timer = now;
         const tankPositionData = data as TankPositions;
         this.updateTankPosition(tankPositionData);
         this.updateBullets(tankPositionData);
@@ -116,6 +117,12 @@ class Game {
         const chatData = data as Array<string>;
         const [chatName, chatContent] = chatData;
         this.chat.appendChat(chatName, chatContent);
+        break;
+      }
+      case MessageType.SCORE_UPDATE: {
+        const scores = data as ScoresData;
+        this.score.updateScore(scores);
+        break;
       }
       default: {
         console.log('unknown message type');
@@ -199,6 +206,7 @@ class Game {
       if (!this.tanks[tankId]) {
         // use a fake tank to hold the place, just in case the same tank is added multiple times 
         const thisTankData = tankData[tankId];
+        // TODO no need to send name in every update
         const tankName = thisTankData.n;
         this.tanks[tankId] = new Tank(new THREE.Object3D(), tankId, tankName);
         this.addTank(tankId, tankName)

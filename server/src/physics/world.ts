@@ -3,7 +3,7 @@ import Arena from './components/arena';
 import Tank from './components/tank';
 import Bullet from './components/bullet';
 import {generateRandomPosition} from '../utils/dynamics';
-import { MoveStatus } from '../../../client/src/types/Types';
+import { MoveStatus, MessageType } from '../../../client/src/types/Types';
 import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from '../utils/tankStatus';
 
 class World {
@@ -11,11 +11,14 @@ class World {
   arena: Arena;
   tanks: {[key: string]: Tank} = {};
   bullets: {[key: string]: Bullet[]} = {};
+  scores: {[key: string]: {n: string, s: number}} = {};
   bulletsToRemove: {[key: string]: Bullet[]} = {};
-  constructor() {
+  messager: (msg: string) => void;
+  constructor(messager: (msg: string) => void) {
     this.world = new CANNON.World();
     this.world.gravity.set(0, -0.25, 0)
     this.arena = new Arena(this.world);
+    this.messager = messager;
   }
 
   addTank(id: string, name: string) {
@@ -30,6 +33,7 @@ class World {
     this.tanks[id] = tank;
     this.bullets[id] = [];
     this.bulletsToRemove[id] = [];
+    this.scores[id] = {n: name, s: 0};
     this.world.addBody(tank.body);
   }
 
@@ -37,8 +41,10 @@ class World {
     const tank = this.tanks[id];
     if (tank) {
       this.world.removeBody(tank.body);
-      delete this.tanks[id];
     }
+    // TODO clean the bullets
+    delete this.tanks[id];
+    delete this.scores[id];
   }
 
   updateTankStatus(id: string, newMoveStatus: MoveStatus) {
@@ -78,10 +84,14 @@ class World {
     this.bullets[tankId].push(bullet);
   }
 
-  bulletExplode(tankId: string, bullet: Bullet) {
+  bulletExplode(tankId: string, bullet: Bullet, collisonTo: string) {
     this.bulletsToRemove[tankId].push(bullet);
     const tanksBullet = this.bullets[tankId];
     this.bullets[tankId] = tanksBullet.filter(blt => blt != bullet);
+    if (this.scores[tankId] && collisonTo && collisonTo.startsWith('tank_')) {
+      this.scores[tankId].s += 1;
+    }
+    this.messager(`${MessageType.SCORE_UPDATE},${JSON.stringify(this.scores)}`);
   }
 }
 

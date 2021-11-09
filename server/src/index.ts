@@ -141,9 +141,6 @@ const server = app.listen(PORT, () => {
   });
 });
 
-/* ------physics------ */
-const world = new World();
-
 /* ------websocket------ */
 const wss = new WebSocket.Server({
   server,
@@ -156,18 +153,23 @@ const broadcastMessage = (message: string): void => {
   });
 }
 
+/* ------physics------ */
+const world = new World(broadcastMessage);
+
 wss.on('connection', (ws, req) => {
   const id = getQueryFromUrl('id', req.url!);
   const name = getQueryFromUrl('name', req.url!);
   console.log(`${id}-${name} tank enters`);
   if(id && name) {
     world.addTank(id, name);
-    score[id] = 0;
+    broadcastMessage(`${MessageType.CHAT_RECEIVE},["System","${name} entered the arena!"]`);
+    broadcastMessage(`${MessageType.SCORE_UPDATE},${JSON.stringify(world.scores)}`);
     ws.on('close', () => {
       console.log(`${id}-${name} tank exits`);
       world.removeTank(id);
-      delete score[id];
       broadcastMessage(`${MessageType.TANK_EXIT},["${id}"]`);
+      broadcastMessage(`${MessageType.SCORE_UPDATE},${JSON.stringify(world.scores)}`);
+      broadcastMessage(`${MessageType.CHAT_RECEIVE},["System","${name} left the arena..."]`);
     });
     ws.on('message', msg => {
       handleMessage(id, msg.toString());
@@ -177,7 +179,6 @@ wss.on('connection', (ws, req) => {
 
 const tanks: TankData = {};
 const tanks3: TanksData3 = {};
-const score: ScoreData = {};
 
 const extractTanksMessage = () => {
   const tanks = world.tanks;

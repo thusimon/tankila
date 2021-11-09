@@ -2,6 +2,7 @@ import Point from '../data/Point';
 import { Vector3, Euler, Color } from 'three';
 import * as CANNON from 'cannon-es'
 import Bullet from '../components/bullet/bullet';
+import Tank from '../components/tank/tank';
 
 export interface GameConfig {
   width: number;
@@ -69,6 +70,17 @@ export interface PositionQueue {
 
 export interface TankPositions {
   [key: string]: TankPosition
+}
+
+export interface Tanks {
+  [key: string]: Tank
+}
+
+export interface ScoresData {
+  [key: string]: {
+    n: string,
+    s: number
+  }
 }
 
 export interface DebugInfo {
@@ -151,4 +163,5 @@ export enum MessageType {
   TANK_SHOOT = '07',
   CHAT_SEND = '08',
   CHAT_RECEIVE = '09',
+  SCORE_UPDATE = '10',
 };

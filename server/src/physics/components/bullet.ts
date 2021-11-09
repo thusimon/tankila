@@ -7,8 +7,8 @@ class Bullet {
   body: CANNON.Body;
   removeFlag: boolean = false;
   tankId: string;
-  bulletExplodeCallback: (id:string, bullet: Bullet) => void
-  constructor(world: CANNON.World, tank: Tank, bulletExplodeCb: (id: string, bullet: Bullet) => void) {
+  bulletExplodeCallback: (id:string, bullet: Bullet, collisonTo: string) => void
+  constructor(world: CANNON.World, tank: Tank, bulletExplodeCb: (id: string, bullet: Bullet, collisonTo: string) => void) {
     this.world = world;
     this.tankId = tank.tankId;
     this.bulletExplodeCallback = bulletExplodeCb;
@@ -37,7 +37,8 @@ class Bullet {
     world.addBody(this.body)
 
     this.body.addEventListener('collide', (evt: any) => {
-      this.bulletExplodeCallback(this.tankId, this);
+      const collisonTo = evt.body.userData as string;
+      this.bulletExplodeCallback(this.tankId, this, collisonTo);
     })
   }
 
