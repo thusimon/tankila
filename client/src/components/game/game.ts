@@ -92,6 +92,7 @@ class Game {
       this.messager.sendMessage(`${MessageType.TANK_START}`);
       this.registerUserInteraction();
       this.chat.showChat();
+      this.score.showPanel();
       this.score.showScore();
     } else {
       console.log('failed to open web socket');

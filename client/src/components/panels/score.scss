@@ -1,0 +1,45 @@
+#score-panel {
+  display: block;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  width: 150px;
+  #score-header {
+    user-select: none;
+    background-color: rgba(235, 250, 22, 1);
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: bold;
+    #score-title {
+      margin: 0px 8px;
+    }
+    #score-control {
+      cursor: pointer;
+    }
+    #score-control:hover {
+      color: rgb(165, 165, 165);
+    }
+  }
+  #score-area {
+    width: 100%;
+    height: 30vh;
+    display: block;
+    resize: none;
+    background-color: rgba(235, 250, 22, 0.3);
+    border: none;
+    outline: none;
+    color: black;
+    padding: 0px 8px;
+    font-size: 1.5rem;
+    transition: max-height 1s ease-out;
+  }
+  .score-show {  
+    max-height: 30vh;
+  }
+  .score-hide {
+    max-height: 0vh;
+  }
+}
