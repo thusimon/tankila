@@ -9,16 +9,14 @@ import { BulletData, MessageType, MoveStatus } from '../../client/src/types/Type
 import * as CANNON from 'cannon-es'
 import {getQueryFromUrl} from './utils/url'
 import World from './physics/world';
-import { setInterval } from 'timers';
+import {TankilaScore} from './db/scores';
+import {updateOne} from './db/utils';
+import {router} from './routes';
 
 dotenv.config({
   path: path.join(__dirname, '../../.env')
 });
 
-const Schema = mongoose.Schema;
-mongoose.set('useFindAndModify', false);
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useUnifiedTopology', true);
 const CONNECTION_URI = process.env.MONGODB_URI!;
 
 /* ------interface------- */
@@ -73,58 +71,16 @@ interface ScoreData {
 
 /* ------db------ */
 const connectToDb = () => {
-  return mongoose.connect(CONNECTION_URI, {
-    useNewUrlParser: true,
-    useCreateIndex: true
-  }).then(async () => {
+  return mongoose.connect(CONNECTION_URI).then(async () => {
     console.log(`Connected to mongoDB to ${CONNECTION_URI}`);
     return Promise.resolve();
   });
 };
 
-const LaserScoreSchema = new Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  credit: {
-    type: Number,
-    required: true
-  }
-}, {
-  timestamps:true
-});
-
-const LaserScore = mongoose.model('LaserScore', LaserScoreSchema);
 /* ------server------- */
 const app = express();
 
 const PORT = process.env.PORT;
-
-const router = express.Router();
-
-router.get('/api/lasercredits', async (req, res) => {
-  try {
-    const laserScores = await LaserScore.find({}, {_id: 0, updatedAt: 0, createdAt: 0, __v: 0}).sort({credit: -1});
-    return res.status(200).json({credits: laserScores});
-  } catch (e) {
-    return res.status(400).json({err: e})
-  }
-});
-
-router.get('/api/lasercredit', async (req, res) => {
-  const {name, credit} = req.query;
-  if (!name || !credit) {
-    return res.status(400).json({err: 'missing param'});
-  }
-  const creditInt = Number.parseInt(credit as string);
-  try {
-    const updateResult = await LaserScore.findOneAndUpdate({name}, {name, credit: creditInt}, {new: true, upsert: true});
-    return res.status(200).json({credit: updateResult});
-  } catch (e) {
-    return res.status(400).json({err: e});
-  }
-});
 
 const clientBuildPath = path.join(__dirname, '../../client/build');
 app.use(express.static(clientBuildPath));
@@ -166,6 +122,11 @@ wss.on('connection', (ws, req) => {
     broadcastMessage(`${MessageType.SCORE_UPDATE},${JSON.stringify(world.scores)}`);
     ws.on('close', () => {
       console.log(`${id}-${name} tank exits`);
+      const tankScore = world.scores[id];
+      if (tankScore && tankScore.s && tankScore.n) {
+        console.log(`saving bulletin ${tankScore.n}: ${tankScore.s}`);
+        updateOne(TankilaScore, {name: tankScore.n}, {name: tankScore.n, credit: tankScore.s});
+      }
       world.removeTank(id);
       broadcastMessage(`${MessageType.TANK_EXIT},["${id}"]`);
       broadcastMessage(`${MessageType.SCORE_UPDATE},${JSON.stringify(world.scores)}`);
