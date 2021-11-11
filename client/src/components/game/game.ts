@@ -15,7 +15,8 @@ import TankBase3 from '../tank/tankBase3';
 import Message from './message';
 import Chat from '../panels/chat';
 import Score from '../panels/score';
-import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
+import Bulletin from '../panels/bulletin';
+import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
 
 class Game {
   scene: THREE.Scene;
@@ -37,6 +38,7 @@ class Game {
   tankName: string = '';
   chat: Chat;
   score: Score;
+  bulletin: Bulletin;
   chatReady: boolean = false;
   moveStatus: MoveStatus = {
     keyW: '0',
@@ -57,6 +59,7 @@ class Game {
     this.messager = new Message(production, port);
     this.chat = new Chat();
     this.score = new Score();
+    this.bulletin = new Bulletin();
     const light = new THREE.AmbientLight()
     this.scene.add(light)
     this.camera = new THREE.PerspectiveCamera(
@@ -354,6 +357,10 @@ class Game {
           this.messager.sendMessage(MessageType.TANK_SHOOT);
         }
         this.moveStatus.keySpace = '0';
+        break;
+      }
+      case 'Escape': {
+        this.bulletin.toggleBulletin();
         break;
       }
     }
