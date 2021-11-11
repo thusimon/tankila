@@ -29,12 +29,11 @@ router.get('/api/lasercredit', async (req, res) => {
 
 router.get('/api/tankilabulletins', async (req, res) => {
   try {
-    console.log(32);
     const tankilaScores = await getAll(TankilaScore) || [];
-    console.log(34)
+    // TODO remove CORS in production
+    res.set('Access-Control-Allow-Origin', '*')
     return res.status(200).json(tankilaScores);
   } catch (e) {
-    console.log(e)
     return res.status(400).json({err: e})
   }
 });

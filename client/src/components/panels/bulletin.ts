@@ -6,10 +6,11 @@ class Bulletin {
   bulletinArea: HTMLDivElement;
   bulletinMain: HTMLDivElement;
   bulletinShow: boolean = false;
-  constructor() {
+  port: string;
+  constructor(port: string) {
+    this.port = port;
     const bulletinPanel = document.createElement('div');
     bulletinPanel.id = 'bulletin-panel';
-    bulletinPanel.style.display = 'none';
     this.bulletinPanel = bulletinPanel;
 
     const bulletinMain = document.createElement('div');
@@ -24,7 +25,7 @@ class Bulletin {
     bulletinArea.id = 'bulletin-area';
     this.bulletinArea = bulletinArea;
 
-    bulletinPanel.addEventListener('transitionend', this.transitionHandler.bind(this));
+    this.hidebulletin();
     bulletinMain.append(bulletinTitle, bulletinArea);
     bulletinPanel.append(bulletinMain);
     document.body.append(bulletinPanel);
@@ -37,19 +38,33 @@ class Bulletin {
   }
 
   showbulletin() {
-    this.bulletinPanel.style.display = 'block';
-    this.bulletinPanel.classList.add('bulletin-panel-show');
+    this.bulletinMain.classList.remove('bulletin-main-hide');
     this.bulletinMain.classList.add('bulletin-main-show');
   }
 
   hidebulletin() {
-    this.bulletinPanel.classList.remove('bulletin-panel-show');
-    this.bulletinMain.classList.remove('bulletin-main-show');
+    this.bulletinPanel.classList.remove('bulletin-main-show');
+    this.bulletinMain.classList.add('bulletin-main-hide');
   }
 
+  fetchBulletin() {
+    let url = `${window.location.protocol}//${window.location.hostname}`;
+    if (this.port) {
+      url += `:${this.port}`;
+    }
+    url += '/api/tankilabulletins';
+    return fetch(url, {
+      method: 'GET',
+      mode: 'cors'
+    }).then(response => response.json())
+    .then(bulletins => {
+      console.log(bulletins);
+    });
+  }
   toggleBulletin() {
     this.bulletinShow = !this.bulletinShow;
     if (this.bulletinShow) {
+      this.fetchBulletin();
       this.showbulletin();
     } else {
       this.hidebulletin();

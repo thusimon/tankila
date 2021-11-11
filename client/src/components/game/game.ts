@@ -59,7 +59,7 @@ class Game {
     this.messager = new Message(production, port);
     this.chat = new Chat();
     this.score = new Score();
-    this.bulletin = new Bulletin();
+    this.bulletin = new Bulletin(port);
     const light = new THREE.AmbientLight()
     this.scene.add(light)
     this.camera = new THREE.PerspectiveCamera(
