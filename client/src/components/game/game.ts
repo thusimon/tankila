@@ -166,7 +166,7 @@ class Game {
         const box = new THREE.Box3().setFromObject(fontMesh);
         const fontSizeVec = new THREE.Vector3();
         box.getSize(fontSizeVec);
-        fontMesh.geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(-fontSizeVec.x / 2, 1, 0.5));
+        fontMesh.geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(-fontSizeVec.x / 2, 1, 0));
         this.scene.add(fontMesh);
         resolve(fontMesh);
       })

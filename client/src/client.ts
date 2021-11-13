@@ -48,6 +48,24 @@ function getNameScaleOnDistance(myTankPos: THREE.Vector3, tankPos: THREE.Vector3
     return 1 + (dist - MinDistToScale)/15;
   }
 }
+
+function getNameDirection(myTankPos: THREE.Vector3, tankPos: THREE.Vector3, tankDir: number, isMyTank: boolean) {
+  if (isMyTank) {
+    return tankDir + Math.PI;
+  } else {
+    const posDiff = new THREE.Vector3().copy(myTankPos).sub(tankPos);
+    const posDiffLen = posDiff.length()
+    if (posDiffLen === 0) {
+      return 0;
+    } else {
+      if (posDiff.z <= 0) {
+        return Math.acos(posDiff.x / posDiffLen) + Math.PI / 2;
+      } else {
+        return Math.asin(posDiff.x / posDiffLen);
+      }
+    }
+  }
+}
 function updateAndTweenScene(deltaTime: number) {
   const tanks = game.tanks;
   const myTank = tanks[game.tankId];
@@ -64,17 +82,20 @@ function updateAndTweenScene(deltaTime: number) {
       .easing(TWEEN.Easing.Linear.None)
       .start();
 
-    const myTankNameRotation = tankId === game.tankId ? Math.PI : 0;
+    const tankNameYRotation = getNameDirection(myTank.curPos, tank.curPos, tank.curDir, tankId === game.tankId);
     let fontScale = 1;
+    const fontNamePos = new THREE.Vector3(tank.curPos.x, tank.curPos.y, tank.curPos.z);
     if (tank.tankId != game.tankId) {
       fontScale = getNameScaleOnDistance(myTank.model.position, model.position);
-      tankName.scale.set(fontScale, fontScale, fontScale);
+      fontNamePos.y = fontNamePos.y - fontScale + 1;
+    } else {
+      fontNamePos.addScaledVector(new THREE.Vector3(Math.sin(tank.curDir),0,Math.cos(tank.curDir)), -0.5)
     }
+    tankName.scale.set(fontScale, fontScale, fontScale);
     new TWEEN.Tween(tankName.rotation)
-      .to({y: tank.curDir + myTankNameRotation}, deltaTime)
+      .to({y: tankNameYRotation}, deltaTime)
       .easing(TWEEN.Easing.Linear.None)
       .start();
-    const fontNamePos = new THREE.Vector3(tank.curPos.x, tank.curPos.y - fontScale + 1, tank.curPos.z);
     new TWEEN.Tween(tankName.position)
       .to(fontNamePos, deltaTime)
       .easing(TWEEN.Easing.Linear.None)
