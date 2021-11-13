@@ -23,6 +23,33 @@
     }
     #bulletin-area {
       flex-grow: 1;
+      overflow: auto;
+      .bulletin-outer-container {
+        opacity: 0;
+        transition: opacity 1s;
+        .bulletin-container {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 1.5rem;
+          margin: 6px 0px;
+          .bulletin-name {
+            margin: 0px 15px;
+            font-weight: 600;
+            flex-basis: 10rem;
+          }
+          .bulletin-credit {
+            flex-basis: 5rem;
+          }
+          .bulletin-date {
+            font-style: italic;
+            margin: 0px 15px;
+          }
+        }
+      }
+      .bulletin-outer-container-show {
+        opacity: 1;
+      }
     }
   }
 }

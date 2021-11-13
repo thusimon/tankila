@@ -165,3 +165,9 @@ export enum MessageType {
   CHAT_RECEIVE = '09',
   SCORE_UPDATE = '10',
 };
+
+export interface BulletinType {
+  updatedAt: string;
+  name: string;
+  credit: number;
+};
