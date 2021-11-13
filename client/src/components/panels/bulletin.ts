@@ -11,10 +11,13 @@ class Bulletin {
     this.port = port;
     const bulletinPanel = document.createElement('div');
     bulletinPanel.id = 'bulletin-panel';
+    bulletinPanel.style.display = 'none';
     this.bulletinPanel = bulletinPanel;
 
     const bulletinMain = document.createElement('div');
     bulletinMain.id = 'bulletin-main';
+    bulletinMain.classList.add('bulletin-main-hide');
+    bulletinMain.addEventListener('transitionend', this.transitionHandler.bind(this));
     this.bulletinMain = bulletinMain;
 
     const bulletinTitle = document.createElement('div');
@@ -38,12 +41,13 @@ class Bulletin {
   }
 
   showbulletin() {
+    this.bulletinPanel.style.display = 'block';
     this.bulletinMain.classList.remove('bulletin-main-hide');
     this.bulletinMain.classList.add('bulletin-main-show');
   }
 
   hidebulletin() {
-    this.bulletinPanel.classList.remove('bulletin-main-show');
+    this.bulletinMain.classList.remove('bulletin-main-show');
     this.bulletinMain.classList.add('bulletin-main-hide');
   }
 
