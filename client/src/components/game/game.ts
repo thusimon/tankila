@@ -17,6 +17,7 @@ import Chat from '../panels/chat';
 import Score from '../panels/score';
 import Bulletin from '../panels/bulletin';
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
+import Sounds from './sounds';
 
 class Game {
   scene: THREE.Scene;
@@ -40,6 +41,7 @@ class Game {
   score: Score;
   bulletin: Bulletin;
   chatReady: boolean = false;
+  sounds: Sounds;
   moveStatus: MoveStatus = {
     keyW: '0',
     keyS: '0',
@@ -74,6 +76,7 @@ class Game {
     this.arena = new Arena(this.scene);
     this.width = this.renderer.domElement.width;
     this.height = this.renderer.domElement.height;
+    this.sounds = new Sounds();
     this.registerUserInteraction.bind(this);
     this.messageHandler.bind(this);
     this.connectToServer.bind(this);
@@ -104,6 +107,15 @@ class Game {
 
   messageHandler(type:string, data: any) {
     switch (type) {
+      case MessageType.TANK_JOINED: {
+        const tankJoinedData = data as string[];
+        const tankId = tankJoinedData[0]
+        if (tankId !== this.tankId) {
+          // play a welcome audio
+          this.sounds.playWelcome();
+        }
+        break;
+      }
       case MessageType.TANK_POS: {
         const tankPositionData = data as TankPositions;
         this.updateTankPosition(tankPositionData);
@@ -112,7 +124,7 @@ class Game {
         break;
       }
       case MessageType.TANK_EXIT: {
-        const exitData = data as Array<string>;
+        const exitData = data as string[];
         const exitTankId = exitData[0];
         this.removeTank(exitTankId);
         break;
@@ -285,6 +297,7 @@ class Game {
     }
     switch (event.code) {
       case 'KeyW': {
+        this.sounds.playEngineRun();
         if (this.moveStatus.keyW != '1') {
           this.messager.sendMessage(`${MessageType.TANK_MOVE_FORWARD},1`);
         }
@@ -292,6 +305,7 @@ class Game {
         break
       }
       case 'KeyA': {
+        this.sounds.playEngineRun();
         if (this.moveStatus.keyA != '1') {
           this.messager.sendMessage(`${MessageType.TANK_ROTATE_LEFT},1`);
         }
@@ -299,6 +313,7 @@ class Game {
         break
       }
       case 'KeyS': {
+        this.sounds.playEngineRun();
         if (this.moveStatus.keyS != '1') {
           this.messager.sendMessage(`${MessageType.TANK_MOVE_BACKWARD},1`);
         }
@@ -306,6 +321,7 @@ class Game {
         break;
       }
       case 'KeyD': {
+        this.sounds.playEngineRun();
         if (this.moveStatus.keyD != '1') {
           this.messager.sendMessage(`${MessageType.TANK_ROTATE_RIGHT},1`);
         }
@@ -353,6 +369,7 @@ class Game {
         break
       }
       case 'Space': {
+        this.sounds.playTankShoot();
         if (this.moveStatus.keySpace != '0') {
           this.messager.sendMessage(MessageType.TANK_SHOOT);
         }
@@ -363,6 +380,10 @@ class Game {
         this.bulletin.toggleBulletin();
         break;
       }
+    }
+    if (this.moveStatus.keyW == '0' && this.moveStatus.keyA == '0'
+      && this.moveStatus.keyS == '0' && this.moveStatus.keyD == '0') {
+        this.sounds.stopEngineRun();
     }
   }
 

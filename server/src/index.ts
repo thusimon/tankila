@@ -120,6 +120,7 @@ wss.on('connection', (ws, req) => {
     world.addTank(id, name);
     broadcastMessage(`${MessageType.CHAT_RECEIVE},["System","${name} entered the arena!"]`);
     broadcastMessage(`${MessageType.SCORE_UPDATE},${JSON.stringify(world.scores)}`);
+    broadcastMessage(`${MessageType.TANK_JOINED},["${id}"]`);
     ws.on('close', () => {
       console.log(`${id}-${name} tank exits`);
       const tankScore = world.scores[id];

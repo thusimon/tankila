@@ -45,7 +45,7 @@ function getNameScaleOnDistance(myTankPos: THREE.Vector3, tankPos: THREE.Vector3
   if (dist < MinDistToScale) {
     return 1;
   } else {
-    return 1 + (dist - MinDistToScale)/15;
+    return 1 + (dist - MinDistToScale)/12;
   }
 }
 
@@ -87,7 +87,7 @@ function updateAndTweenScene(deltaTime: number) {
     const fontNamePos = new THREE.Vector3(tank.curPos.x, tank.curPos.y, tank.curPos.z);
     if (tank.tankId != game.tankId) {
       fontScale = getNameScaleOnDistance(myTank.model.position, model.position);
-      fontNamePos.y = fontNamePos.y - fontScale + 1;
+      fontNamePos.y = fontNamePos.y - fontScale + 1.1;
     } else {
       fontNamePos.addScaledVector(new THREE.Vector3(Math.sin(tank.curDir),0,Math.cos(tank.curDir)), -0.5)
     }

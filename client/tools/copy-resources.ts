@@ -5,6 +5,7 @@ const staticResources = [
   'models',
   'textures',
   'fonts',
+  'sounds',
   'favicon.ico'
 ]
 

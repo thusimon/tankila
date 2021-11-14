@@ -154,16 +154,17 @@ export interface MessageListener {
 
 export enum MessageType {
   TANK_START = '00',
-  TANK_POS = '01',
-  TANK_EXIT = '02',
-  TANK_MOVE_FORWARD = '03',
-  TANK_MOVE_BACKWARD = '04',
-  TANK_ROTATE_LEFT = '05',
-  TANK_ROTATE_RIGHT = '06',
-  TANK_SHOOT = '07',
-  CHAT_SEND = '08',
-  CHAT_RECEIVE = '09',
-  SCORE_UPDATE = '10',
+  TANK_JOINED = '01',
+  TANK_POS = '02',
+  TANK_EXIT = '03',
+  TANK_MOVE_FORWARD = '04',
+  TANK_MOVE_BACKWARD = '05',
+  TANK_ROTATE_LEFT = '06',
+  TANK_ROTATE_RIGHT = '07',
+  TANK_SHOOT = '08',
+  CHAT_SEND = '09',
+  CHAT_RECEIVE = '10',
+  SCORE_UPDATE = '11',
 };
 
 export interface BulletinType {
