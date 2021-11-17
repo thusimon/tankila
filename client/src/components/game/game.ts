@@ -15,7 +15,7 @@ import TankBase3 from '../tank/tankBase3';
 import Message from './message';
 import Chat from '../panels/chat';
 import Score from '../panels/score';
-import Bulletin from '../panels/bulletin';
+import Settings from '../panels/settings';
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
 import Sounds from './sounds';
 
@@ -39,7 +39,7 @@ class Game {
   tankName: string = '';
   chat: Chat;
   score: Score;
-  bulletin: Bulletin;
+  settings: Settings;
   chatReady: boolean = false;
   sounds: Sounds;
   moveStatus: MoveStatus = {
@@ -59,7 +59,8 @@ class Game {
     this.production = production;
     this.port = port;
     this.messager = new Message(production, port);
-    this.bulletin = new Bulletin(port);
+    this.sounds = new Sounds();
+    this.settings = new Settings(port, this.sounds);
     this.chat = new Chat();
     this.score = new Score();
     const light = new THREE.AmbientLight()
@@ -76,7 +77,6 @@ class Game {
     this.arena = new Arena(this.scene);
     this.width = this.renderer.domElement.width;
     this.height = this.renderer.domElement.height;
-    this.sounds = new Sounds();
     this.registerUserInteraction.bind(this);
     this.messageHandler.bind(this);
     this.connectToServer.bind(this);
@@ -377,7 +377,7 @@ class Game {
         break;
       }
       case 'Escape': {
-        this.bulletin.toggleBulletin();
+        this.settings.toggleSetting();
         break;
       }
     }
@@ -412,6 +412,9 @@ class Game {
   }
 
   onDocumentMouseMove(event: MouseEvent) {
+    if (this.settings.settingShown) {
+      return;
+    }
     const {x, y} = event;
     this.cameraRotationXZOffset = (x / this.width - 0.5) * Math.PI / 2;
     this.cameraRotationYOffset = (y / this.height - 0.5) * Math.PI / 2;

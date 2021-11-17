@@ -16,11 +16,13 @@ class Sounds {
   adjustVolumn(newVolumn: number) {
     this.volumn = newVolumn;
     this.welcome.volume = newVolumn;
-    this.engineRun.volume = newVolumn * 1.5;
+    this.engineRun.volume = newVolumn * 1.5 < 1 ? newVolumn * 1.5 : 1;
     this.tankShoot.volume = newVolumn;
   }
 
   playWelcome() {
+    this.welcome.pause();
+    this.welcome.currentTime = 0;
     this.welcome.play();
   }
 

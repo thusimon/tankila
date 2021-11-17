@@ -1,0 +1,51 @@
+#settings-panel {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  #settings-main {
+    position: relative;
+    top: 30vh;
+    height: 40vh;
+    left: 20vw;
+    width: 60vw;
+    transition: opacity 0.25s ease-out;
+    #settings-title {
+      height: 10%;
+      background-color: rgba(150, 150, 150, 0.9);
+      font-size: 2rem;
+      font-weight: 600;
+      padding: 10px;
+    }
+    #settings-options-container {
+      height: 90%;
+      display: flex;
+      background-color: rgba(200, 200, 200, 0.7);
+      transition: opacity 0.25s ease-out;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      font-size: 1.5rem;
+      .sub-settings-container {
+        #audio-volumn-label {
+          display: block;
+        }
+        #audio-volumn {
+          cursor: pointer;
+          width: 100%;
+        }
+        .setting-button {
+          font-size: 1.5rem;
+        }
+      }
+    }
+  }
+}
+
+.settings-main-show {
+  opacity: 1;
+}
+.settings-main-hide {
+  opacity: 0;
+}

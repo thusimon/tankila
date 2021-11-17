@@ -56,7 +56,7 @@ class Bulletin {
       this.bulletinArea.removeChild(this.bulletinArea.firstChild);
     }
     let url = `${window.location.protocol}//${window.location.hostname}`;
-    if (this.port) {
+    if (window.location.protocol === 'http:' && this.port) {
       url += `:${this.port}`;
     }
     url += '/api/tankilabulletins';

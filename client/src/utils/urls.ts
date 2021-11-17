@@ -8,7 +8,8 @@ export const getWebSockedDomain = (production: string, port: string): string => 
     wsUri = 'wss:';
   }
   wsUri += '//' + loc.hostname;
-  if (port) {
+  // Chrome enforce that if use wss, you must use port 443, so assigning other port will fail
+  if (loc.protocol === 'http:' && port) {
     wsUri += `:${port}`;
   }
   return wsUri;
