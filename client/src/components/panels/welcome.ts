@@ -72,7 +72,7 @@ class Welcome {
     keyEsc.classList.add('keyboard-cell');
     keyEsc.classList.add('right-cell');
     const keyEscContent = instructionContent[3];
-    keyEscContent.textContent = 'Esc: Bulletin';
+    keyEscContent.textContent = 'Esc: Settings';
 
     instructionContainer.append(...instructionCells);
     

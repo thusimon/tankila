@@ -11,15 +11,24 @@
     left: 20vw;
     width: 60vw;
     display: flex;
-    background-color: rgba(200, 200, 200, 0.7);
+    background-color: rgba(200, 200, 200, 1);
     transition: opacity 0.25s ease-out;
     flex-direction: column;
-    #bulletin-title {
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 600;
-      padding: 10px;
-      flex-grow: 0;
+    #bulletin-header {
+      display: flex;
+      align-content: center;
+      justify-content: space-between;
+      background-color: rgb(239, 239, 239);
+      #bulletin-title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 600;
+        padding: 10px;
+        flex-grow: 1;
+      }
+      #bulletin-close {
+        font-size: 2rem;
+      }
     }
     #bulletin-area {
       flex-grow: 1;

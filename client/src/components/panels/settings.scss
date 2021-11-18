@@ -8,15 +8,23 @@
     position: relative;
     top: 30vh;
     height: 40vh;
-    left: 20vw;
-    width: 60vw;
+    left: 38vw;
+    width: 24vw;
     transition: opacity 0.25s ease-out;
-    #settings-title {
-      height: 10%;
-      background-color: rgba(150, 150, 150, 0.9);
-      font-size: 2rem;
-      font-weight: 600;
-      padding: 10px;
+    #settings-header {
+      display: flex;
+      align-content: center;
+      justify-content: space-between;
+      background-color: rgb(239, 239, 239);
+      #settings-title {
+        height: 10%;
+        font-size: 2rem;
+        font-weight: 600;
+        padding: 10px;
+      }
+      #settings-close {
+        font-size: 2rem;
+      }
     }
     #settings-options-container {
       height: 90%;

@@ -20,16 +20,26 @@ class Bulletin {
     bulletinMain.addEventListener('transitionend', this.transitionHandler.bind(this));
     this.bulletinMain = bulletinMain;
 
+    const bulletinHeader = document.createElement('div');
+    bulletinHeader.id = 'bulletin-header';
+
     const bulletinTitle = document.createElement('div');
     bulletinTitle.id = 'bulletin-title';
     bulletinTitle.textContent = 'Hero Bulletin';
+
+    const bulletinClose = document.createElement('button');
+    bulletinClose.id = 'bulletin-close';
+    bulletinClose.textContent = '✖';
+    bulletinClose.addEventListener('click', () => this.hidebulletin(true));
+
+    bulletinHeader.append(bulletinTitle, bulletinClose);
 
     const bulletinArea = document.createElement('div');
     bulletinArea.id = 'bulletin-area';
     this.bulletinArea = bulletinArea;
 
-    this.hidebulletin();
-    bulletinMain.append(bulletinTitle, bulletinArea);
+    this.hidebulletin(true);
+    bulletinMain.append(bulletinHeader, bulletinArea);
     bulletinPanel.append(bulletinMain);
     document.body.append(bulletinPanel);
   }
@@ -46,7 +56,10 @@ class Bulletin {
     this.bulletinMain.classList.add('bulletin-main-show');
   }
 
-  hidebulletin() {
+  hidebulletin(enforce: boolean) {
+    if (enforce == true) {
+      this.bulletinShow = false;
+    }
     this.bulletinMain.classList.remove('bulletin-main-show');
     this.bulletinMain.classList.add('bulletin-main-hide');
   }
@@ -105,7 +118,7 @@ class Bulletin {
       this.fetchBulletin();
       this.showbulletin();
     } else {
-      this.hidebulletin();
+      this.hidebulletin(false);
     }
   }
 }

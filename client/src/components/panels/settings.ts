@@ -23,9 +23,19 @@ class Settings {
     settingsMain.addEventListener('transitionend', this.transitionHandler.bind(this));
     this.settingsMain = settingsMain;
 
+    const settingsHeader = document.createElement('div');
+    settingsHeader.id = 'settings-header';
+
     const settingsTitle = document.createElement('div');
     settingsTitle.id = 'settings-title';
     settingsTitle.textContent = 'Settings';
+
+    const settingsClose = document.createElement('button');
+    settingsClose.id = 'settings-close';
+    settingsClose.textContent = '✖';
+    settingsClose.addEventListener('click', () => this.hideSetting(true));
+
+    settingsHeader.append(settingsTitle, settingsClose);
 
     const settingsOptionsContainer = document.createElement('div');
     settingsOptionsContainer.id = 'settings-options-container';
@@ -54,16 +64,17 @@ class Settings {
     const bulletinButton = document.createElement('button');
     bulletinButton.className = 'setting-button';
     bulletinButton.textContent = 'Bulletin';
+    bulletinButton.addEventListener('click', this.showBulletin.bind(this));
     bulletinContainer.append(bulletinButton);
 
-    this.hideSetting();
+    this.hideSetting(true);
     settingsOptionsContainer.append(audioSettingContainer, bulletinContainer);
-    settingsMain.append(settingsTitle, settingsOptionsContainer);
+    settingsMain.append(settingsHeader, settingsOptionsContainer);
     settingsPanel.append(settingsMain);
 
-    this.bulletin = new Bulletin(port);
-
     document.body.append(settingsPanel);
+
+    this.bulletin = new Bulletin(port);
   }
 
   transitionHandler() {
@@ -86,7 +97,10 @@ class Settings {
     this.settingsMain.classList.add('settings-main-show');
   }
 
-  hideSetting() {
+  hideSetting(enforce: boolean) {
+    if (enforce) {
+      this.settingShown = false;
+    }
     this.settingsMain.classList.remove('settings-main-show');
     this.settingsMain.classList.add('settings-main-hide');
   }
@@ -96,8 +110,12 @@ class Settings {
     if (this.settingShown) {
       this.showSetting();
     } else {
-      this.hideSetting();
+      this.hideSetting(false);
     }
+  }
+
+  showBulletin() {
+    this.bulletin.toggleBulletin();
   }
 }
 
