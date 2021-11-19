@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
-import {BulletsType} from './types/Types'
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 import Game from './components/game/game';
 import Welcome from './components/panels/welcome';
@@ -16,15 +15,6 @@ document.body.appendChild(renderer.domElement)
 const game = new Game(renderer, PRODUCTION, PORT);
 
 const welcome = new Welcome(game);
-
-const updateBullets = (bullets: BulletsType) => {
-  for (const tank in bullets) {
-    const tankBullets = bullets[tank];
-    tankBullets.forEach(bullet => {
-      //bullet.updateSphere();
-    })
-  }
-}
 
 const stats = Stats()
 document.body.appendChild(stats.dom)
@@ -45,7 +35,7 @@ function getNameScaleOnDistance(myTankPos: THREE.Vector3, tankPos: THREE.Vector3
   if (dist < MinDistToScale) {
     return 1;
   } else {
-    return 1 + (dist - MinDistToScale)/12;
+    return 1 + (dist - MinDistToScale) / 12;
   }
 }
 
@@ -66,6 +56,7 @@ function getNameDirection(myTankPos: THREE.Vector3, tankPos: THREE.Vector3, tank
     }
   }
 }
+
 function updateAndTweenScene(deltaTime: number) {
   const tanks = game.tanks;
   const myTank = tanks[game.tankId];
@@ -88,16 +79,17 @@ function updateAndTweenScene(deltaTime: number) {
     if (tank.tankId != game.tankId) {
       fontScale = getNameScaleOnDistance(myTank.model.position, model.position);
       fontNamePos.y = fontNamePos.y - fontScale + 1.1;
+      tankName.position.copy(fontNamePos);
     } else {
-      fontNamePos.addScaledVector(new THREE.Vector3(Math.sin(tank.curDir),0,Math.cos(tank.curDir)), -0.5)
+      fontNamePos.addScaledVector(new THREE.Vector3(Math.sin(tank.curDir),0,Math.cos(tank.curDir)), -0.5);
+      new TWEEN.Tween(tankName.position)
+      .to(fontNamePos, deltaTime)
+      .easing(TWEEN.Easing.Linear.None)
+      .start();
     }
     tankName.scale.set(fontScale, fontScale, fontScale);
     new TWEEN.Tween(tankName.rotation)
       .to({y: tankNameYRotation}, deltaTime)
-      .easing(TWEEN.Easing.Linear.None)
-      .start();
-    new TWEEN.Tween(tankName.position)
-      .to(fontNamePos, deltaTime)
       .easing(TWEEN.Easing.Linear.None)
       .start();
   }

@@ -11,7 +11,7 @@ class World {
   arena: Arena;
   tanks: {[key: string]: Tank} = {};
   bullets: {[key: string]: Bullet[]} = {};
-  scores: {[key: string]: {n: string, s: number}} = {};
+  scores: {[key: string]: {n: string, s: number, h: number}} = {};
   bulletsToRemove: {[key: string]: Bullet[]} = {};
   messager: (msg: string) => void;
   constructor(messager: (msg: string) => void) {
@@ -33,7 +33,7 @@ class World {
     this.tanks[id] = tank;
     this.bullets[id] = [];
     this.bulletsToRemove[id] = [];
-    this.scores[id] = {n: name, s: 0};
+    this.scores[id] = {n: name, s: 0, h: 0};
     this.world.addBody(tank.body);
   }
 
@@ -84,12 +84,14 @@ class World {
     this.bullets[tankId].push(bullet);
   }
 
-  bulletExplode(tankId: string, bullet: Bullet, collisonTo: string) {
+  bulletExplode(tankId: string, bullet: Bullet, collisionTo: string) {
     this.bulletsToRemove[tankId].push(bullet);
     const tanksBullet = this.bullets[tankId];
     this.bullets[tankId] = tanksBullet.filter(blt => blt != bullet);
-    if (this.scores[tankId] && collisonTo && collisonTo.startsWith('tank_')) {
+    if (this.scores[tankId] && collisionTo && collisionTo.startsWith('tank_')) {
+      const hitTankId = collisionTo.split('_')[1];
       this.scores[tankId].s += 1;
+      this.scores[hitTankId].h += 1;
     }
     this.messager(`${MessageType.SCORE_UPDATE},${JSON.stringify(this.scores)}`);
   }

@@ -1,22 +1,14 @@
 import * as THREE from 'three';
-import * as CANNON from 'cannon-es';
-import {GRAVITY, BULLET_SPEED} from '../../utils/constants';
 import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {updateMoveStatus} from '../../../../server/src/utils/tankStatus';
-import { PerspectiveCamera, Scene, WebGLRenderer, Clock, Vector3, DirectionalLight, AmbientLight, Color, MathUtils, FontLoader } from 'three';
-import { DebugInfo, GameConfig, TankData3, TankStatus3, BulletsType, MessageType, Tanks, TankPosition, TankPositions, MoveStatus, PositionQueue, ScoresData } from '../../types/Types';
-// import Debug from '../info/debug';
+import { BulletsType, MessageType, Tanks, TankPositions, MoveStatus, ScoresData } from '../../types/Types';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
 import Explosion from '../bullet/explosion';
-import TankMe3 from '../tank/tankMe3';
-import TankBase3 from '../tank/tankBase3';
 import Message from './message';
 import Chat from '../panels/chat';
 import Score from '../panels/score';
 import Settings from '../panels/settings';
-import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
 import Sounds from './sounds';
 
 class Game {
@@ -138,6 +130,7 @@ class Game {
       case MessageType.SCORE_UPDATE: {
         const scores = data as ScoresData;
         this.score.updateScore(scores);
+        this.updateTankHits(scores);
         break;
       }
       default: {
@@ -200,6 +193,19 @@ class Game {
 
   getMyTank() {
     return this.tanks[this.tankId];
+  }
+
+  updateTankHits(scoreData: ScoresData) {
+    for(let id in scoreData) {
+      const tank = this.tanks[id];
+      if (tank) {
+        tank.hits = scoreData[id].h;
+        // update tank name mesh material
+        const materials = tank.tankNameMesh.material as THREE.MeshBasicMaterial[];
+        const capHit = tank.hits > 100 ? 100 : tank.hits;
+        materials[0].color = new THREE.Color(capHit / 100, (100 - capHit) / 100, 0);
+      }
+    }
   }
 
   registerUserInteraction() {
@@ -412,7 +418,7 @@ class Game {
   }
 
   onDocumentMouseMove(event: MouseEvent) {
-    if (this.settings.settingShown) {
+    if (this.settings.settingShown || this.settings.bulletin.bulletinShow) {
       return;
     }
     const {x, y} = event;

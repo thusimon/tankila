@@ -79,7 +79,8 @@ export interface Tanks {
 export interface ScoresData {
   [key: string]: {
     n: string,
-    s: number
+    s: number,
+    h: number,
   }
 }
 

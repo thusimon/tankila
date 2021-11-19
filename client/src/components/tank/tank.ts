@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MoveStatus, PositionQueue } from '../../types/Types';
+import { MoveStatus } from '../../types/Types';
 
 class Tank {
   model: THREE.Object3D;
@@ -10,6 +10,7 @@ class Tank {
   ready: boolean = false;
   curPos: THREE.Vector3 = new THREE.Vector3(0,0,0);
   curDir: number = 0;
+  hits: number = 0;
   constructor(tankModel: THREE.Object3D, tankId: string, tankName: string) {
     this.model = tankModel;
     this.moveStatus = {
