@@ -3,7 +3,7 @@ import Bullet from '../components/bullet/bullet';
 import Tank from '../components/tank/tank';
 
 export interface BulletsType {
-  [key:string]: Bullet[]
+  [key:string]: {[key:string]: Bullet}
 }
 
 export interface UserBody extends CANNON.Body {
@@ -24,6 +24,7 @@ export interface BulletPosition {
   x: number,
   y: number,
   z: number,
+  i: number,
 }
 
 export interface PositionQueue {

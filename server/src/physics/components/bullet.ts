@@ -5,12 +5,13 @@ import { BULLET_SPEED } from '../../../../client/src/utils/constants';
 class Bullet {
   world: CANNON.World;
   body: CANNON.Body;
-  removeFlag: boolean = false;
   tankId: string;
+  id: number = 0;
   bulletExplodeCallback: (id:string, bullet: Bullet, collisionTo: string) => void
-  constructor(world: CANNON.World, tank: Tank, bulletExplodeCb: (id: string, bullet: Bullet, collisionTo: string) => void) {
+  constructor(world: CANNON.World, tank: Tank, id: number, bulletExplodeCb: (id: string, bullet: Bullet, collisionTo: string) => void) {
     this.world = world;
     this.tankId = tank.tankId;
+    this.id = id;
     this.bulletExplodeCallback = bulletExplodeCb;
     const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
     slipperyMaterial.friction = 0.15

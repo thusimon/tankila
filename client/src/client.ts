@@ -93,7 +93,21 @@ function updateAndTweenScene(deltaTime: number) {
       .easing(TWEEN.Easing.Linear.None)
       .start();
   }
+
+  const bullets = game.bullets;
+  for (const tankId in bullets) {
+    const tankBullets = bullets[tankId];
+    for (const bulletId in tankBullets) {
+      const tankBullet = tankBullets[bulletId];
+      new TWEEN.Tween(tankBullet.model.position)
+        .to(tankBullet.position, deltaTime)
+        .easing(TWEEN.Easing.Linear.None)
+        .start();
+    }
+  }
+
   game.updateCamera();
+
   game.explosions.forEach(explosion => {
     explosion.update();
   });

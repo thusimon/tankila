@@ -80,8 +80,9 @@ class World {
       // no tank found, bail
       return;
     }
-    const bullet = new Bullet(this.world, tank, this.bulletExplode.bind(this));
-    this.bullets[tankId].push(bullet);
+    const tankBullets = this.bullets[tankId];
+    const bullet = new Bullet(this.world, tank, tankBullets.length, this.bulletExplode.bind(this));
+    tankBullets.push(bullet);
   }
 
   bulletExplode(tankId: string, bullet: Bullet, collisionTo: string) {

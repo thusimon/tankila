@@ -151,7 +151,7 @@ class Game {
         tank.ready = true;
         this.scene.add(tank.model);
         if (!this.bullets[tankId]) {
-          this.bullets[tankId] = [];
+          this.bullets[tankId] = {};
         }
         this.tanks[tankId] = tank;
         resolve(tank);
@@ -248,21 +248,28 @@ class Game {
   }
 
   updateBullets(tankData: TankPositions) {
-    // remove all the existing bullets
-    for(const tankId in this.bullets) {
-      const tankBullets = this.bullets[tankId];
+    for (const tankId in tankData) {
+      const tankBullets = tankData[tankId].b;
+      const tankBulletsId = tankBullets.map(tb => tb.i);
+      const tankBulletsInScene = this.bullets[tankId] || {};
       tankBullets.forEach(blt => {
-        blt.removeBullet();
+        const bulletInScene = tankBulletsInScene[blt.i];
+        if (bulletInScene) {
+          // bullet still in scene update position
+          bulletInScene.updatePosition(blt.x, blt.y, blt.z);
+        } else {
+          // bullet not in scene, create a new bullet
+          const newTankBullet = new Bullet(this.scene, blt.x, blt.y, blt.z, blt.i);
+          tankBulletsInScene[blt.i] = newTankBullet;
+          newTankBullet.addBullet();
+        }
       });
-    }
-    for(const tankId in tankData) {
-      const tankBulletsData = tankData[tankId].b;
-      const tankBullets = tankBulletsData.map(data => {
-        const blt = new Bullet(this.scene, data.x, data.y, data.z);
-        blt.addBullet();
-        return blt;
-      });
-      this.bullets[tankId] = tankBullets;
+      for(const bltIdx in tankBulletsInScene) {
+        if (!tankBulletsId.includes(tankBulletsInScene[bltIdx].id)) {
+          tankBulletsInScene[bltIdx].removeBullet();
+          delete tankBulletsInScene[bltIdx];
+        }
+      }
     }
   }
 

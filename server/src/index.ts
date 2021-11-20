@@ -105,7 +105,8 @@ const extractTanksMessage = () => {
     const tankBulletsMessage = tankBullets.map(blt => ({
       x: blt.body.position.x,
       y: blt.body.position.y,
-      z: blt.body.position.z
+      z: blt.body.position.z,
+      i: blt.id
     }));
     const tankBulletsToRemoveMessage = tankBulletsToRmove.map(blt => {
       // remove bullet from world
@@ -113,8 +114,9 @@ const extractTanksMessage = () => {
       return {
         x: blt.body.position.x,
         y: blt.body.position.y,
-        z: blt.body.position.z
-      }
+        z: blt.body.position.z,
+        i: blt.id
+      };
     });
     const euler = new CANNON.Vec3();
     tank.body.quaternion.toEuler(euler);
