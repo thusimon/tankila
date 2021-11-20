@@ -3,9 +3,7 @@ import path from 'path';
 import express from 'express';
 import WebSocket from 'ws';
 import mongoose from 'mongoose';
-import {Euler, Vector3} from 'three';
-import Bullet3 from './Bullet3';
-import { BulletData, MessageType, MoveStatus } from '../../client/src/types/Types';
+import { MessageType, MoveStatus } from '../../client/src/types/Types';
 import * as CANNON from 'cannon-es'
 import {getQueryFromUrl} from './utils/url'
 import World from './physics/world';
@@ -19,54 +17,8 @@ dotenv.config({
 
 const CONNECTION_URI = process.env.MONGODB_URI!;
 
-/* ------interface------- */
-// enum MessageType {
-//   pos='pos',
-//   fwd='fwd',
-//   bwd='bwd',
-//   rl='rl',
-//   rr='rr',
-//   blt='blt',
-//   hit='hit',
-//   ext='ext',
-//   //Engine version
-//   st3='st3', // start
-//   bon='bon', // boundary
-//   stup='stup', // setup speed
-//   dir='dir', // move forward, backward or stop
-//   rot='rot', // rotate left, right or stop
-//   blt3='blt3',
-//   pos3='pos3', // send all tank position
-//   scor='scor',
-//   hit3='hit3',
-// }
-
-interface Position {
-  x: number,
-  y: number,
-  r: number
-}
-
 interface TankData {
   [key: string]: string
-}
-
-interface Command {
-  cmd: string,
-  stmp: number
-}
-
-interface TankData3 {
-  stmp: number;
-  scor: number;
-}
-
-interface TanksData3 {
-  [key: string]: TankData3
-}
-
-interface ScoreData {
-  [key: string]: number
 }
 
 /* ------db------ */
@@ -140,7 +92,6 @@ wss.on('connection', (ws, req) => {
 });
 
 const tanks: TankData = {};
-const tanks3: TanksData3 = {};
 
 const extractTanksMessage = () => {
   const tanks = world.tanks;
@@ -190,18 +141,6 @@ setInterval(() => {
   const tanksMessage = extractTanksMessage();
   broadcastMessage(`${MessageType.TANK_POS},${JSON.stringify(tanksMessage)}`);
 }, updateRate);
-
-const handleTankCommand = (id: string, commandType: string, command: string) => {
-  broadcastMessage(`${commandType},${id},${command}`);
-}
-
-const handleTanksPosition = (id: string, x: string, y: string, r: string) => {
-  tanks[id] = `${x},${y},${r}`;
-}
-
-// const handleBulletPosition = (id: string, x: string, y: string, r: string) => {
-//   broadcastMessage(`${MessageType.blt},${id},${x},${y},${r}`);
-// }
 
 const handleMessage = (id: string, message: string): void => {
   const messageType = message.substring(0, 2);

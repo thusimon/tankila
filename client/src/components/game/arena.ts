@@ -1,6 +1,4 @@
-import * as THREE from 'three'
-import * as CANNON from 'cannon-es'
-import {UserBody} from '../../types/Types'
+import * as THREE from 'three';
 
 class Arena {
   constructor(scene: THREE.Scene) {

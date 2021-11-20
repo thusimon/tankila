@@ -1,5 +1,5 @@
 import Game from '../game/game';
-import {uuidv4} from '../../utils/urls';
+import { uuidv4 } from '../../utils/urls';
 import './welcome.scss';
 
 class Welcome {

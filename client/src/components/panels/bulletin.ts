@@ -1,4 +1,4 @@
-import { BulletinType, ScoresData } from "../../types/Types";
+import { BulletinType } from "../../types/Types";
 import './bulletin.scss';
 
 class Bulletin {
