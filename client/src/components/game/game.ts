@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import { BulletsType, MessageType, Tanks, TankPositions, MoveStatus, ScoresData } from '../../types/Types';
+import { BulletsType, MessageType, Tanks, TankPositions, MoveStatus, ScoresData, RewardType } from '../../types/Types';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
 import Explosion from '../bullet/explosion';
@@ -131,6 +131,13 @@ class Game {
         const scores = data as ScoresData;
         this.score.updateScore(scores);
         this.updateTankHits(scores);
+        break;
+      }
+      case MessageType.REWARD_ADD: {
+        const reward = data as Array<any>;
+        const rewardType = reward[0] as RewardType;
+        const positon = new THREE.Vector3(data[1], data[2], data[3]);
+        console.log(`reward added type=${rewardType}, at ${data[1]} ${data[2]} ${data[3]}`);
         break;
       }
       default: {

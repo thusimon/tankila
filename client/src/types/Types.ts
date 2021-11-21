@@ -77,10 +77,20 @@ export enum MessageType {
   CHAT_SEND = '09',
   CHAT_RECEIVE = '10',
   SCORE_UPDATE = '11',
+  REWARD_ADD = '12',
+  REWARD_HIT = '13',
 };
 
 export interface BulletinType {
   updatedAt: string;
   name: string;
   credit: number;
+};
+
+export enum RewardType {
+  TANK_SWIFT,
+  TANK_SAMLL,
+  TANK_INVULNERABLE,
+  BULLTET_LARGE,
+  BULLET_POWER,
 };

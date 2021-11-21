@@ -138,6 +138,7 @@ const extractTanksMessage = () => {
 const updateRate = 1000 / 100;
 const worldStep = updateRate / 1000;
 setInterval(() => {
+  world.addRewards();
   world.updateTanksPosition();
   world.world.step(worldStep);
   const tanksMessage = extractTanksMessage();

@@ -42,26 +42,6 @@ class Bullet {
       this.bulletExplodeCallback(this.tankId, this, collisionTo);
     })
   }
-
-  // removeBullet() {
-  //   this.world.removeBody(this.bulletBody);
-  //   this.scene.remove(this.bulletSphere);
-  //   this.removeFlag = true;
-  // }
-
-  // bulletExplode() {
-  //   const explosion = new Explosion(new THREE.Color(0xffff00), this.scene);
-  //   this.explosions.push(explosion);
-  //   explosion.explode(new THREE.Vector3(this.bulletBody.position.x, this.bulletBody.position.y, this.bulletBody.position.z));
-  // }
-
-  // updateSphere() {
-  //   this.bulletSphere.position.set(
-  //     this.bulletBody.position.x,
-  //     this.bulletBody.position.y,
-  //     this.bulletBody.position.z
-  //   );
-  // }
 }
 
 export default Bullet;

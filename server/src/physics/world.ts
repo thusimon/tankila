@@ -2,8 +2,9 @@ import * as CANNON from 'cannon-es'
 import Arena from './components/arena';
 import Tank from './components/tank';
 import Bullet from './components/bullet';
-import {generateRandomPosition} from '../utils/dynamics';
-import { MoveStatus, MessageType } from '../../../client/src/types/Types';
+import Reward from './components/reward';
+import { generateRandomPosition, randomEnum } from '../utils/dynamics';
+import { MoveStatus, MessageType, RewardType } from '../../../client/src/types/Types';
 import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from '../utils/tankStatus';
 
 class World {
@@ -12,8 +13,11 @@ class World {
   tanks: {[key: string]: Tank} = {};
   bullets: {[key: string]: Bullet[]} = {};
   scores: {[key: string]: {n: string, s: number, h: number}} = {};
+  rewards: Reward[] = [];
   bulletsToRemove: {[key: string]: Bullet[]} = {};
   messager: (msg: string) => void;
+  rewardChecked: number = 10;
+  REWARD_INTERVAL: number = 10;
   constructor(messager: (msg: string) => void) {
     this.world = new CANNON.World();
     this.world.gravity.set(0, -0.25, 0)
@@ -95,6 +99,38 @@ class World {
       this.scores[hitTankId].h += 1;
     }
     this.messager(`${MessageType.SCORE_UPDATE},${JSON.stringify(this.scores)}`);
+  }
+
+  rewardHit(reward: Reward, collisionTo: string) {
+    console.log('reward hit', reward.type, collisionTo);
+  }
+
+  addRewards() {
+    // if no tank, skip adding
+    if (Object.keys(this.tanks).length < 1) {
+      return;
+    }
+    // only allow 5 rewards at most
+    if (this.rewards.length > 4) {
+      return;
+    }
+    // reward should be added at least with 10s interval
+    if (this.rewardChecked + this.REWARD_INTERVAL > this.world.time) {
+      return;
+    }
+    this.rewardChecked = this.world.time;
+    // use a random number to check if needs to add reward
+    if (Math.random() < 0.7) {
+      return;
+    }
+    const lowerBound = new CANNON.Vec3(-this.arena.width + 20, 0, -this.arena.height + 20);
+    const upperBound = new CANNON.Vec3(this.arena.width - 20, 0, this.arena.height - 20);
+    const initPosition = generateRandomPosition(lowerBound, upperBound);
+    const rewardType = randomEnum(RewardType);
+    const reward = new Reward(rewardType, this.rewardHit.bind(this));
+    reward.body.position.set(initPosition.x, initPosition.y, initPosition.z);
+    this.rewards.push(reward);
+    this.messager(`${MessageType.REWARD_ADD},${JSON.stringify([reward.type, initPosition.x, initPosition.y, initPosition.z])}`);
   }
 }
 
