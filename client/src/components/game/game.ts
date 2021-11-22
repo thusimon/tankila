@@ -10,6 +10,7 @@ import Chat from '../panels/chat';
 import Score from '../panels/score';
 import Settings from '../panels/settings';
 import Sounds from './sounds';
+import Reward from '../rewards/reward';
 
 class Game {
   scene: THREE.Scene;
@@ -19,6 +20,7 @@ class Game {
   bullets: BulletsType = {};
   bulletsToRemove: Bullet[] = [];
   explosions: Explosion[] =[];
+  rewards: Reward[] = [];
   tanks: Tanks = {};
   cameraRotationXZOffset: number = 0;
   cameraRotationYOffset: number = 0;
@@ -135,9 +137,10 @@ class Game {
       }
       case MessageType.REWARD_ADD: {
         const reward = data as Array<any>;
-        const rewardType = reward[0] as RewardType;
-        const positon = new THREE.Vector3(data[1], data[2], data[3]);
-        console.log(`reward added type=${rewardType}, at ${data[1]} ${data[2]} ${data[3]}`);
+        const rewardId = reward[0] as number;
+        const rewardType = reward[1] as RewardType;
+        const position = new THREE.Vector3(data[2], data[3], data[4]);
+        this.addReward(rewardId, rewardType, position);
         break;
       }
       default: {
@@ -215,6 +218,12 @@ class Game {
     }
   }
 
+  addReward(id: number, type: RewardType, position: THREE.Vector3) {
+    const reward = new Reward(id, type, position);
+    this.rewards.push(reward);
+    this.scene.add(reward.model);
+  }
+
   registerUserInteraction() {
     document.addEventListener('keydown', this.onKeyDown.bind(this), true);
     document.addEventListener('keyup', this.onKeyUp.bind(this), true);
@@ -228,7 +237,6 @@ class Game {
       chatInputEnter.addEventListener('click', this.sendChat.bind(this), true);
     }
   }
-
 
   updateTankPosition(tankData: TankPositions) {
     for (const tankId in tankData) {

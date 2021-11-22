@@ -127,10 +127,11 @@ class World {
     const upperBound = new CANNON.Vec3(this.arena.width - 20, 0, this.arena.height - 20);
     const initPosition = generateRandomPosition(lowerBound, upperBound);
     const rewardType = randomEnum(RewardType);
-    const reward = new Reward(rewardType, this.rewardHit.bind(this));
+    const id = this.rewards.length;
+    const reward = new Reward(id, rewardType, this.rewardHit.bind(this));
     reward.body.position.set(initPosition.x, initPosition.y, initPosition.z);
     this.rewards.push(reward);
-    this.messager(`${MessageType.REWARD_ADD},${JSON.stringify([reward.type, initPosition.x, initPosition.y, initPosition.z])}`);
+    this.messager(`${MessageType.REWARD_ADD},${JSON.stringify([reward.id, reward.type, initPosition.x, initPosition.y, initPosition.z])}`);
   }
 }
 

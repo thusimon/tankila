@@ -2,10 +2,12 @@ import * as CANNON from 'cannon-es';
 import { RewardType } from '../../../../client/src/types/Types';
 
 class Reward {
+  id: number = 0;
   body: CANNON.Body;
   type: RewardType;
   rewardHitCallback: (reward: Reward, collisionTo: string) => void
-  constructor(type: RewardType, rewardHitCb: (reward: Reward, collisionTo: string) => void) {
+  constructor(id: number, type: RewardType, rewardHitCb: (reward: Reward, collisionTo: string) => void) {
+    this.id = id;
     this.type = type;
     this.rewardHitCallback = rewardHitCb;
     const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
