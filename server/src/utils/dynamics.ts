@@ -1,5 +1,4 @@
 import * as CANNON from 'cannon-es';
-import { RewardType } from '../../../client/src/types/Types';
 
 export const generateRandomPosition = (lowerBound: CANNON.Vec3, upperBound: CANNON.Vec3) => {
   const lowerX = lowerBound.x;

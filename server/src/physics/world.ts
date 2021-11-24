@@ -103,6 +103,8 @@ class World {
 
   rewardHit(reward: Reward, collisionTo: string) {
     console.log('reward hit', reward.type, collisionTo);
+    
+    this.messager(`${MessageType.REWARD_HIT},${JSON.stringify([reward.type, reward.id])}`)
   }
 
   addRewards() {
@@ -111,7 +113,7 @@ class World {
       return;
     }
     // only allow 5 rewards at most
-    if (this.rewards.length > 4) {
+    if (this.rewards.length > 5) {
       return;
     }
     // reward should be added at least with 10s interval
@@ -130,6 +132,7 @@ class World {
     const id = this.rewards.length;
     const reward = new Reward(id, rewardType, this.rewardHit.bind(this));
     reward.body.position.set(initPosition.x, initPosition.y, initPosition.z);
+    this.world.addBody(reward.body);
     this.rewards.push(reward);
     this.messager(`${MessageType.REWARD_ADD},${JSON.stringify([reward.id, reward.type, initPosition.x, initPosition.y, initPosition.z])}`);
   }

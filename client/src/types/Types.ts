@@ -94,3 +94,8 @@ export enum RewardType {
   BULLTET_LARGE,
   BULLET_POWER,
 };
+
+export interface RewardStatus {
+  type: RewardType,
+  left: number,
+};

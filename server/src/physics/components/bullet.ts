@@ -1,10 +1,11 @@
 import * as CANNON from 'cannon-es';
 import Tank from './tank';
 import { BULLET_SPEED } from '../../../../client/src/utils/constants';
+import { UserBody } from '../../../../client/src/types/Types';
 
 class Bullet {
   world: CANNON.World;
-  body: CANNON.Body;
+  body: UserBody;
   tankId: string;
   id: number = 0;
   bulletExplodeCallback: (id:string, bullet: Bullet, collisionTo: string) => void
@@ -13,13 +14,9 @@ class Bullet {
     this.tankId = tank.tankId;
     this.id = id;
     this.bulletExplodeCallback = bulletExplodeCb;
-    const slipperyMaterial: CANNON.Material = new CANNON.Material('slipperyMaterial');
-    slipperyMaterial.friction = 0.15
-    slipperyMaterial.restitution = 0.25
     const bulletShape = new CANNON.Sphere(0.08)
     this.body = new CANNON.Body({
         mass: 0.1,
-        material: slipperyMaterial,
         type: CANNON.Body.DYNAMIC,
         isTrigger: true
     })
@@ -35,6 +32,7 @@ class Bullet {
       tankBody.position.z + 0.6 * Math.cos(eulerY));
 
     this.body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
+    this.body.userData = `bullet_${this.tankId}_${this.id}`;
     world.addBody(this.body)
 
     this.body.addEventListener('collide', (evt: any) => {
