@@ -2,11 +2,9 @@ import * as THREE from 'three';
 import { RewardType } from '../../types/Types';
 
 class Reward {
-  id: number;
   type: RewardType
   model: THREE.Object3D;
-  constructor(id: number, type: RewardType, position: THREE.Vector3) {
-    this.id = id;
+  constructor(type: RewardType, position: THREE.Vector3) {
     this.type = type;
     const geo = new THREE.BoxGeometry(1, 1, 1);
     const texture = this.getTexture();

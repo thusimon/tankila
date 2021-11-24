@@ -34,11 +34,18 @@ class Bullet {
     this.body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
     this.body.userData = `bullet_${this.tankId}_${this.id}`;
     world.addBody(this.body)
+    this.collideCallback = this.collideCallback.bind(this);
+    this.body.addEventListener('collide', this.collideCallback);
+  }
 
-    this.body.addEventListener('collide', (evt: any) => {
-      const collisionTo = evt.body.userData as string;
-      this.bulletExplodeCallback(this.tankId, this, collisionTo);
-    })
+  collideCallback(evt: any) {
+    const collisionTo = evt.body.userData as string;
+    this.bulletExplodeCallback(this.tankId, this, collisionTo);
+  }
+
+  remove() {
+    this.body.removeEventListener('collide', this.collideCallback);
+    this.world.removeBody(this.body);
   }
 }
 

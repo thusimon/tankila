@@ -11,6 +11,7 @@ import Score from '../panels/score';
 import Settings from '../panels/settings';
 import Sounds from './sounds';
 import Reward from '../rewards/reward';
+import { REWARD_DURATION } from '../../../../server/src/constants';
 
 class Game {
   scene: THREE.Scene;
@@ -137,10 +138,17 @@ class Game {
       }
       case MessageType.REWARD_ADD: {
         const reward = data as Array<any>;
-        const rewardId = reward[0] as number;
-        const rewardType = reward[1] as RewardType;
-        const position = new THREE.Vector3(data[2], data[3], data[4]);
-        this.addReward(rewardId, rewardType, position);
+        const rewardType = reward[0] as RewardType;
+        const position = new THREE.Vector3(data[1], data[2], data[3]);
+        this.addReward(rewardType, position);
+        break;
+      }
+      case MessageType.REWARD_HIT: {
+        const rewardHit = data as Array<any>;
+        const tankId = rewardHit[0] as string;
+        const rewardType = rewardHit[1] as RewardType;
+        const rewardIdx = rewardHit[2] as number;
+        console.log('should remove reward', tankId, rewardType, rewardIdx);
         break;
       }
       default: {
@@ -218,10 +226,22 @@ class Game {
     }
   }
 
-  addReward(id: number, type: RewardType, position: THREE.Vector3) {
-    const reward = new Reward(id, type, position);
+  addReward(type: RewardType, position: THREE.Vector3) {
+    const reward = new Reward(type, position);
     this.rewards.push(reward);
     this.scene.add(reward.model);
+  }
+
+  hitReward(tankId: string, type: RewardType, idx: number) {
+    if (this.tanks[tankId]) {
+      return;
+    }
+    const tank = this.tanks[tankId];
+    tank.rewards[type] = REWARD_DURATION;
+    const reward = this.rewards[idx];
+    this.scene.remove(reward.model);
+    this.rewards.splice(idx, 1);
+    // TODO add reward hit effect
   }
 
   registerUserInteraction() {

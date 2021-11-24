@@ -95,7 +95,6 @@ export enum RewardType {
   BULLET_POWER,
 };
 
-export interface RewardStatus {
-  type: RewardType,
-  left: number,
+export type RewardStatus = {
+  [key in RewardType]?: number;
 };

@@ -6,15 +6,17 @@ import Reward from './components/reward';
 import { generateRandomPosition, randomEnum } from '../utils/dynamics';
 import { MoveStatus, MessageType, RewardType } from '../../../client/src/types/Types';
 import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from '../utils/tankStatus';
+import { REWARD_DURATION } from '../constants';
 
 class World {
   world: CANNON.World;
   arena: Arena;
   tanks: {[key: string]: Tank} = {};
   bullets: {[key: string]: Bullet[]} = {};
+  bulletsToRemove: {[key: string]: Bullet[]} = {};
   scores: {[key: string]: {n: string, s: number, h: number}} = {};
   rewards: Reward[] = [];
-  bulletsToRemove: {[key: string]: Bullet[]} = {};
+  rewardsToRemove: Reward[] = [];
   messager: (msg: string) => void;
   rewardChecked: number = 10;
   REWARD_INTERVAL: number = 10;
@@ -102,9 +104,21 @@ class World {
   }
 
   rewardHit(reward: Reward, collisionTo: string) {
-    console.log('reward hit', reward.type, collisionTo);
-    
-    this.messager(`${MessageType.REWARD_HIT},${JSON.stringify([reward.type, reward.id])}`)
+    if (!collisionTo.startsWith('tank_')) {
+      // not hit by tank, bail
+      return;
+    }
+    const tankId = collisionTo.split('_')[1];
+    if (!this.tanks[tankId]) {
+      return;
+    }
+    const tank = this.tanks[tankId];
+    tank.rewards[reward.type] = REWARD_DURATION;
+    // delete rewards
+    this.rewardsToRemove.push(reward);
+    const rewardIdx = this.rewards.indexOf(reward);
+    this.rewards.splice(rewardIdx, 1);
+    this.messager(`${MessageType.REWARD_HIT},${JSON.stringify([tankId, reward.type, rewardIdx])}`);
   }
 
   addRewards() {
@@ -113,7 +127,7 @@ class World {
       return;
     }
     // only allow 5 rewards at most
-    if (this.rewards.length > 5) {
+    if (this.rewards.length > 4) {
       return;
     }
     // reward should be added at least with 10s interval
@@ -122,19 +136,18 @@ class World {
     }
     this.rewardChecked = this.world.time;
     // use a random number to check if needs to add reward
-    if (Math.random() < 0.7) {
+    if (Math.random() < 0.8) {
       return;
     }
     const lowerBound = new CANNON.Vec3(-this.arena.width + 20, 0, -this.arena.height + 20);
     const upperBound = new CANNON.Vec3(this.arena.width - 20, 0, this.arena.height - 20);
     const initPosition = generateRandomPosition(lowerBound, upperBound);
     const rewardType = randomEnum(RewardType);
-    const id = this.rewards.length;
-    const reward = new Reward(id, rewardType, this.rewardHit.bind(this));
+    const reward = new Reward(this.world, rewardType, this.rewardHit.bind(this));
     reward.body.position.set(initPosition.x, initPosition.y, initPosition.z);
     this.world.addBody(reward.body);
     this.rewards.push(reward);
-    this.messager(`${MessageType.REWARD_ADD},${JSON.stringify([reward.id, reward.type, initPosition.x, initPosition.y, initPosition.z])}`);
+    this.messager(`${MessageType.REWARD_ADD},${JSON.stringify([reward.type, initPosition.x, initPosition.y, initPosition.z])}`);
   }
 }
 

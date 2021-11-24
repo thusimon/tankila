@@ -97,6 +97,7 @@ const extractTanksMessage = () => {
   const tanks = world.tanks;
   const bullets = world.bullets;
   const bullestToRemove = world.bulletsToRemove;
+  const rewardsToRemove = world.rewardsToRemove;
   const tanksMessage: {[key: string]: object} = {};
   for (const tankId in tanks) {
     const tank = tanks[tankId];
@@ -110,7 +111,7 @@ const extractTanksMessage = () => {
     }));
     const tankBulletsToRemoveMessage = tankBulletsToRmove.map(blt => {
       // remove bullet from world
-      world.world.removeBody(blt.body);
+      blt.remove();
       return {
         x: blt.body.position.x,
         y: blt.body.position.y,
@@ -132,6 +133,10 @@ const extractTanksMessage = () => {
     tanksMessage[tankId] = tankMessage;
     world.bulletsToRemove[tankId] = [];
   }
+  rewardsToRemove.forEach(reward => {
+    reward.remove();
+  });
+  world.rewardsToRemove = [];
   return tanksMessage;
 }
 
