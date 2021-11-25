@@ -79,6 +79,7 @@ export enum MessageType {
   SCORE_UPDATE = '11',
   REWARD_ADD = '12',
   REWARD_HIT = '13',
+  REWARD_UPDATE = '14',
 };
 
 export interface BulletinType {

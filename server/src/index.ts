@@ -73,6 +73,7 @@ wss.on('connection', (ws, req) => {
     broadcastMessage(`${MessageType.CHAT_RECEIVE},["System","${name} entered the arena!"]`);
     broadcastMessage(`${MessageType.SCORE_UPDATE},${JSON.stringify(world.scores)}`);
     broadcastMessage(`${MessageType.TANK_JOINED},["${id}"]`);
+    broadcastMessage(`${MessageType.REWARD_UPDATE},${JSON.stringify(extractRewardMessage())}`);
     ws.on('close', () => {
       console.log(`${id}-${name} tank exits`);
       const tankScore = world.scores[id];
@@ -90,8 +91,6 @@ wss.on('connection', (ws, req) => {
     });
   }
 });
-
-const tanks: TankData = {};
 
 const extractTanksMessage = () => {
   const tanks = world.tanks;
@@ -138,7 +137,11 @@ const extractTanksMessage = () => {
   });
   world.rewardsToRemove = [];
   return tanksMessage;
-}
+};
+
+const extractRewardMessage = () => {
+  return world.rewards.map(reward => [reward.type, reward.body.position.x, reward.body.position.y, reward.body.position.z])
+};
 
 const updateRate = 1000 / 100;
 const worldStep = updateRate / 1000;

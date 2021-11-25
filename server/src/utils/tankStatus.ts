@@ -1,5 +1,5 @@
 import {MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED} from '../../../client/src/utils/constants';
-import { MoveStatus } from '../../../client/src/types/Types';
+import { MoveStatus, RewardType } from '../../../client/src/types/Types';
 
 
 export const accelerate = (speed: number) => {
@@ -116,3 +116,20 @@ export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: M
 
   return currentMoveStatus;
 }
+
+export const getRewardName = (type: RewardType) => {
+  switch (type) {
+    case RewardType.TANK_SWIFT:
+      return 'Acceleration';
+    case RewardType.TANK_SAMLL:
+      return 'Shrink';
+    case RewardType.TANK_INVULNERABLE:
+      return 'Invulnerable';
+    case RewardType.BULLET_POWER:
+      return 'Damage';
+    case RewardType.BULLTET_LARGE:
+      return 'Power';
+    default:
+      return 'Unknown';
+  }
+};

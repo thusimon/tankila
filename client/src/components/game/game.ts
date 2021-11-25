@@ -139,7 +139,7 @@ class Game {
       case MessageType.REWARD_ADD: {
         const reward = data as Array<any>;
         const rewardType = reward[0] as RewardType;
-        const position = new THREE.Vector3(data[1], data[2], data[3]);
+        const position = new THREE.Vector3(reward[1], reward[2], reward[3]);
         this.addReward(rewardType, position);
         break;
       }
@@ -148,7 +148,16 @@ class Game {
         const tankId = rewardHit[0] as string;
         const rewardType = rewardHit[1] as RewardType;
         const rewardIdx = rewardHit[2] as number;
-        console.log('should remove reward', tankId, rewardType, rewardIdx);
+        this.hitReward(tankId, rewardType, rewardIdx);
+        break;
+      }
+      case MessageType.REWARD_UPDATE: {
+        const rewards = data as Array<any>;
+        rewards.forEach((reward: Array<any>) => {
+          const rewardType = reward[0] as RewardType;
+          const position = new THREE.Vector3(reward[1], reward[2], reward[3]);
+          this.addReward(rewardType, position);
+        });
         break;
       }
       default: {
@@ -233,7 +242,7 @@ class Game {
   }
 
   hitReward(tankId: string, type: RewardType, idx: number) {
-    if (this.tanks[tankId]) {
+    if (!this.tanks[tankId]) {
       return;
     }
     const tank = this.tanks[tankId];

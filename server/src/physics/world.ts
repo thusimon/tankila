@@ -5,7 +5,7 @@ import Bullet from './components/bullet';
 import Reward from './components/reward';
 import { generateRandomPosition, randomEnum } from '../utils/dynamics';
 import { MoveStatus, MessageType, RewardType } from '../../../client/src/types/Types';
-import {updateMoveStatus, updateMoveSpeed, updateMoveRotation} from '../utils/tankStatus';
+import {updateMoveStatus, updateMoveSpeed, updateMoveRotation, getRewardName} from '../utils/tankStatus';
 import { REWARD_DURATION } from '../constants';
 
 class World {
@@ -19,7 +19,7 @@ class World {
   rewardsToRemove: Reward[] = [];
   messager: (msg: string) => void;
   rewardChecked: number = 10;
-  REWARD_INTERVAL: number = 10;
+  REWARD_INTERVAL: number = 1;
   constructor(messager: (msg: string) => void) {
     this.world = new CANNON.World();
     this.world.gravity.set(0, -0.25, 0)
@@ -109,7 +109,7 @@ class World {
       return;
     }
     const tankId = collisionTo.split('_')[1];
-    if (!this.tanks[tankId]) {
+    if (!tankId || !this.tanks[tankId]) {
       return;
     }
     const tank = this.tanks[tankId];
@@ -136,7 +136,7 @@ class World {
     }
     this.rewardChecked = this.world.time;
     // use a random number to check if needs to add reward
-    if (Math.random() < 0.8) {
+    if (Math.random() < 0) {
       return;
     }
     const lowerBound = new CANNON.Vec3(-this.arena.width + 20, 0, -this.arena.height + 20);
@@ -148,6 +148,7 @@ class World {
     this.world.addBody(reward.body);
     this.rewards.push(reward);
     this.messager(`${MessageType.REWARD_ADD},${JSON.stringify([reward.type, initPosition.x, initPosition.y, initPosition.z])}`);
+    this.messager(`${MessageType.CHAT_RECEIVE},["System","${getRewardName(reward.type)} reward showed up, go for it!"]`);
   }
 }
 
