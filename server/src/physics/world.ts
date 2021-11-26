@@ -5,7 +5,7 @@ import Bullet from './components/bullet';
 import Reward from './components/reward';
 import { generateRandomPosition, randomEnum } from '../utils/dynamics';
 import { MoveStatus, MessageType, RewardType } from '../../../client/src/types/Types';
-import {updateMoveStatus, updateMoveSpeed, updateMoveRotation, getRewardName} from '../utils/tankStatus';
+import {updateMoveStatus, updateMoveSpeed, updateMoveRotation, getRewardName, updateTankRewardStatus} from '../utils/tankStatus';
 import { REWARD_DURATION } from '../constants';
 
 class World {
@@ -65,7 +65,8 @@ class World {
     for (const tankId in this.tanks) {
       const tank = this.tanks[tankId];
       const moveStatus = tank.moveStatus;
-      updateMoveSpeed(moveStatus);
+      const rewardStatus = tank.rewards;
+      updateMoveSpeed(moveStatus, rewardStatus);
       updateMoveRotation(moveStatus);
       const direction = moveStatus.direction || 0;
       const body = tank.body;
@@ -77,6 +78,13 @@ class World {
       const offsetX = speed * Math.sin(eulerY);
       const offsetZ = speed * Math.cos(eulerY);
       body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
+    }
+  }
+
+  updateRewardStatus() {
+    const stepTime = this.world.dt;
+    for (const tankId in this.tanks) {
+      updateTankRewardStatus(this.tanks[tankId], stepTime);
     }
   }
 
@@ -127,7 +135,7 @@ class World {
       return;
     }
     // only allow 5 rewards at most
-    if (this.rewards.length > 4) {
+    if (this.rewards.length > 20) {
       return;
     }
     // reward should be added at least with 10s interval

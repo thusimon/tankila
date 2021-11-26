@@ -97,5 +97,5 @@ export enum RewardType {
 };
 
 export type RewardStatus = {
-  [key in RewardType]?: number;
+  [key in RewardType]: number;
 };

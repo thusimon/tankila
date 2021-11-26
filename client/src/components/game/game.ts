@@ -149,6 +149,7 @@ class Game {
         const rewardType = rewardHit[1] as RewardType;
         const rewardIdx = rewardHit[2] as number;
         this.hitReward(tankId, rewardType, rewardIdx);
+        this.sounds.playHappyNotification();
         break;
       }
       case MessageType.REWARD_UPDATE: {

@@ -1,20 +1,21 @@
 import {MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED} from '../../../client/src/utils/constants';
-import { MoveStatus, RewardType } from '../../../client/src/types/Types';
+import { MoveStatus, RewardType, RewardStatus } from '../../../client/src/types/Types';
+import Tank from '../physics/components/tank';
 
 
-export const accelerate = (speed: number) => {
+export const accelerate = (speed: number, maxSpeed = MAX_FORWARD_SPEED) => {
   speed += FORWARD_ACC;
-  if (speed > MAX_FORWARD_SPEED) {
-    return MAX_FORWARD_SPEED;
+  if (speed > maxSpeed) {
+    return maxSpeed;
   } else {
     return speed;
   }
 }
 
-export const deaccelerate = (speed: number) => {
+export const deaccelerate = (speed: number, maxSpeed = MAX_BACKWARD_SPEED) => {
   speed += BACKWARD_ACC;
-  if (speed < MAX_BACKWARD_SPEED) {
-    return MAX_BACKWARD_SPEED;
+  if (speed < maxSpeed) {
+    return maxSpeed;
   } else {
     return speed;
   }
@@ -31,12 +32,14 @@ export const stop = (speed: number) => {
   return speed;
 }
 
-export const updateMoveSpeed = (currentMoveStatus: MoveStatus) => {
+export const updateMoveSpeed = (currentMoveStatus: MoveStatus, rewardStatus: RewardStatus) => {
   const currentSpeed = currentMoveStatus.speed || 0;
   if (currentMoveStatus.forward === 1) {
-    currentMoveStatus.speed = accelerate(currentSpeed);
+    const maxSpeed = rewardStatus[RewardType.TANK_SWIFT]! > 0 ? MAX_FORWARD_SPEED * 2 : MAX_FORWARD_SPEED;
+    currentMoveStatus.speed = accelerate(currentSpeed, maxSpeed);
   } else if (currentMoveStatus.forward === -1) {
-    currentMoveStatus.speed = deaccelerate(currentSpeed);
+    const maxSpeed = rewardStatus[RewardType.TANK_SWIFT]! > 0 ? MAX_BACKWARD_SPEED * 2 : MAX_BACKWARD_SPEED;
+    currentMoveStatus.speed = deaccelerate(currentSpeed, maxSpeed);
   } else {
     currentMoveStatus.speed = stop(currentSpeed);
   }
@@ -115,6 +118,16 @@ export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: M
   }
 
   return currentMoveStatus;
+}
+
+export const updateTankRewardStatus = (tank: Tank, deltaTime: number) => {
+  const rewardStatus = tank.rewards;
+  Object.values(RewardType).forEach(key => {
+    if(typeof key != 'string') {
+      const updateVal = rewardStatus[key] - deltaTime;
+      rewardStatus[key] = updateVal > 0 ? updateVal : 0; 
+    }
+  });
 }
 
 export const getRewardName = (type: RewardType) => {

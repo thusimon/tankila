@@ -148,6 +148,7 @@ const worldStep = updateRate / 1000;
 setInterval(() => {
   world.addRewards();
   world.updateTanksPosition();
+  world.updateRewardStatus();
   world.world.step(worldStep);
   const tanksMessage = extractTanksMessage();
   broadcastMessage(`${MessageType.TANK_POS},${JSON.stringify(tanksMessage)}`);
