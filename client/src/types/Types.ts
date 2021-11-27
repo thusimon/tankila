@@ -1,4 +1,5 @@
-import * as CANNON from 'cannon-es'
+import * as CANNON from 'cannon-es';
+import WebSocket from 'ws';
 import Bullet from '../components/bullet/bullet';
 import Tank from '../components/tank/tank';
 
@@ -98,4 +99,8 @@ export enum RewardType {
 
 export type RewardStatus = {
   [key in RewardType]: number;
+};
+
+export interface WSClients {
+  [key: string]: WebSocket;
 };

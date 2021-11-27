@@ -17,10 +17,10 @@ class World {
   scores: {[key: string]: {n: string, s: number, h: number}} = {};
   rewards: Reward[] = [];
   rewardsToRemove: Reward[] = [];
-  messager: (msg: string) => void;
+  messager: (msg: string, id?: string) => void;
   rewardChecked: number = 10;
   REWARD_INTERVAL: number = 1;
-  constructor(messager: (msg: string) => void) {
+  constructor(messager: (msg: string, id?: string) => void) {
     this.world = new CANNON.World();
     this.world.gravity.set(0, -0.25, 0)
     this.arena = new Arena(this.world);
@@ -48,7 +48,8 @@ class World {
     if (tank) {
       this.world.removeBody(tank.body);
     }
-    // TODO clean the bullets
+    this.bulletsToRemove[id] = this.bulletsToRemove[id].concat(this.bullets[id]);
+    this.bullets[id] = [];
     delete this.tanks[id];
     delete this.scores[id];
   }

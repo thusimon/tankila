@@ -9,6 +9,7 @@ import Message from './message';
 import Chat from '../panels/chat';
 import Score from '../panels/score';
 import Settings from '../panels/settings';
+import RewaresPanel from '../panels/rewards';
 import Sounds from './sounds';
 import Reward from '../rewards/reward';
 import { REWARD_DURATION } from '../../../../server/src/constants';
@@ -35,6 +36,7 @@ class Game {
   chat: Chat;
   score: Score;
   settings: Settings;
+  rewardsPanel: RewaresPanel;
   chatReady: boolean = false;
   sounds: Sounds;
   moveStatus: MoveStatus = {
@@ -55,6 +57,7 @@ class Game {
     this.port = port;
     this.messager = new Message(production, port);
     this.sounds = new Sounds();
+    this.rewardsPanel = new RewaresPanel();
     this.settings = new Settings(port, this.sounds);
     this.chat = new Chat();
     this.score = new Score();
@@ -149,7 +152,6 @@ class Game {
         const rewardType = rewardHit[1] as RewardType;
         const rewardIdx = rewardHit[2] as number;
         this.hitReward(tankId, rewardType, rewardIdx);
-        this.sounds.playHappyNotification();
         break;
       }
       case MessageType.REWARD_UPDATE: {
@@ -251,7 +253,9 @@ class Game {
     const reward = this.rewards[idx];
     this.scene.remove(reward.model);
     this.rewards.splice(idx, 1);
-    // TODO add reward hit effect
+    if (tankId === this.tankId) {
+      this.sounds.playHappyNotification();
+    }
   }
 
   registerUserInteraction() {

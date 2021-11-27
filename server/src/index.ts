@@ -3,7 +3,7 @@ import path from 'path';
 import express from 'express';
 import WebSocket from 'ws';
 import mongoose from 'mongoose';
-import { MessageType, MoveStatus } from '../../client/src/types/Types';
+import { MessageType, MoveStatus, WSClients } from '../../client/src/types/Types';
 import * as CANNON from 'cannon-es'
 import {getQueryFromUrl} from './utils/url'
 import World from './physics/world';
@@ -16,10 +16,6 @@ dotenv.config({
 });
 
 const CONNECTION_URI = process.env.MONGODB_URI!;
-
-interface TankData {
-  [key: string]: string
-}
 
 /* ------db------ */
 const connectToDb = () => {
@@ -50,6 +46,8 @@ const server = app.listen(PORT, () => {
 });
 
 /* ------websocket------ */
+const wsClients: WSClients = {};
+
 const wss = new WebSocket.Server({
   server,
   path: '/websockets'
@@ -61,19 +59,36 @@ const broadcastMessage = (message: string): void => {
   });
 }
 
+const clientMessage = (id: string, message: string): void => {
+  const client = wsClients[id];
+  if (!client) {
+    return;
+  }
+  client.send(message);
+};
+
+const messager = (message: string, id?: string): void => {
+  if (id) {
+    clientMessage(id, message);
+  } else {
+    broadcastMessage(message);
+  }
+}
+
 /* ------physics------ */
-const world = new World(broadcastMessage);
+const world = new World(messager);
 
 wss.on('connection', (ws, req) => {
   const id = getQueryFromUrl('id', req.url!);
   const name = getQueryFromUrl('name', req.url!);
   console.log(`${id}-${name} tank enters`);
   if(id && name) {
+    wsClients[id] = ws;
     world.addTank(id, name);
     broadcastMessage(`${MessageType.CHAT_RECEIVE},["System","${name} entered the arena!"]`);
     broadcastMessage(`${MessageType.SCORE_UPDATE},${JSON.stringify(world.scores)}`);
     broadcastMessage(`${MessageType.TANK_JOINED},["${id}"]`);
-    broadcastMessage(`${MessageType.REWARD_UPDATE},${JSON.stringify(extractRewardMessage())}`);
+    clientMessage(id, `${MessageType.REWARD_UPDATE},${JSON.stringify(extractRewardMessage())}`);
     ws.on('close', () => {
       console.log(`${id}-${name} tank exits`);
       const tankScore = world.scores[id];
@@ -85,6 +100,7 @@ wss.on('connection', (ws, req) => {
       broadcastMessage(`${MessageType.TANK_EXIT},["${id}"]`);
       broadcastMessage(`${MessageType.SCORE_UPDATE},${JSON.stringify(world.scores)}`);
       broadcastMessage(`${MessageType.CHAT_RECEIVE},["System","${name} left the arena..."]`);
+      delete wsClients[id];
     });
     ws.on('message', msg => {
       handleMessage(id, msg.toString());
