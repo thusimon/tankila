@@ -159,16 +159,26 @@ const extractRewardMessage = () => {
   return world.rewards.map(reward => [reward.type, reward.body.position.x, reward.body.position.y, reward.body.position.z])
 };
 
-const updateRate = 1000 / 100;
-const worldStep = updateRate / 1000;
+const positionUpdateRate = 1000 / 100;
+const rewardUpdateRate = 1000;
+const worldStep = positionUpdateRate / 1000;
+
 setInterval(() => {
-  world.addRewards();
   world.updateTanksPosition();
-  world.updateRewardStatus();
   world.world.step(worldStep);
   const tanksMessage = extractTanksMessage();
   broadcastMessage(`${MessageType.TANK_POS},${JSON.stringify(tanksMessage)}`);
-}, updateRate);
+}, positionUpdateRate);
+
+setInterval(() => {
+  world.addRewards();
+  world.updateRewardStatus(rewardUpdateRate / 1000);
+  // send tanks reward status to each client
+  const tanks = world.tanks;
+  for(const tankId in tanks) {
+    clientMessage(tankId, `${MessageType.TANK_REWARDS},${JSON.stringify(tanks[tankId].rewards)}`);
+  }
+}, rewardUpdateRate);
 
 const handleMessage = (id: string, message: string): void => {
   const messageType = message.substring(0, 2);

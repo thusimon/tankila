@@ -1,35 +1,66 @@
+import { RewardStatus, RewardType } from '../../types/Types';
+import { getRewardColor, getRewardText } from '../../utils/status';
 import './rewards.scss';
 
 class Rewards {
   rewardsPanel: HTMLDivElement;
-  rewards: HTMLDivElement[];
+  rewards: HTMLDivElement[][];
+  rewardKeys: RewardType[] = [];
+  rewardStatus: RewardStatus = {};
   constructor() {
+    this.rewardKeys = Object.keys(RewardType)
+    .filter(key => !Number.isNaN(parseInt(key)))
+    .map(key => parseInt(key) as unknown as RewardType);
     const rewardsPanel = document.createElement('div');
     rewardsPanel.id = 'rewards-panel';
     rewardsPanel.style.display = 'none';
     this.rewardsPanel = rewardsPanel;
-
-    const rewardsMain = document.createElement('div');
-    rewardsMain.id = 'rewards-main';
     
     // create 5 rewards
     this.rewards = [];
-    for (let i = 0; i < 5; i++) {
+    this.rewardKeys.forEach((key, idx) => {
+      const rewardType = this.rewardKeys[key];
       const reward = document.createElement('div');
       reward.className = 'reward-container';
-      const rewardType = document.createElement('div');
-      rewardType.className = 'reward-type';
-      const rewardTime = document.createElement('div');
-      rewardTime.className = 'reward-time';
-      reward.id = `reward-${i}`;
-      reward.append(rewardType, rewardTime);
-      this.rewards.push(reward);
-      rewardsMain.append(reward);
-    }
-
-    rewardsPanel.append(rewardsMain);
+      const rewardTypeView = document.createElement('div');
+      rewardTypeView.className = 'reward-type';
+      rewardTypeView.textContent = getRewardText(rewardType);
+      rewardTypeView.style.backgroundColor = getRewardColor(rewardType);
+      const rewardTimeView = document.createElement('div');
+      rewardTimeView.className = 'reward-time';
+      reward.id = `reward-${idx}`;
+      reward.append(rewardTypeView, rewardTimeView);
+      this.rewards.push([reward, rewardTimeView]);
+      rewardsPanel.append(reward);
+    });
 
     document.body.append(rewardsPanel);
+
+    setInterval(this.updateStatus.bind(this), 1000);
+  }
+
+  show() {
+    this.rewardsPanel.style.display = 'flex';
+  }
+
+  updateTimer(rewardStatus: RewardStatus) {
+    this.rewardStatus = rewardStatus;
+  }
+
+  updateStatus() {
+    this.rewardKeys.forEach((key, idx) => {
+      const leftTime = this.rewardStatus[key]!;
+      const rewardView = this.rewards[idx];
+      if (leftTime > 0) {
+        // show the status and update the time
+        rewardView[0].classList.remove('reward-container-hide');
+        rewardView[1].textContent = `${leftTime}s`
+        this.rewardStatus[key]! -= 1;
+      } else {
+        // hide the status
+        rewardView[0].classList.add('reward-container-hide');
+      }
+    });
   }
 }
 

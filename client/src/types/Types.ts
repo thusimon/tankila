@@ -81,6 +81,7 @@ export enum MessageType {
   REWARD_ADD = '12',
   REWARD_HIT = '13',
   REWARD_UPDATE = '14',
+  TANK_REWARDS = '15',
 };
 
 export interface BulletinType {
@@ -98,7 +99,7 @@ export enum RewardType {
 };
 
 export type RewardStatus = {
-  [key in RewardType]: number;
+  [key in RewardType]?: number;
 };
 
 export interface WSClients {

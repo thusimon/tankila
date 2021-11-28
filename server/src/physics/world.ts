@@ -82,10 +82,10 @@ class World {
     }
   }
 
-  updateRewardStatus() {
-    const stepTime = this.world.dt;
+  updateRewardStatus(stepTime: number) {
     for (const tankId in this.tanks) {
-      updateTankRewardStatus(this.tanks[tankId], stepTime);
+      const tank = this.tanks[tankId];
+      updateTankRewardStatus(tank, stepTime);
     }
   }
 

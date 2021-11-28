@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import { BulletsType, MessageType, Tanks, TankPositions, MoveStatus, ScoresData, RewardType } from '../../types/Types';
+import { BulletsType, MessageType, Tanks, TankPositions, MoveStatus, ScoresData, RewardType, RewardStatus } from '../../types/Types';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
 import Explosion from '../bullet/explosion';
@@ -119,6 +119,11 @@ class Game {
         this.updateTankPosition(tankPositionData);
         this.updateBullets(tankPositionData);
         this.updateExplosion(tankPositionData);
+        break;
+      }
+      case MessageType.TANK_REWARDS: {
+        const tankRewardData = data as RewardStatus;
+        console.log(tankRewardData);
         break;
       }
       case MessageType.TANK_EXIT: {
@@ -256,6 +261,7 @@ class Game {
     if (tankId === this.tankId) {
       this.sounds.playHappyNotification();
     }
+    this.rewardsPanel.updateTimer(tank.rewards);
   }
 
   registerUserInteraction() {
@@ -291,6 +297,9 @@ class Game {
           const targetPos = new THREE.Vector3(data.x, data.y - 0.5, data.z);
           tank.curPos.copy(targetPos);
           tank.curDir = data.r;
+          if (tank.tankId === this.tankId) {
+            this.rewardsPanel.show();
+          }
         }
       }
     }

@@ -122,10 +122,12 @@ export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: M
 
 export const updateTankRewardStatus = (tank: Tank, deltaTime: number) => {
   const rewardStatus = tank.rewards;
-  Object.values(RewardType).forEach(key => {
-    if(typeof key != 'string') {
-      const updateVal = rewardStatus[key] - deltaTime;
-      rewardStatus[key] = updateVal > 0 ? updateVal : 0; 
+  Object.keys(RewardType).forEach(key => {
+    const keyParse = parseInt(key);
+    if(!Number.isNaN(keyParse)) {
+      const type = keyParse as RewardType;
+      const updateVal = rewardStatus[type]! - deltaTime;
+      rewardStatus[type] = updateVal > 0 ? updateVal : 0; 
     }
   });
 }
