@@ -6,7 +6,6 @@ class Rewards {
   rewardsPanel: HTMLDivElement;
   rewards: HTMLDivElement[][];
   rewardKeys: RewardType[] = [];
-  rewardStatus: RewardStatus = {};
   constructor() {
     this.rewardKeys = Object.keys(RewardType)
     .filter(key => !Number.isNaN(parseInt(key)))
@@ -35,30 +34,23 @@ class Rewards {
     });
 
     document.body.append(rewardsPanel);
-
-    setInterval(this.updateStatus.bind(this), 1000);
   }
 
   show() {
     this.rewardsPanel.style.display = 'flex';
   }
 
-  updateTimer(rewardStatus: RewardStatus) {
-    this.rewardStatus = rewardStatus;
-  }
-
-  updateStatus() {
+  updateStatus(rewardStatus: RewardStatus) {
     this.rewardKeys.forEach((key, idx) => {
-      const leftTime = this.rewardStatus[key]!;
+      const leftTime = rewardStatus[key]!;
       const rewardView = this.rewards[idx];
       if (leftTime > 0) {
         // show the status and update the time
-        rewardView[0].classList.remove('reward-container-hide');
+        rewardView[0].classList.add('reward-container-show');
         rewardView[1].textContent = `${leftTime}s`
-        this.rewardStatus[key]! -= 1;
       } else {
         // hide the status
-        rewardView[0].classList.add('reward-container-hide');
+        rewardView[0].classList.remove('reward-container-show');
       }
     });
   }

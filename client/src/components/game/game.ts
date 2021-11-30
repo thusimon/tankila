@@ -123,7 +123,7 @@ class Game {
       }
       case MessageType.TANK_REWARDS: {
         const tankRewardData = data as RewardStatus;
-        console.log(tankRewardData);
+        this.rewardsPanel.updateStatus(tankRewardData);
         break;
       }
       case MessageType.TANK_EXIT: {
@@ -261,7 +261,6 @@ class Game {
     if (tankId === this.tankId) {
       this.sounds.playHappyNotification();
     }
-    this.rewardsPanel.updateTimer(tank.rewards);
   }
 
   registerUserInteraction() {
