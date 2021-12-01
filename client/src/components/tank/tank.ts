@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import Shield from './shield';
 import { MoveStatus, RewardStatus, RewardType } from '../../types/Types';
 
 class Tank {
@@ -12,6 +13,7 @@ class Tank {
   curDir: number = 0;
   hits: number = 0;
   rewards: RewardStatus;
+  shield: Shield;
   constructor(tankModel: THREE.Object3D, tankId: string, tankName: string) {
     this.model = tankModel;
     this.moveStatus = {
@@ -30,6 +32,11 @@ class Tank {
     this.tankId = tankId;
     this.tankName = tankName;
     this.tankNameMesh = new THREE.Mesh();
+    this.shield = new Shield();
+  }
+
+  updateShield() {
+    this.shield.updateTransparency(this.rewards[RewardType.TANK_INVULNERABLE]!);
   }
 }
 

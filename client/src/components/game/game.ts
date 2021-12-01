@@ -123,6 +123,10 @@ class Game {
       }
       case MessageType.TANK_REWARDS: {
         const tankRewardData = data as RewardStatus;
+        const myTank = this.tanks[this.tankId];
+        if (myTank) {
+          myTank.rewards = tankRewardData;
+        }
         this.rewardsPanel.updateStatus(tankRewardData);
         break;
       }
@@ -189,6 +193,11 @@ class Game {
           this.bullets[tankId] = {};
         }
         this.tanks[tankId] = tank;
+        // TODO show shield for all tanks
+        if (tankId === this.tankId) {
+          tank.updateShield();
+          this.scene.add(tank.shield.model);
+        }
         resolve(tank);
       });
     });

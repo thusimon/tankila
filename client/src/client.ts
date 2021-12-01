@@ -94,6 +94,14 @@ function updateAndTweenScene(deltaTime: number) {
       .start();
   }
 
+  if (myTank) {
+    myTank.updateShield();
+    new TWEEN.Tween(myTank.shield.model.position)
+      .to({x: myTank.curPos.x, y: myTank.curPos.y + 0.6, z:myTank.curPos.z}, deltaTime)
+      .easing(TWEEN.Easing.Linear.None)
+      .start();
+  }
+
   const bullets = game.bullets;
   for (const tankId in bullets) {
     const tankBullets = bullets[tankId];

@@ -47,7 +47,7 @@ class Rewards {
       if (leftTime > 0) {
         // show the status and update the time
         rewardView[0].classList.add('reward-container-show');
-        rewardView[1].textContent = `${leftTime}s`
+        rewardView[1].textContent = `${leftTime}s`;
       } else {
         // hide the status
         rewardView[0].classList.remove('reward-container-show');
