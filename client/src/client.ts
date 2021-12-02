@@ -92,12 +92,9 @@ function updateAndTweenScene(deltaTime: number) {
       .to({y: tankNameYRotation}, deltaTime)
       .easing(TWEEN.Easing.Linear.None)
       .start();
-  }
-
-  if (myTank) {
-    myTank.updateShield();
-    new TWEEN.Tween(myTank.shield.model.position)
-      .to({x: myTank.curPos.x, y: myTank.curPos.y + 0.6, z:myTank.curPos.z}, deltaTime)
+    tank.updateShield();
+    new TWEEN.Tween(tank.shield.model.position)
+      .to({x: tank.curPos.x, y: tank.curPos.y + 0.6, z:tank.curPos.z}, deltaTime)
       .easing(TWEEN.Easing.Linear.None)
       .start();
   }

@@ -42,12 +42,14 @@ class Rewards {
 
   updateStatus(rewardStatus: RewardStatus) {
     this.rewardKeys.forEach((key, idx) => {
-      const leftTime = rewardStatus[key]!;
+      const leftTime = Math.floor(rewardStatus[key]!);
       const rewardView = this.rewards[idx];
       if (leftTime > 0) {
         // show the status and update the time
         rewardView[0].classList.add('reward-container-show');
         rewardView[1].textContent = `${leftTime}s`;
+        const rewardTimeClass = leftTime > 10 ? 'reward-time-high' : 'reward-time-low';
+        rewardView[1].classList.add(rewardTimeClass);
       } else {
         // hide the status
         rewardView[0].classList.remove('reward-container-show');

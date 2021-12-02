@@ -144,6 +144,7 @@ const extractTanksMessage = () => {
       r: euler.y,
       b: tankBulletsMessage,
       e: tankBulletsToRemoveMessage,
+      w: tank.rewards
     }
     tanksMessage[tankId] = tankMessage;
     world.bulletsToRemove[tankId] = [];
@@ -166,18 +167,13 @@ const worldStep = positionUpdateRate / 1000;
 setInterval(() => {
   world.updateTanksPosition();
   world.world.step(worldStep);
+  world.updateRewardStatus(worldStep);
   const tanksMessage = extractTanksMessage();
   broadcastMessage(`${MessageType.TANK_POS},${JSON.stringify(tanksMessage)}`);
 }, positionUpdateRate);
 
 setInterval(() => {
   world.addRewards();
-  world.updateRewardStatus(rewardUpdateRate / 1000);
-  // send tanks reward status to each client
-  const tanks = world.tanks;
-  for(const tankId in tanks) {
-    clientMessage(tankId, `${MessageType.TANK_REWARDS},${JSON.stringify(tanks[tankId].rewards)}`);
-  }
 }, rewardUpdateRate);
 
 const handleMessage = (id: string, message: string): void => {

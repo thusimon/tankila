@@ -1,7 +1,8 @@
 import * as THREE from 'three';
+import {throttle} from 'lodash';
 import Arena from './arena';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import { BulletsType, MessageType, Tanks, TankPositions, MoveStatus, ScoresData, RewardType, RewardStatus } from '../../types/Types';
+import { BulletsType, MessageType, Tanks, TankPositions, MoveStatus, ScoresData, RewardType, RewardStatus, TankPosition } from '../../types/Types';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
 import Explosion from '../bullet/explosion';
@@ -50,6 +51,7 @@ class Game {
     speed: 0,
     direction: 0
   }
+  updateRewardPannel: (tankPosition: TankPosition) => void;
   constructor(renderer: THREE.WebGLRenderer, production: string, port: string) {
     this.renderer = renderer;
     this.scene = new THREE.Scene();
@@ -84,6 +86,7 @@ class Game {
     this.updateBullets.bind(this);
     this.updateExplosion.bind(this);
     this.updateCamera.bind(this);
+    this.updateRewardPannel = throttle(this.updateRewardPannelInternal, 500);
     window.addEventListener('resize', this.onWindowResize.bind(this), true);
   }
 
@@ -119,15 +122,11 @@ class Game {
         this.updateTankPosition(tankPositionData);
         this.updateBullets(tankPositionData);
         this.updateExplosion(tankPositionData);
-        break;
-      }
-      case MessageType.TANK_REWARDS: {
-        const tankRewardData = data as RewardStatus;
-        const myTank = this.tanks[this.tankId];
+        this.updateTankRewards(tankPositionData);
+        const myTank = tankPositionData[this.tankId];
         if (myTank) {
-          myTank.rewards = tankRewardData;
+          this.updateRewardPannel(myTank);
         }
-        this.rewardsPanel.updateStatus(tankRewardData);
         break;
       }
       case MessageType.TANK_EXIT: {
@@ -193,11 +192,7 @@ class Game {
           this.bullets[tankId] = {};
         }
         this.tanks[tankId] = tank;
-        // TODO show shield for all tanks
-        if (tankId === this.tankId) {
-          tank.updateShield();
-          this.scene.add(tank.shield.model);
-        }
+        this.scene.add(tank.shield.model);
         resolve(tank);
       });
     });
@@ -231,6 +226,7 @@ class Game {
       const tankToRemove = this.tanks[tankId];
       this.scene.remove(tankToRemove.model);
       this.scene.remove(tankToRemove.tankNameMesh);
+      this.scene.remove(tankToRemove.shield.model);
       delete this.tanks[tankId];
     }
   }
@@ -270,6 +266,11 @@ class Game {
     if (tankId === this.tankId) {
       this.sounds.playHappyNotification();
     }
+  }
+
+  updateRewardPannelInternal(tank: TankPosition) {
+    const myTankRewards = tank.w as RewardStatus;
+    this.rewardsPanel.updateStatus(myTankRewards);
   }
 
   registerUserInteraction() {
@@ -349,6 +350,15 @@ class Game {
         explosion.explode(new THREE.Vector3(exp.x, exp.y, exp.z));
         return explosion;
       });
+    }
+  }
+
+  updateTankRewards(tankData: TankPositions) {
+    for(const tankId in tankData) {
+      if(this.tanks[tankId]) {
+        const tankReward = tankData[tankId].w as RewardStatus;
+        this.tanks[tankId].rewards = tankReward;
+      }
     }
   }
 

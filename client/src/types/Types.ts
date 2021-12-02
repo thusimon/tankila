@@ -19,6 +19,7 @@ export interface TankPosition {
   r: number,
   b: BulletPosition[],
   e: BulletPosition[],
+  w: RewardStatus
 }
 
 export interface BulletPosition {
@@ -80,8 +81,7 @@ export enum MessageType {
   SCORE_UPDATE = '11',
   REWARD_ADD = '12',
   REWARD_HIT = '13',
-  REWARD_UPDATE = '14',
-  TANK_REWARDS = '15',
+  REWARD_UPDATE = '14'
 };
 
 export interface BulletinType {
