@@ -96,21 +96,24 @@ class World {
       return;
     }
     const tankBullets = this.bullets[tankId];
-    const bullet = new Bullet(this.world, tank, tankBullets.length, this.bulletExplode.bind(this));
+    const radius = tank.rewards[RewardType.BULLTET_LARGE]! > 0 ? 0.16 : 0.08;
+    const bullet = new Bullet(this.world, tank, tankBullets.length, radius, this.bulletExplode.bind(this));
     tankBullets.push(bullet);
   }
 
   bulletExplode(tankId: string, bullet: Bullet, collisionTo: string) {
     this.bulletsToRemove[tankId].push(bullet);
     const tanksBullet = this.bullets[tankId];
+    const tank = this.tanks[tankId];
     this.bullets[tankId] = tanksBullet.filter(blt => blt != bullet);
     if (this.scores[tankId] && collisionTo && collisionTo.startsWith('tank_')) {
       const hitTankId = collisionTo.split('_')[1];
       const hitTank = this.tanks[hitTankId];
       // check if the hit tank is invulnarable
       if (hitTank.rewards[RewardType.TANK_INVULNERABLE]! == 0) {
-        this.scores[tankId].s += 1;
-        this.scores[hitTankId].h += 1;
+        const bulletPower = (tank && tank.rewards[RewardType.BULLET_POWER]! > 0) ? 3 : 1;
+        this.scores[tankId].s += bulletPower;
+        this.scores[hitTankId].h += bulletPower;
       }
     }
     this.messager(`${MessageType.SCORE_UPDATE},${JSON.stringify(this.scores)}`);

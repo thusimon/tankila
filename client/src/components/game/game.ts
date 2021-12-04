@@ -319,6 +319,7 @@ class Game {
       const tankBullets = tankData[tankId].b;
       const tankBulletsId = tankBullets.map(tb => tb.i);
       const tankBulletsInScene = this.bullets[tankId] || {};
+      const tankRewardStatus = this.tanks[tankId].rewards;
       tankBullets.forEach(blt => {
         const bulletInScene = tankBulletsInScene[blt.i];
         if (bulletInScene) {
@@ -326,7 +327,9 @@ class Game {
           bulletInScene.updatePosition(blt.x, blt.y, blt.z);
         } else {
           // bullet not in scene, create a new bullet
-          const newTankBullet = new Bullet(this.scene, blt.x, blt.y, blt.z, blt.i);
+          const bulletRadius = tankRewardStatus[RewardType.BULLTET_LARGE]! > 0 ? 0.2 : 0.1;
+          const bulletColor = tankRewardStatus[RewardType.BULLET_POWER]! > 0 ? new THREE.Color(255, 0, 0) : new THREE.Color(255, 255, 0);
+          const newTankBullet = new Bullet(this.scene, blt.x, blt.y, blt.z, blt.i, bulletRadius, bulletColor);
           tankBulletsInScene[blt.i] = newTankBullet;
           newTankBullet.addBullet();
         }
@@ -344,8 +347,10 @@ class Game {
     // TODO clear game.explosions array
     for(const tankId in tankData) {
       const explosionsData = tankData[tankId].e;
+      const tankReward = this.tanks[tankId].rewards
+      const bulletColor = tankReward[RewardType.BULLET_POWER]! > 0 ? new THREE.Color(255, 0, 0) : new THREE.Color(255, 255, 0);
       explosionsData.forEach(exp => {
-        const explosion = new Explosion(new THREE.Color(0xffff00), this.scene);
+        const explosion = new Explosion(bulletColor, this.scene);
         this.explosions.push(explosion);
         explosion.explode(new THREE.Vector3(exp.x, exp.y, exp.z));
         return explosion;

@@ -9,12 +9,12 @@ class Bullet {
   tankId: string;
   id: number = 0;
   bulletExplodeCallback: (id:string, bullet: Bullet, collisionTo: string) => void
-  constructor(world: CANNON.World, tank: Tank, id: number, bulletExplodeCb: (id: string, bullet: Bullet, collisionTo: string) => void) {
+  constructor(world: CANNON.World, tank: Tank, id: number, radius: number, bulletExplodeCb: (id: string, bullet: Bullet, collisionTo: string) => void) {
     this.world = world;
     this.tankId = tank.tankId;
     this.id = id;
     this.bulletExplodeCallback = bulletExplodeCb;
-    const bulletShape = new CANNON.Sphere(0.08)
+    const bulletShape = new CANNON.Sphere(radius);
     this.body = new CANNON.Body({
         mass: 0.1,
         type: CANNON.Body.DYNAMIC,
@@ -27,9 +27,9 @@ class Bullet {
     const eulerY = euler.y;
     const offsetX = BULLET_SPEED * Math.sin(eulerY);
     const offsetZ = BULLET_SPEED * Math.cos(eulerY);
-    this.body.position.set(tankBody.position.x + 0.6 * Math.sin(eulerY),
-      tankBody.position.y,
-      tankBody.position.z + 0.6 * Math.cos(eulerY));
+    this.body.position.set(tankBody.position.x + 0.7 * Math.sin(eulerY),
+      tankBody.position.y + 0.1,
+      tankBody.position.z + 0.7 * Math.cos(eulerY));
 
     this.body.velocity = new CANNON.Vec3(offsetX, 0, offsetZ);
     this.body.userData = `bullet_${this.tankId}_${this.id}`;
