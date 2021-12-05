@@ -5,7 +5,7 @@ import Bullet from './components/bullet';
 import Reward from './components/reward';
 import { generateRandomPosition, randomEnum } from '../utils/dynamics';
 import { MoveStatus, MessageType, RewardType } from '../../../client/src/types/Types';
-import {updateMoveStatus, updateMoveSpeed, updateMoveRotation, getRewardName, updateTankRewardStatus} from '../utils/tankStatus';
+import {updateMoveStatus, updateMoveSpeed, updateMoveRotation, getRewardName, updateTankRewardStatus, updateTankSize} from '../utils/tankStatus';
 import { REWARD_DURATION } from '../constants';
 
 class World {
@@ -86,6 +86,13 @@ class World {
     for (const tankId in this.tanks) {
       const tank = this.tanks[tankId];
       updateTankRewardStatus(tank, stepTime);
+    }
+  }
+
+  updateTankSize() {
+    for (const tankId in this.tanks) {
+      const tank = this.tanks[tankId];
+      updateTankSize(tank);
     }
   }
 

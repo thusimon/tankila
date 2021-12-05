@@ -132,6 +132,15 @@ export const updateTankRewardStatus = (tank: Tank, deltaTime: number) => {
   });
 }
 
+export const updateTankSize = (tank: Tank) => {
+  const smallReward = tank.rewards[RewardType.TANK_SAMLL]!;
+  if (smallReward > 0) {
+    tank.shrink();
+  } else {
+    tank.normal();
+  }
+}
+
 export const getRewardName = (type: RewardType) => {
   switch (type) {
     case RewardType.TANK_SWIFT:

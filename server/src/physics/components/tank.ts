@@ -3,6 +3,7 @@ import { MoveStatus, UserBody, RewardStatus, RewardType } from '../../../../clie
 
 class Tank {
   body: UserBody;
+  geo: CANNON.Sphere;
   moveStatus: MoveStatus;
   tankId: string;
   tankName: string;
@@ -21,16 +22,30 @@ class Tank {
       [RewardType.BULLTET_LARGE]: 0,
       [RewardType.BULLET_POWER]: 0,
     };
-    const sphereShape = new CANNON.Sphere(0.5);
+    this.geo = new CANNON.Sphere(0.5);
     this.body = new CANNON.Body({
         mass: 1,
         type: CANNON.Body.DYNAMIC
     });
-    this.body.addShape(sphereShape);
+    this.body.addShape(this.geo);
     this.body.userData = `tank_${tankId}_${tankName}`;
     
     this.tankId = tankId;
     this.tankName = tankName;
+  }
+
+  shrink() {
+    this.body.removeShape(this.geo);
+    this.geo.radius = 0.3;
+    this.body.addShape(this.geo);
+    this.body.position.y = 0.3;
+  }
+
+  normal() {
+    this.body.removeShape(this.geo);
+    this.geo.radius = 0.5;
+    this.body.addShape(this.geo);
+    this.body.position.y = 0.5;
   }
 }
 

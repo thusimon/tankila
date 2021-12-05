@@ -93,8 +93,9 @@ function updateAndTweenScene(deltaTime: number) {
       .easing(TWEEN.Easing.Linear.None)
       .start();
     tank.updateShield();
+    tank.updateSize();
     new TWEEN.Tween(tank.shield.model.position)
-      .to({x: tank.curPos.x, y: tank.curPos.y + 0.6, z:tank.curPos.z}, deltaTime)
+      .to({x: tank.curPos.x, y: tank.curPos.y + tank.shieldOffsetY, z:tank.curPos.z}, deltaTime)
       .easing(TWEEN.Easing.Linear.None)
       .start();
   }

@@ -303,7 +303,7 @@ class Game {
         const tank = this.tanks[tankId];
         const data = tankData[tankId];
         if (tank.ready) {
-          const targetPos = new THREE.Vector3(data.x, data.y - 0.5, data.z);
+          const targetPos = new THREE.Vector3(data.x, data.y - tank.offsetY, data.z);
           tank.curPos.copy(targetPos);
           tank.curDir = data.r;
           if (tank.tankId === this.tankId) {
