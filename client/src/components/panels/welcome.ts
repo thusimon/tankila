@@ -1,6 +1,9 @@
 import Game from '../game/game';
 import { uuidv4 } from '../../utils/urls';
 import './welcome.scss';
+import { RewardType } from '../../types/Types';
+import { getRewardText } from '../../utils/status';
+import { getRewardInstruction } from '../../../../server/src/utils/tankStatus';
 
 class Welcome {
   menuPanel: HTMLDivElement;
@@ -28,6 +31,10 @@ class Welcome {
     startButton.textContent = 'Start';
     startButton.disabled = true;
     tankNameContainer.append(tankNameInput, startButton);
+
+    const instructionLabel = document.createElement('div');
+    instructionLabel.className = 'instruction-title';
+    instructionLabel.textContent = 'Keyboard Operations:';
 
     const instructionContainer = document.createElement('div');
     instructionContainer.id = 'instruction-container';
@@ -76,7 +83,22 @@ class Welcome {
 
     instructionContainer.append(...instructionCells);
     
-    startGame.append(label, tankNameContainer, instructionContainer);
+    const rewardLabel = document.createElement('div');
+    rewardLabel.className = 'instruction-title';
+    rewardLabel.textContent = 'Rewards:';
+
+    const rewardContainer = document.createElement('div');
+    rewardContainer.id = 'reward-container';
+    for(let i = 0; i < 5 ; i++) {
+      const reward = document.createElement('div');
+      reward.classList.add('reward-cell');
+      const rewardType = i as RewardType;
+      reward.textContent = getRewardText(rewardType);
+      reward.title = getRewardInstruction(rewardType);
+      rewardContainer.append(reward);
+    }
+
+    startGame.append(label, tankNameContainer, instructionLabel, instructionContainer, rewardLabel, rewardContainer);
 
     menuPanel.append(startGame);
     document.body.append(menuPanel);

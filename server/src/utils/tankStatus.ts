@@ -144,15 +144,32 @@ export const updateTankSize = (tank: Tank) => {
 export const getRewardName = (type: RewardType) => {
   switch (type) {
     case RewardType.TANK_SWIFT:
-      return 'Acceleration';
+      return 'Swift';
     case RewardType.TANK_SAMLL:
-      return 'Shrink';
+      return 'Dodge';
     case RewardType.TANK_INVULNERABLE:
       return 'Invulnerable';
     case RewardType.BULLET_POWER:
-      return 'Damage';
+      return 'Battle';
     case RewardType.BULLTET_LARGE:
       return 'Power';
+    default:
+      return 'Unknown';
+  }
+};
+
+export const getRewardInstruction = (type: RewardType) => {
+  switch (type) {
+    case RewardType.TANK_SWIFT:
+      return 'Swift, faster movement';
+    case RewardType.TANK_SAMLL:
+      return 'Dodge, tank shrinks';
+    case RewardType.TANK_INVULNERABLE:
+      return 'Invulnerability, can\'t be damaged';
+    case RewardType.BULLET_POWER:
+      return 'Battle Effectiveness, larger ammunition size';
+    case RewardType.BULLTET_LARGE:
+      return 'Fire Power, ammunition gains more scores';
     default:
       return 'Unknown';
   }
