@@ -3,8 +3,8 @@ import * as THREE from 'three';
 class Arena {
   constructor(scene: THREE.Scene) {
     const wallTexture = new THREE.TextureLoader().load('./textures/brickwallmoss.jpg');
-    wallTexture.minFilter = THREE.NearestMipmapLinearFilter
-    wallTexture.magFilter = THREE.NearestMipmapLinearFilter
+    wallTexture.minFilter = THREE.NearestMipmapLinearFilter;
+    wallTexture.magFilter = THREE.NearestMipmapLinearFilter;
     wallTexture.wrapS = THREE.RepeatWrapping;
     wallTexture.wrapT = THREE.RepeatWrapping;
     wallTexture.repeat.set(100, 1);

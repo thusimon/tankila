@@ -63,7 +63,7 @@ export interface MoveStatus {
 }
 
 export interface MessageListener {
-  (type: string, data: object): void;
+  (type: string, data: string[] | TankPositions | ScoresData | RewardType[] | [RewardType, number, number, number][]): void;
 }
 
 export enum MessageType {
@@ -99,7 +99,7 @@ export enum RewardType {
 };
 
 export type RewardStatus = {
-  [key in RewardType]?: number;
+  [key in RewardType]: number;
 };
 
 export interface WSClients {

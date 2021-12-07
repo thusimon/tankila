@@ -4,7 +4,7 @@ class Explosion {
   private particleCount = 30;
   private particles: THREE.Points;
   private scene: THREE.Scene;
-  public removeFlag: boolean = false;
+  public removeFlag = false;
   constructor(color: THREE.Color, scene: THREE.Scene) {
     this.scene = scene;
     const particleGeometry = new THREE.BufferGeometry();
@@ -23,7 +23,7 @@ class Explosion {
     this.particles.visible = false;
   }
 
-  public explode(position: THREE.Vector3) {
+  public explode(position: THREE.Vector3): void {
     this.particles.position.x = position.x;
     this.particles.position.y = position.y;
     this.particles.position.z = position.z;
@@ -44,7 +44,7 @@ class Explosion {
     this.particles.visible = true;
   }
 
-  public update() {
+  public update(): void {
     if (!this.particles.visible) {
       return;
     }
@@ -69,7 +69,7 @@ class Explosion {
     }
   }
 
-  public remove() {
+  public remove(): void {
     this.scene.remove(this.particles);
   }
 }

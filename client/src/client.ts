@@ -5,8 +5,8 @@ import Game from './components/game/game';
 import Welcome from './components/panels/welcome';
 import './client.scss';
 
-declare var PRODUCTION: string;
-declare var PORT: string;
+declare let PRODUCTION: string;
+declare let PORT: string;
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)

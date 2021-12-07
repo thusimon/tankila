@@ -25,20 +25,20 @@ class Game {
   explosions: Explosion[] =[];
   rewards: Reward[] = [];
   tanks: Tanks = {};
-  cameraRotationXZOffset: number = 0;
-  cameraRotationYOffset: number = 0;
-  width: number = 1;
-  height: number = 1;
+  cameraRotationXZOffset = 0;
+  cameraRotationYOffset = 0;
+  width = 1;
+  height = 1;
   production: string;
   port: string;
   messager: Message;
-  tankId: string = '';
-  tankName: string = '';
+  tankId = '';
+  tankName = '';
   chat: Chat;
   score: Score;
   settings: Settings;
   rewardsPanel: RewaresPanel;
-  chatReady: boolean = false;
+  chatReady = false;
   sounds: Sounds;
   moveStatus: MoveStatus = {
     keyW: '0',
@@ -90,7 +90,7 @@ class Game {
     window.addEventListener('resize', this.onWindowResize.bind(this), true);
   }
 
-  async connectToServer(tankId: string, tankName: string) {
+  async connectToServer(tankId: string, tankName: string): Promise<void> {
     this.tankId = tankId;
     this.tankName = tankName;
     const connected = await this.messager.getConnection(tankId, tankName);
@@ -106,7 +106,7 @@ class Game {
     }
   }
 
-  messageHandler(type:string, data: any) {
+  messageHandler(type:string, data: string[] | TankPositions | ScoresData | RewardType[] | [RewardType, number, number, number][]): void {
     switch (type) {
       case MessageType.TANK_JOINED: {
         const tankJoinedData = data as string[];
@@ -136,7 +136,7 @@ class Game {
         break;
       }
       case MessageType.CHAT_RECEIVE: {
-        const chatData = data as Array<string>;
+        const chatData = data as string[];
         const [chatName, chatContent] = chatData;
         this.chat.appendChat(chatName, chatContent);
         break;
@@ -148,14 +148,14 @@ class Game {
         break;
       }
       case MessageType.REWARD_ADD: {
-        const reward = data as Array<any>;
+        const reward = data as RewardType[];
         const rewardType = reward[0] as RewardType;
         const position = new THREE.Vector3(reward[1], reward[2], reward[3]);
         this.addReward(rewardType, position);
         break;
       }
       case MessageType.REWARD_HIT: {
-        const rewardHit = data as Array<any>;
+        const rewardHit = data as [string, RewardType, number];
         const tankId = rewardHit[0] as string;
         const rewardType = rewardHit[1] as RewardType;
         const rewardIdx = rewardHit[2] as number;
@@ -163,9 +163,9 @@ class Game {
         break;
       }
       case MessageType.REWARD_UPDATE: {
-        const rewards = data as Array<any>;
-        rewards.forEach((reward: Array<any>) => {
-          const rewardType = reward[0] as RewardType;
+        const rewards = data as [RewardType, number, number, number][];
+        rewards.forEach(reward => {
+          const rewardType = reward[0];
           const position = new THREE.Vector3(reward[1], reward[2], reward[3]);
           this.addReward(rewardType, position);
         });
@@ -178,7 +178,7 @@ class Game {
     }
   }
 
-  async addTank(tankId: string, tankName: string) {
+  async addTank(tankId: string, tankName: string): Promise<void | THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>> {
     const tankLoader = new GLTFLoader();
     const fontLoader = new THREE.FontLoader();
     const tankModelPromise = new Promise<Tank>(resolve => {
@@ -221,7 +221,7 @@ class Game {
     });
   }
 
-  removeTank(tankId: string) {
+  removeTank(tankId: string): void {
     if (this.tanks[tankId]) {
       const tankToRemove = this.tanks[tankId];
       this.scene.remove(tankToRemove.model);
@@ -231,12 +231,12 @@ class Game {
     }
   }
 
-  getMyTank() {
+  getMyTank(): Tank {
     return this.tanks[this.tankId];
   }
 
-  updateTankHits(scoreData: ScoresData) {
-    for(let id in scoreData) {
+  updateTankHits(scoreData: ScoresData): void {
+    for(const id in scoreData) {
       const tank = this.tanks[id];
       if (tank) {
         tank.hits = scoreData[id].h;
@@ -248,13 +248,13 @@ class Game {
     }
   }
 
-  addReward(type: RewardType, position: THREE.Vector3) {
+  addReward(type: RewardType, position: THREE.Vector3): void {
     const reward = new Reward(type, position);
     this.rewards.push(reward);
     this.scene.add(reward.model);
   }
 
-  hitReward(tankId: string, type: RewardType, idx: number) {
+  hitReward(tankId: string, type: RewardType, idx: number): void {
     if (!this.tanks[tankId]) {
       return;
     }
@@ -268,12 +268,12 @@ class Game {
     }
   }
 
-  updateRewardPannelInternal(tank: TankPosition) {
+  updateRewardPannelInternal(tank: TankPosition): void {
     const myTankRewards = tank.w as RewardStatus;
     this.rewardsPanel.updateStatus(myTankRewards);
   }
 
-  registerUserInteraction() {
+  registerUserInteraction(): void {
     document.addEventListener('keydown', this.onKeyDown.bind(this), true);
     document.addEventListener('keyup', this.onKeyUp.bind(this), true);
     document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), true);
@@ -287,7 +287,7 @@ class Game {
     }
   }
 
-  updateTankPosition(tankData: TankPositions) {
+  updateTankPosition(tankData: TankPositions): void {
     for (const tankId in tankData) {
       if (!this.tanks[tankId]) {
         // use a fake tank to hold the place, just in case the same tank is added multiple times 
@@ -314,7 +314,7 @@ class Game {
     }
   }
 
-  updateBullets(tankData: TankPositions) {
+  updateBullets(tankData: TankPositions): void {
     for (const tankId in tankData) {
       const tankBullets = tankData[tankId].b;
       const tankBulletsId = tankBullets.map(tb => tb.i);
@@ -327,8 +327,8 @@ class Game {
           bulletInScene.updatePosition(blt.x, blt.y, blt.z);
         } else {
           // bullet not in scene, create a new bullet
-          const bulletRadius = tankRewardStatus[RewardType.BULLTET_LARGE]! > 0 ? 0.2 : 0.1;
-          const bulletColor = tankRewardStatus[RewardType.BULLET_POWER]! > 0 ? new THREE.Color(255, 0, 0) : new THREE.Color(255, 255, 0);
+          const bulletRadius = tankRewardStatus[RewardType.BULLTET_LARGE] > 0 ? 0.2 : 0.1;
+          const bulletColor = tankRewardStatus[RewardType.BULLET_POWER] > 0 ? new THREE.Color(255, 0, 0) : new THREE.Color(255, 255, 0);
           const newTankBullet = new Bullet(this.scene, blt.x, blt.y, blt.z, blt.i, bulletRadius, bulletColor);
           tankBulletsInScene[blt.i] = newTankBullet;
           newTankBullet.addBullet();
@@ -343,12 +343,12 @@ class Game {
     }
   }
 
-  updateExplosion(tankData: TankPositions) {
+  updateExplosion(tankData: TankPositions): void {
     // TODO clear game.explosions array
     for(const tankId in tankData) {
       const explosionsData = tankData[tankId].e;
       const tankReward = this.tanks[tankId].rewards
-      const bulletColor = tankReward[RewardType.BULLET_POWER]! > 0 ? new THREE.Color(255, 0, 0) : new THREE.Color(255, 255, 0);
+      const bulletColor = tankReward[RewardType.BULLET_POWER] > 0 ? new THREE.Color(255, 0, 0) : new THREE.Color(255, 255, 0);
       explosionsData.forEach(exp => {
         const explosion = new Explosion(bulletColor, this.scene);
         this.explosions.push(explosion);
@@ -358,7 +358,7 @@ class Game {
     }
   }
 
-  updateTankRewards(tankData: TankPositions) {
+  updateTankRewards(tankData: TankPositions): void {
     for(const tankId in tankData) {
       if(this.tanks[tankId]) {
         const tankReward = tankData[tankId].w as RewardStatus;
@@ -367,7 +367,7 @@ class Game {
     }
   }
 
-  updateCameraToTank(myTank: Tank) {
+  updateCameraToTank(myTank: Tank): void {
     const {position, rotation} = myTank.model;
 
     this.camera.position.x = position.x - 2 * Math.sin(rotation.z);
@@ -378,14 +378,14 @@ class Game {
       position.z + 10 * Math.cos(rotation.z - this.cameraRotationXZOffset));
   }
 
-  updateCamera() {
+  updateCamera(): void {
     const myTank = this.getMyTank();
     if (myTank) {
       this.updateCameraToTank(myTank);
     }
   }
 
-  onKeyDown (event: KeyboardEvent) {
+  onKeyDown (event: KeyboardEvent): void {
     if (this.chatReady) {
       return;
     }
@@ -429,7 +429,7 @@ class Game {
     }
   }
 
-  onKeyUp(event: KeyboardEvent) {
+  onKeyUp(event: KeyboardEvent): void {
     if (this.chatReady) {
       return;
     }
@@ -481,7 +481,7 @@ class Game {
     }
   }
 
-  sendChat() {
+  sendChat(): void {
     const chatContent = this.chat.getChatInputContent();
     if (!chatContent) {
       return;
@@ -490,22 +490,22 @@ class Game {
     this.chat.clearChatInputContent();
   }
 
-  onSendChat(event: KeyboardEvent) {
+  onSendChat(event: KeyboardEvent): void {
     if (event.code !== 'Enter') {
       return;
     }
     this.sendChat();
   }
 
-  onActiveChat() {
+  onActiveChat(): void {
     this.chatReady = true;
   }
 
-  onDeactiveChat() {
+  onDeactiveChat(): void {
     this.chatReady = false;
   }
 
-  onDocumentMouseMove(event: MouseEvent) {
+  onDocumentMouseMove(event: MouseEvent): void {
     if (this.settings.settingShown || this.settings.bulletin.bulletinShow) {
       return;
     }
@@ -514,7 +514,7 @@ class Game {
     this.cameraRotationYOffset = (y / this.height - 0.5) * Math.PI / 2;
   }
 
-  onWindowResize() {
+  onWindowResize(): void {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.camera.aspect = this.width / this.height;
