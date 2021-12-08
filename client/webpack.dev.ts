@@ -3,7 +3,7 @@ import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-serv
 import { merge } from 'webpack-merge';
 import common from './webpack.common';
 import path from 'path';
-import dotenv, {DotenvParseOutput} from 'dotenv';
+import dotenv from 'dotenv';
 import webpack from 'webpack';
 
 interface Configuration extends WebpackConfiguration {
@@ -13,7 +13,7 @@ interface Configuration extends WebpackConfiguration {
 const env = dotenv.config({
   path: path.join(__dirname, '../.env')
 });
-const envParsed: DotenvParseOutput = env.parsed!;
+const envParsed = env.parsed;
 
 export default merge<Configuration>(common, {
   mode: 'development',
@@ -35,7 +35,7 @@ export default merge<Configuration>(common, {
   plugins: [
     new webpack.DefinePlugin({
       PRODUCTION: JSON.stringify(false),
-      PORT: envParsed.PORT
+      PORT: envParsed ? envParsed.PORT : '3000'
     })
   ]
 });

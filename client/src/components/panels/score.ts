@@ -5,7 +5,7 @@ class Score {
   scorePanel: HTMLDivElement;
   scoreArea: HTMLTextAreaElement;
   scoreControl: HTMLSpanElement;
-  scoreShow: boolean = true;
+  scoreShow = true;
   constructor() {
     const scorePanel = document.createElement('div');
     scorePanel.id = 'score-panel';
@@ -40,11 +40,11 @@ class Score {
     document.body.append(scorePanel);
   }
 
-  showPanel() {
+  showPanel(): void {
     this.scorePanel.style.display = 'block';
   }
 
-  toggleScore() {
+  toggleScore(): void {
     this.scoreShow = !this.scoreShow;
     if (this.scoreShow) {
       this.showScore();
@@ -53,19 +53,19 @@ class Score {
     }
   }
 
-  showScore() {
+  showScore(): void {
     this.scoreArea.classList.remove('score-hide');
     this.scoreArea.classList.add('score-show');
     this.scoreControl.textContent = '⯅';
   }
 
-  hideScore() {
+  hideScore(): void {
     this.scoreArea.classList.remove('score-show');
     this.scoreArea.classList.add('score-hide');
     this.scoreControl.textContent = '⯆';
   }
 
-  updateScore(scoresData: ScoresData) {
+  updateScore(scoresData: ScoresData): void {
     // sort score
     const scoresArray = Object.keys(scoresData).map(tankId => [tankId, scoresData[tankId].n, scoresData[tankId].s]);
     scoresArray.sort((a, b) => {

@@ -16,7 +16,8 @@ class Reward {
     rewardModel.position.copy(position);
     this.model = rewardModel;
   }
-  getTexture() {
+  getTexture(): THREE.CanvasTexture {
+    // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
     const ctx = document.createElement('canvas').getContext('2d')!;
     ctx.canvas.width = 256;
     ctx.canvas.height = 256;

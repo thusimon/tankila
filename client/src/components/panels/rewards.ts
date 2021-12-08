@@ -36,13 +36,13 @@ class Rewards {
     document.body.append(rewardsPanel);
   }
 
-  show() {
+  show(): void {
     this.rewardsPanel.style.display = 'flex';
   }
 
-  updateStatus(rewardStatus: RewardStatus) {
+  updateStatus(rewardStatus: RewardStatus): void {
     this.rewardKeys.forEach((key, idx) => {
-      const leftTime = Math.floor(rewardStatus[key]!);
+      const leftTime = Math.floor(rewardStatus[key]);
       const rewardView = this.rewards[idx];
       if (leftTime > 0) {
         // show the status and update the time

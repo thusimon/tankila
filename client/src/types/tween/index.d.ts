@@ -64,10 +64,10 @@ export class tween {
 }
 declare type EasingFunction = (amount: number) => number
 declare class Tween {
-  constructor(object: any)
+  constructor(object: unknown)
   isPlaying(): boolean
   isPaused(): boolean
-  to(properties: {}, duration?: number): this
+  to(properties: unknown, duration?: number): this
   duration(value: number): this
   start(time?: number | string): this
   stop(): this
@@ -77,11 +77,11 @@ declare class Tween {
   delay(amount: number): this
   repeat(times: number): this
   repeatDelay(amount: number): this
-  onStart(callback: (object: any) => void): this
-  onUpdate(callback: (object: any, elapsed: number) => void): this
-  onRepeat(callback: (object: any) => void): this
-  onComplete(callback: (object: any) => void): this
-  onStop(callback: (object: any) => void): this
+  onStart(callback: (object: unknown) => void): this
+  onUpdate(callback: (object: unknown, elapsed: number) => void): this
+  onRepeat(callback: (object: unknown) => void): this
+  onComplete(callback: (object: unknown) => void): this
+  onStop(callback: (object: unknown) => void): this
   easing(easing: EasingFunction): this
 }
 

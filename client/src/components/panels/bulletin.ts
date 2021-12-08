@@ -5,7 +5,7 @@ class Bulletin {
   bulletinPanel: HTMLDivElement;
   bulletinArea: HTMLDivElement;
   bulletinMain: HTMLDivElement;
-  bulletinShow: boolean = false;
+  bulletinShow = false;
   port: string;
   constructor(port: string) {
     this.port = port;
@@ -44,19 +44,19 @@ class Bulletin {
     document.body.append(bulletinPanel);
   }
 
-  transitionHandler() {
+  transitionHandler(): void {
     if (!this.bulletinShow) {
       this.bulletinPanel.style.display = 'none';
     }
   }
 
-  showbulletin() {
+  showbulletin(): void {
     this.bulletinPanel.style.display = 'block';
     this.bulletinMain.classList.remove('bulletin-main-hide');
     this.bulletinMain.classList.add('bulletin-main-show');
   }
 
-  hidebulletin(enforce: boolean) {
+  hidebulletin(enforce: boolean): void {
     if (enforce == true) {
       this.bulletinShow = false;
     }
@@ -64,7 +64,7 @@ class Bulletin {
     this.bulletinMain.classList.add('bulletin-main-hide');
   }
 
-  fetchBulletin() {
+  async fetchBulletin(): Promise<void> {
     while (this.bulletinArea.firstChild) {
       this.bulletinArea.removeChild(this.bulletinArea.firstChild);
     }
@@ -73,16 +73,15 @@ class Bulletin {
       url += `:${this.port}`;
     }
     url += '/api/tankilabulletins';
-    return fetch(url, {
+    const response = await fetch(url, {
       method: 'GET',
       mode: 'cors'
-    }).then(response => response.json())
-    .then((bulletinsResp: BulletinType[]) => {
-      this.constructBulletin(bulletinsResp);
     });
+    const bulletinsResp = await response.json();
+    this.constructBulletin(bulletinsResp);
   }
 
-  constructBulletin(bulletins: BulletinType[]) {
+  constructBulletin(bulletins: BulletinType[]): void {
     const dateTimeOptions = {
       year: 'numeric', month: 'numeric', day: 'numeric',
       hour: 'numeric', minute: 'numeric', second: 'numeric',
@@ -112,7 +111,7 @@ class Bulletin {
     })
   }
 
-  toggleBulletin() {
+  toggleBulletin(): void {
     this.bulletinShow = !this.bulletinShow;
     if (this.bulletinShow) {
       this.fetchBulletin();

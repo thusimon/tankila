@@ -10,7 +10,7 @@ class Shield {
     this.model = new THREE.Mesh(geo);
   }
 
-  updateTransparency(timeLeft: number) {
+  updateTransparency(timeLeft: number): void {
     const leftCap = (timeLeft < QUARTER_DURATION && timeLeft > 0) ? QUARTER_DURATION : timeLeft; 
     this.model.material = new THREE.MeshBasicMaterial({
       color: 0x99004C,
@@ -19,13 +19,13 @@ class Shield {
     });
   }
 
-  small() {
+  small(): void {
     if (this.model.scale.length() > 1) {
       this.model.scale.set(0.5, 0.5, 0.5);
     }
   }
 
-  normal() {
+  normal(): void {
     if (this.model.scale.length() < 1) {
       this.model.scale.set(1, 1, 1);
     }

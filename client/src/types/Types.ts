@@ -82,13 +82,13 @@ export enum MessageType {
   REWARD_ADD = '12',
   REWARD_HIT = '13',
   REWARD_UPDATE = '14'
-};
+}
 
 export interface BulletinType {
   updatedAt: string;
   name: string;
   credit: number;
-};
+}
 
 export enum RewardType {
   TANK_SWIFT,
@@ -96,12 +96,12 @@ export enum RewardType {
   TANK_INVULNERABLE,
   BULLTET_LARGE,
   BULLET_POWER,
-};
+}
 
 export type RewardStatus = {
   [key in RewardType]: number;
-};
+}
 
 export interface WSClients {
   [key: string]: WebSocket;
-};
+}

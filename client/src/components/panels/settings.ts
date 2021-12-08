@@ -6,7 +6,7 @@ class Settings {
   settingsPanel: HTMLDivElement;
   settingsMain: HTMLDivElement;
   audioSlider: HTMLInputElement;
-  settingShown: boolean = false;
+  settingShown = false;
   port: string;
   sounds: Sounds
   bulletin: Bulletin;
@@ -77,27 +77,27 @@ class Settings {
     this.bulletin = new Bulletin(port);
   }
 
-  transitionHandler() {
+  transitionHandler(): void {
     if (!this.settingShown) {
       this.settingsPanel.style.display = 'none';
     }
   }
 
-  audioUpate(event: Event) {
+  audioUpate(event: Event): void {
     const target = event.target as HTMLInputElement;
     const newVal = Number(target.value);
     this.sounds.adjustVolumn(newVal);
     this.sounds.playWelcome();
   }
 
-  showSetting() {
+  showSetting(): void {
     this.audioSlider.value = `${this.sounds.volumn}`;
     this.settingsPanel.style.display = 'block';
     this.settingsMain.classList.remove('settings-main-hide');
     this.settingsMain.classList.add('settings-main-show');
   }
 
-  hideSetting(enforce: boolean) {
+  hideSetting(enforce: boolean): void {
     if (enforce) {
       this.settingShown = false;
     }
@@ -105,7 +105,7 @@ class Settings {
     this.settingsMain.classList.add('settings-main-hide');
   }
 
-  toggleSetting() {
+  toggleSetting(): void {
     this.settingShown = !this.settingShown;
     if (this.settingShown) {
       this.showSetting();
@@ -114,7 +114,7 @@ class Settings {
     }
   }
 
-  showBulletin() {
+  showBulletin(): void {
     this.bulletin.toggleBulletin();
   }
 }

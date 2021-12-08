@@ -33,23 +33,23 @@ class Chat {
     document.body.append(chatPanel);
   }
 
-  showChat() {
+  showChat(): void {
     this.chatPanel.style.display = 'block';
   }
 
-  hideChat() {
+  hideChat(): void {
     this.chatPanel.style.display = 'none';
   }
 
-  getChatInputContent() {
+  getChatInputContent(): string {
     return this.chatInput.value;
   }
 
-  clearChatInputContent() {
+  clearChatInputContent(): void {
     this.chatInput.value = '';
   }
 
-  appendChat(name: string, content: string) {
+  appendChat(name: string, content: string): void{
     const now = new Date();
     const hour = `0${now.getHours()}`.substr(-2);
     const minute = `0${now.getMinutes()}`.substr(-2);

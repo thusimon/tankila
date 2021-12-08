@@ -1,9 +1,0 @@
-{
-  "apps": [
-    {
-      "name": "tankila",
-      "script": "npm",
-      "args": "run start-server"
-    }
-  ]
-}

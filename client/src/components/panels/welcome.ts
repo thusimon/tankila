@@ -121,10 +121,10 @@ class Welcome {
     }, true);
   }
 
-  showPanel() {
+  showPanel(): void {
     this.menuPanel.style.display = 'block';
   }
-  hidePanel() {
+  hidePanel(): void {
     this.menuPanel.style.display = 'none';
   }
 }

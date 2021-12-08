@@ -3,13 +3,13 @@ import { merge } from 'webpack-merge';
 import common from './webpack.common';
 import path from 'path';
 import webpack from 'webpack';
-import dotenv, {DotenvParseOutput} from 'dotenv';
+import dotenv from 'dotenv';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 const env = dotenv.config({
   path: path.join(__dirname, '../.env')
 });
-const envParsed: DotenvParseOutput = env.parsed!;
+const envParsed = env.parsed;
 
 export default merge<Configuration>(common, {
   mode: 'production',
@@ -32,7 +32,7 @@ export default merge<Configuration>(common, {
   plugins: [
     new webpack.DefinePlugin({
       PRODUCTION: JSON.stringify(true),
-      PORT: envParsed.PORT
+      PORT: envParsed ? envParsed.PORT : '3000'
     }),
     new MiniCssExtractPlugin({
       filename: 'style.[contenthash].css'
