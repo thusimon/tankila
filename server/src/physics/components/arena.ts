@@ -1,5 +1,5 @@
-import * as CANNON from 'cannon-es'
-import {UserBody} from '../../../../client/src/types/Types'
+import * as CANNON from 'cannon-es';
+import {UserBody} from '../../types';
 import {ARENA_WIDTH, ARENA_HEIGHT} from '../../constants';
 
 class Arena {

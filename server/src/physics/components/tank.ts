@@ -1,5 +1,6 @@
 import * as CANNON from 'cannon-es';
-import { MoveStatus, UserBody, RewardStatus, RewardType } from '../../../../client/src/types/Types';
+import { MoveStatus, RewardStatus, RewardType } from '../../../../client/src/types/Types';
+import { UserBody } from '../../types';
 
 class Tank {
   body: UserBody;
@@ -34,14 +35,14 @@ class Tank {
     this.tankName = tankName;
   }
 
-  shrink() {
+  shrink(): void {
     this.body.removeShape(this.geo);
     this.geo.radius = 0.3;
     this.body.addShape(this.geo);
     this.body.position.y = 0.3;
   }
 
-  normal() {
+  normal(): void {
     this.body.removeShape(this.geo);
     this.geo.radius = 0.5;
     this.body.addShape(this.geo);

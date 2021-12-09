@@ -1,4 +1,4 @@
-import {Schema, model, Model, FilterQuery, UpdateQuery} from 'mongoose';
+import {Schema, model} from 'mongoose';
 
 const ScoreSchema = new Schema({
   name: {

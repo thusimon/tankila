@@ -1,5 +1,6 @@
 import * as CANNON from 'cannon-es';
-import { RewardType, UserBody } from '../../../../client/src/types/Types';
+import { RewardType } from '../../../../client/src/types/Types';
+import { UserBody, CollisionEvent } from '../../types'; 
 
 class Reward {
   world: CANNON.World;
@@ -21,12 +22,12 @@ class Reward {
     this.body.addEventListener('collide', this.collideCallBack);
   }
 
-  collideCallBack(evt: any) {
+  collideCallBack(evt: CollisionEvent): void {
     const collisionTo = evt.body.userData as string;
     this.rewardHitCallback(this, collisionTo);
   }
 
-  remove() {
+  remove(): void {
     this.body.removeEventListener('collide', this.collideCallBack);
     this.world.removeBody(this.body);
   }

@@ -10,15 +10,19 @@ import World from './physics/world';
 import {TankilaScore} from './db/scores';
 import {updateOne} from './db/utils';
 import {router} from './routes';
+import {TankMessageType} from './types';
 
 dotenv.config({
   path: path.join(__dirname, '../../.env')
 });
 
-const CONNECTION_URI = process.env.MONGODB_URI!;
+const CONNECTION_URI = process.env.MONGODB_URI;
 
 /* ------db------ */
 const connectToDb = () => {
+  if (!CONNECTION_URI) {
+    return Promise.reject('invalid connection url')
+  }
   return mongoose.connect(CONNECTION_URI).then(async () => {
     console.log(`Connected to mongoDB to ${CONNECTION_URI}`);
     return Promise.resolve();
@@ -79,8 +83,8 @@ const messager = (message: string, id?: string): void => {
 const world = new World(messager);
 
 wss.on('connection', (ws, req) => {
-  const id = getQueryFromUrl('id', req.url!);
-  const name = getQueryFromUrl('name', req.url!);
+  const id = getQueryFromUrl('id', req.url);
+  const name = getQueryFromUrl('name', req.url);
   console.log(`${id}-${name} tank enters`);
   if(id && name) {
     wsClients[id] = ws;
@@ -113,7 +117,7 @@ const extractTanksMessage = () => {
   const bullets = world.bullets;
   const bullestToRemove = world.bulletsToRemove;
   const rewardsToRemove = world.rewardsToRemove;
-  const tanksMessage: {[key: string]: object} = {};
+  const tanksMessage: TankMessageType = {};
   for (const tankId in tanks) {
     const tank = tanks[tankId];
     const tankBullets = bullets[tankId] || [];
@@ -214,6 +218,7 @@ const handleMessage = (id: string, message: string): void => {
       if (tank && tank.tankName) {
         broadcastMessage(`${MessageType.CHAT_RECEIVE},["${tank.tankName}","${chatContent}"]`);
       }
+      break;
     }
     default:
       break;

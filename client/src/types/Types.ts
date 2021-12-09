@@ -1,14 +1,9 @@
-import * as CANNON from 'cannon-es';
 import WebSocket from 'ws';
 import Bullet from '../components/bullet/bullet';
 import Tank from '../components/tank/tank';
 
 export interface BulletsType {
   [key:string]: {[key:string]: Bullet}
-}
-
-export interface UserBody extends CANNON.Body {
-  userData?: string;
 }
 
 export interface TankPosition {

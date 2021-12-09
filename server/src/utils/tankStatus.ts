@@ -3,7 +3,7 @@ import { MoveStatus, RewardType, RewardStatus } from '../../../client/src/types/
 import Tank from '../physics/components/tank';
 
 
-export const accelerate = (speed: number, maxSpeed = MAX_FORWARD_SPEED) => {
+export const accelerate = (speed: number, maxSpeed = MAX_FORWARD_SPEED): number => {
   speed += FORWARD_ACC;
   if (speed > maxSpeed) {
     return maxSpeed;
@@ -12,7 +12,7 @@ export const accelerate = (speed: number, maxSpeed = MAX_FORWARD_SPEED) => {
   }
 }
 
-export const deaccelerate = (speed: number, maxSpeed = MAX_BACKWARD_SPEED) => {
+export const deaccelerate = (speed: number, maxSpeed = MAX_BACKWARD_SPEED): number => {
   speed += BACKWARD_ACC;
   if (speed < maxSpeed) {
     return maxSpeed;
@@ -21,7 +21,7 @@ export const deaccelerate = (speed: number, maxSpeed = MAX_BACKWARD_SPEED) => {
   }
 }
 
-export const stop = (speed: number) => {
+export const stop = (speed: number): number => {
   if (speed > Math.abs(BACKWARD_ACC)) {
     speed += BACKWARD_ACC;
   } else if (speed < -Math.abs(FORWARD_ACC)) {
@@ -32,20 +32,20 @@ export const stop = (speed: number) => {
   return speed;
 }
 
-export const updateMoveSpeed = (currentMoveStatus: MoveStatus, rewardStatus: RewardStatus) => {
+export const updateMoveSpeed = (currentMoveStatus: MoveStatus, rewardStatus: RewardStatus): void => {
   const currentSpeed = currentMoveStatus.speed || 0;
   if (currentMoveStatus.forward === 1) {
-    const maxSpeed = rewardStatus[RewardType.TANK_SWIFT]! > 0 ? MAX_FORWARD_SPEED * 2 : MAX_FORWARD_SPEED;
+    const maxSpeed = rewardStatus[RewardType.TANK_SWIFT] > 0 ? MAX_FORWARD_SPEED * 2 : MAX_FORWARD_SPEED;
     currentMoveStatus.speed = accelerate(currentSpeed, maxSpeed);
   } else if (currentMoveStatus.forward === -1) {
-    const maxSpeed = rewardStatus[RewardType.TANK_SWIFT]! > 0 ? MAX_BACKWARD_SPEED * 2 : MAX_BACKWARD_SPEED;
+    const maxSpeed = rewardStatus[RewardType.TANK_SWIFT] > 0 ? MAX_BACKWARD_SPEED * 2 : MAX_BACKWARD_SPEED;
     currentMoveStatus.speed = deaccelerate(currentSpeed, maxSpeed);
   } else {
     currentMoveStatus.speed = stop(currentSpeed);
   }
 }
 
-export const updateMoveRotation = (currentMoveStatus: MoveStatus) => {
+export const updateMoveRotation = (currentMoveStatus: MoveStatus): void => {
   const currentDirection = currentMoveStatus.direction || 0;
   if (currentMoveStatus.rotation === 1) {
     currentMoveStatus.direction = currentDirection - ROTATE_SPEED;
@@ -56,7 +56,7 @@ export const updateMoveRotation = (currentMoveStatus: MoveStatus) => {
   }
 }
 
-export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: MoveStatus) => {
+export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: MoveStatus): MoveStatus => {
   if (newMoveStatus.keyW) {
     if (newMoveStatus.keyW === '1') {
       // keyW pressed
@@ -120,20 +120,20 @@ export const updateMoveStatus = (currentMoveStatus: MoveStatus, newMoveStatus: M
   return currentMoveStatus;
 }
 
-export const updateTankRewardStatus = (tank: Tank, deltaTime: number) => {
+export const updateTankRewardStatus = (tank: Tank, deltaTime: number): void => {
   const rewardStatus = tank.rewards;
   Object.keys(RewardType).forEach(key => {
     const keyParse = parseInt(key);
     if(!Number.isNaN(keyParse)) {
       const type = keyParse as RewardType;
-      const updateVal = rewardStatus[type]! - deltaTime;
+      const updateVal = rewardStatus[type] - deltaTime;
       rewardStatus[type] = updateVal > 0 ? updateVal : 0; 
     }
   });
 }
 
-export const updateTankSize = (tank: Tank) => {
-  const smallReward = tank.rewards[RewardType.TANK_SAMLL]!;
+export const updateTankSize = (tank: Tank): void => {
+  const smallReward = tank.rewards[RewardType.TANK_SAMLL];
   if (smallReward > 0) {
     tank.shrink();
   } else {
@@ -141,7 +141,7 @@ export const updateTankSize = (tank: Tank) => {
   }
 }
 
-export const getRewardName = (type: RewardType) => {
+export const getRewardName = (type: RewardType): string => {
   switch (type) {
     case RewardType.TANK_SWIFT:
       return 'Swift';
@@ -158,7 +158,7 @@ export const getRewardName = (type: RewardType) => {
   }
 };
 
-export const getRewardInstruction = (type: RewardType) => {
+export const getRewardInstruction = (type: RewardType): string => {
   switch (type) {
     case RewardType.TANK_SWIFT:
       return 'Swift, faster movement';

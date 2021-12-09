@@ -18,8 +18,8 @@ class World {
   rewards: Reward[] = [];
   rewardsToRemove: Reward[] = [];
   messager: (msg: string, id?: string) => void;
-  rewardChecked: number = 10;
-  REWARD_INTERVAL: number = 1;
+  rewardChecked = 10;
+  REWARD_INTERVAL = 1;
   constructor(messager: (msg: string, id?: string) => void) {
     this.world = new CANNON.World();
     this.world.gravity.set(0, -0.25, 0)
@@ -27,7 +27,7 @@ class World {
     this.messager = messager;
   }
 
-  addTank(id: string, name: string) {
+  addTank(id: string, name: string): void {
     const lowerBound = new CANNON.Vec3(-this.arena.width + 10, 0, -this.arena.height + 10);
     const upperBound = new CANNON.Vec3(this.arena.width - 10, 0, this.arena.height - 10);
     const initPosition = generateRandomPosition(lowerBound, upperBound);
@@ -43,7 +43,7 @@ class World {
     this.world.addBody(tank.body);
   }
 
-  removeTank(id: string) {
+  removeTank(id: string): void {
     const tank = this.tanks[id];
     if (tank) {
       this.world.removeBody(tank.body);
@@ -54,7 +54,7 @@ class World {
     delete this.scores[id];
   }
 
-  updateTankStatus(id: string, newMoveStatus: MoveStatus) {
+  updateTankStatus(id: string, newMoveStatus: MoveStatus): void {
     const tank = this.tanks[id];
     if (tank) {
       const currentTankStatus = tank.moveStatus;
@@ -62,7 +62,7 @@ class World {
     }
   }
 
-  updateTanksPosition() {
+  updateTanksPosition(): void {
     for (const tankId in this.tanks) {
       const tank = this.tanks[tankId];
       const moveStatus = tank.moveStatus;
@@ -82,33 +82,33 @@ class World {
     }
   }
 
-  updateRewardStatus(stepTime: number) {
+  updateRewardStatus(stepTime: number): void {
     for (const tankId in this.tanks) {
       const tank = this.tanks[tankId];
       updateTankRewardStatus(tank, stepTime);
     }
   }
 
-  updateTankSize() {
+  updateTankSize(): void {
     for (const tankId in this.tanks) {
       const tank = this.tanks[tankId];
       updateTankSize(tank);
     }
   }
 
-  shootBullet(tankId: string) {
+  shootBullet(tankId: string): void {
     const tank = this.tanks[tankId];
     if (!tank) {
       // no tank found, bail
       return;
     }
     const tankBullets = this.bullets[tankId];
-    const radius = tank.rewards[RewardType.BULLTET_LARGE]! > 0 ? 0.16 : 0.08;
+    const radius = tank.rewards[RewardType.BULLTET_LARGE] > 0 ? 0.16 : 0.08;
     const bullet = new Bullet(this.world, tank, tankBullets.length, radius, this.bulletExplode.bind(this));
     tankBullets.push(bullet);
   }
 
-  bulletExplode(tankId: string, bullet: Bullet, collisionTo: string) {
+  bulletExplode(tankId: string, bullet: Bullet, collisionTo: string): void {
     this.bulletsToRemove[tankId].push(bullet);
     const tanksBullet = this.bullets[tankId];
     const tank = this.tanks[tankId];
@@ -117,8 +117,8 @@ class World {
       const hitTankId = collisionTo.split('_')[1];
       const hitTank = this.tanks[hitTankId];
       // check if the hit tank is invulnarable
-      if (hitTank.rewards[RewardType.TANK_INVULNERABLE]! == 0) {
-        const bulletPower = (tank && tank.rewards[RewardType.BULLET_POWER]! > 0) ? 3 : 1;
+      if (hitTank.rewards[RewardType.TANK_INVULNERABLE] == 0) {
+        const bulletPower = (tank && tank.rewards[RewardType.BULLET_POWER] > 0) ? 3 : 1;
         this.scores[tankId].s += bulletPower;
         this.scores[hitTankId].h += bulletPower;
       }
@@ -126,7 +126,7 @@ class World {
     this.messager(`${MessageType.SCORE_UPDATE},${JSON.stringify(this.scores)}`);
   }
 
-  rewardHit(reward: Reward, collisionTo: string) {
+  rewardHit(reward: Reward, collisionTo: string): void {
     if (!collisionTo.startsWith('tank_')) {
       // not hit by tank, bail
       return;
@@ -144,7 +144,7 @@ class World {
     this.messager(`${MessageType.REWARD_HIT},${JSON.stringify([tankId, reward.type, rewardIdx])}`);
   }
 
-  addRewards() {
+  addRewards(): void {
     // if no tank, skip adding
     if (Object.keys(this.tanks).length < 1) {
       return;

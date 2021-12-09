@@ -1,5 +1,8 @@
-export const getQueryFromUrl = (name: string, uri: string) => {
-  name = name.replace(/[\[\]]/g, '\\$&');
+export const getQueryFromUrl = (name: string, uri?: string): string | null => {
+  if (!uri) {
+    return null;
+  }
+  name = name.replace(/[[]]/g, '\\$&');
   const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
   results = regex.exec(uri);
   if (!results) return null;

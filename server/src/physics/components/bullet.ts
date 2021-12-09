@@ -1,13 +1,13 @@
 import * as CANNON from 'cannon-es';
 import Tank from './tank';
 import { BULLET_SPEED } from '../../../../client/src/utils/constants';
-import { UserBody } from '../../../../client/src/types/Types';
+import {UserBody, CollisionEvent} from '../../types';
 
 class Bullet {
   world: CANNON.World;
   body: UserBody;
   tankId: string;
-  id: number = 0;
+  id = 0;
   bulletExplodeCallback: (id:string, bullet: Bullet, collisionTo: string) => void
   constructor(world: CANNON.World, tank: Tank, id: number, radius: number, bulletExplodeCb: (id: string, bullet: Bullet, collisionTo: string) => void) {
     this.world = world;
@@ -38,12 +38,12 @@ class Bullet {
     this.body.addEventListener('collide', this.collideCallback);
   }
 
-  collideCallback(evt: any) {
+  collideCallback(evt: CollisionEvent): void {
     const collisionTo = evt.body.userData as string;
     this.bulletExplodeCallback(this.tankId, this, collisionTo);
   }
 
-  remove() {
+  remove(): void {
     this.body.removeEventListener('collide', this.collideCallback);
     this.world.removeBody(this.body);
   }

@@ -1,6 +1,6 @@
 import * as CANNON from 'cannon-es';
 
-export const generateRandomPosition = (lowerBound: CANNON.Vec3, upperBound: CANNON.Vec3) => {
+export const generateRandomPosition = (lowerBound: CANNON.Vec3, upperBound: CANNON.Vec3): CANNON.Vec3 => {
   const lowerX = lowerBound.x;
   const lowerZ = lowerBound.z;
   const upperX = upperBound.x;
