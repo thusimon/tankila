@@ -1,7 +1,7 @@
 import Game from '../game/game';
 import { uuidv4 } from '../../utils/urls';
 import './welcome.scss';
-import { RewardType } from '../../types/Types';
+import { RewardType } from '../../../../common/types';
 import { getRewardText } from '../../utils/status';
 import { getRewardInstruction } from '../../../../server/src/utils/tankStatus';
 

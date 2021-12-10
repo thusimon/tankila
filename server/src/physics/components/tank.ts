@@ -1,5 +1,5 @@
 import * as CANNON from 'cannon-es';
-import { MoveStatus, RewardStatus, RewardType } from '../../../../client/src/types/Types';
+import { MoveStatus, RewardStatus, RewardType } from '../../../../common/types';
 import { UserBody } from '../../types';
 
 class Tank {

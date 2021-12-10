@@ -1,5 +1,5 @@
 import * as CANNON from 'cannon-es';
-import { RewardType } from '../../../../client/src/types/Types';
+import { RewardType } from '../../../../common/types';
 import { UserBody, CollisionEvent } from '../../types'; 
 
 class Reward {

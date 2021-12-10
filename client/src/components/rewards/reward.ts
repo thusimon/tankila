@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { RewardType } from '../../types/Types';
+import { RewardType } from '../../../../common/types';
 import { getRewardColor, getRewardText } from '../../utils/status';
 
 class Reward {

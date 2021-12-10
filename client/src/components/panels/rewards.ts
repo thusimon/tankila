@@ -1,4 +1,4 @@
-import { RewardStatus, RewardType } from '../../types/Types';
+import { RewardStatus, RewardType } from '../../../../common/types';
 import { getRewardColor, getRewardText } from '../../utils/status';
 import './rewards.scss';
 
