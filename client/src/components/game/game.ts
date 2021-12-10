@@ -1,8 +1,10 @@
 import * as THREE from 'three';
-import {throttle} from 'lodash';
+import { throttle } from 'lodash';
 import Arena from './arena';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import { BulletsType, MessageType, Tanks, TankPositions, MoveStatus, ScoresData, RewardType, RewardStatus, TankPosition } from '../../types/Types';
+import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
+import { MoveStatus, MessageType, RewardType, RewardStatus } from '../../../../common/types';
+import { getNewMoveStatus } from '../../../../common/utils/status';
+import { BulletsType, Tanks, TanksStatus, ScoresData, TankStatus } from '../../types/Types';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
 import Explosion from '../bullet/explosion';
@@ -40,18 +42,8 @@ class Game {
   rewardsPanel: RewaresPanel;
   chatReady = false;
   sounds: Sounds;
-  moveStatus: MoveStatus = {
-    keyW: '0',
-    keyS: '0',
-    keyA: '0',
-    keyD: '0',
-    keySpace: '0',
-    forward: 0,
-    rotation: 0,
-    speed: 0,
-    direction: 0
-  }
-  updateRewardPannel: (tankPosition: TankPosition) => void;
+  moveStatus: MoveStatus = getNewMoveStatus();
+  updateRewardPannel: (tankPosition: TankStatus) => void;
   constructor(renderer: THREE.WebGLRenderer, production: string, port: string) {
     this.renderer = renderer;
     this.scene = new THREE.Scene();
@@ -106,7 +98,7 @@ class Game {
     }
   }
 
-  messageHandler(type:string, data: string[] | TankPositions | ScoresData | RewardType[] | [RewardType, number, number, number][]): void {
+  messageHandler(type:string, data: string[] | TanksStatus | ScoresData | RewardType[] | [RewardType, number, number, number][]): void {
     switch (type) {
       case MessageType.TANK_JOINED: {
         const tankJoinedData = data as string[];
@@ -118,7 +110,7 @@ class Game {
         break;
       }
       case MessageType.TANK_POS: {
-        const tankPositionData = data as TankPositions;
+        const tankPositionData = data as TanksStatus;
         this.updateTankPosition(tankPositionData);
         this.updateBullets(tankPositionData);
         this.updateExplosion(tankPositionData);
@@ -268,7 +260,7 @@ class Game {
     }
   }
 
-  updateRewardPannelInternal(tank: TankPosition): void {
+  updateRewardPannelInternal(tank: TankStatus): void {
     const myTankRewards = tank.w as RewardStatus;
     this.rewardsPanel.updateStatus(myTankRewards);
   }
@@ -287,7 +279,7 @@ class Game {
     }
   }
 
-  updateTankPosition(tankData: TankPositions): void {
+  updateTankPosition(tankData: TanksStatus): void {
     for (const tankId in tankData) {
       if (!this.tanks[tankId]) {
         // use a fake tank to hold the place, just in case the same tank is added multiple times 
@@ -314,7 +306,7 @@ class Game {
     }
   }
 
-  updateBullets(tankData: TankPositions): void {
+  updateBullets(tankData: TanksStatus): void {
     for (const tankId in tankData) {
       const tankBullets = tankData[tankId].b;
       const tankBulletsId = tankBullets.map(tb => tb.i);
@@ -343,7 +335,7 @@ class Game {
     }
   }
 
-  updateExplosion(tankData: TankPositions): void {
+  updateExplosion(tankData: TanksStatus): void {
     // TODO clear game.explosions array
     for(const tankId in tankData) {
       const explosionsData = tankData[tankId].e;
@@ -358,7 +350,7 @@ class Game {
     }
   }
 
-  updateTankRewards(tankData: TankPositions): void {
+  updateTankRewards(tankData: TanksStatus): void {
     for(const tankId in tankData) {
       if(this.tanks[tankId]) {
         const tankReward = tankData[tankId].w as RewardStatus;

@@ -1,4 +1,4 @@
-import { RewardType } from "../types/Types"
+import { RewardType } from "../../../common/types";
 
 export const getRewardText = (rewardType: RewardType): string => {
   switch (rewardType) {

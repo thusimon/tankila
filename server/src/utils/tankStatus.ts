@@ -1,5 +1,5 @@
-import {MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED} from '../../../client/src/utils/constants';
-import { MoveStatus, RewardType, RewardStatus } from '../../../client/src/types/Types';
+import { MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED } from '../../../client/src/utils/constants';
+import { MoveStatus, RewardType, RewardStatus } from '../../../common/types';
 import Tank from '../physics/components/tank';
 
 

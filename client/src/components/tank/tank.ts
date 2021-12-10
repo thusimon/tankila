@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import Shield from './shield';
-import { MoveStatus, RewardStatus, RewardType } from '../../types/Types';
+import { MoveStatus, RewardType, RewardStatus } from '../../../../common/types';
+import { getNewMoveStatus } from '../../../../common/utils/status';
 
 class Tank {
   model: THREE.Object3D;
-  moveStatus: MoveStatus;
   tankId: string;
   tankName: string;
   tankNameMesh: THREE.Mesh;
@@ -16,14 +16,9 @@ class Tank {
   curDir = 0;
   hits = 0;
   shieldOffsetY = 0.6;
+  moveStatus: MoveStatus = getNewMoveStatus();
   constructor(tankModel: THREE.Object3D, tankId: string, tankName: string) {
     this.model = tankModel;
-    this.moveStatus = {
-      forward: 0,
-      direction: 0,
-      speed: 0,
-      rotation: 0
-    }
     this.rewards = {
       [RewardType.TANK_SWIFT]: 0,
       [RewardType.TANK_SAMLL]: 0,

@@ -3,14 +3,16 @@ import path from 'path';
 import express from 'express';
 import WebSocket from 'ws';
 import mongoose from 'mongoose';
-import { MessageType, MoveStatus, WSClients } from '../../client/src/types/Types';
+import { MoveStatus, MessageType } from '../../common/types';
+import { getNewMoveStatus } from '../../common/utils/status';
+import { WSClients } from '../../client/src/types/Types';
 import * as CANNON from 'cannon-es'
-import {getQueryFromUrl} from './utils/url'
+import { getQueryFromUrl } from './utils/url'
 import World from './physics/world';
-import {TankilaScore} from './db/scores';
-import {updateOne} from './db/utils';
-import {router} from './routes';
-import {TankMessageType} from './types';
+import { TankilaScore } from './db/scores';
+import { updateOne } from './db/utils';
+import { router } from './routes';
+import { TankMessageType } from './types';
 
 dotenv.config({
   path: path.join(__dirname, '../../.env')
