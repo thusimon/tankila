@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { REWARD_DURATION } from '../../../../server/src/constants';
+import { REWARD_DURATION } from '../../../../common/constants';
 
 const QUARTER_DURATION = REWARD_DURATION / 4;
 

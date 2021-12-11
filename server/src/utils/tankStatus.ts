@@ -1,4 +1,4 @@
-import { MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED } from '../../../client/src/utils/constants';
+import { MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED } from '../../../common/constants';
 import { MoveStatus, RewardType, RewardStatus } from '../../../common/types';
 import Tank from '../physics/components/tank';
 
@@ -153,23 +153,6 @@ export const getRewardName = (type: RewardType): string => {
       return 'Battle';
     case RewardType.BULLTET_LARGE:
       return 'Power';
-    default:
-      return 'Unknown';
-  }
-};
-
-export const getRewardInstruction = (type: RewardType): string => {
-  switch (type) {
-    case RewardType.TANK_SWIFT:
-      return 'Swift, faster movement';
-    case RewardType.TANK_SAMLL:
-      return 'Dodge, tank shrinks';
-    case RewardType.TANK_INVULNERABLE:
-      return 'Invulnerability, can\'t be damaged';
-    case RewardType.BULLET_POWER:
-      return 'Battle Effectiveness, larger ammunition size';
-    case RewardType.BULLTET_LARGE:
-      return 'Fire Power, ammunition gains more scores';
     default:
       return 'Unknown';
   }

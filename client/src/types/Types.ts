@@ -1,4 +1,3 @@
-import WebSocket from 'ws';
 import { RewardType, RewardStatus } from '../../../common/types';
 import Bullet from '../components/bullet/bullet';
 import Tank from '../components/tank/tank';
@@ -43,16 +42,18 @@ export interface ScoresData {
   [key: string]: ScoreData
 }
 
+export type RewardHitData = [string, RewardType, number];
+
+export type RewardPositionData = [RewardType, number, number, number];
+
+export type MessageListenerData = string[] | TanksStatus | ScoresData | RewardType[] | RewardHitData | RewardPositionData[];
+
 export interface MessageListener {
-  (type: string, data: string[] | TanksStatus | ScoresData | RewardType[] | [RewardType, number, number, number][]): void;
+  (type: string, data: MessageListenerData): void;
 }
 
 export interface BulletinType {
   updatedAt: string;
   name: string;
   credit: number;
-}
-
-export interface WSClients {
-  [key: string]: WebSocket;
 }

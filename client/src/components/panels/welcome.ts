@@ -3,7 +3,6 @@ import { uuidv4 } from '../../utils/urls';
 import './welcome.scss';
 import { RewardType } from '../../../../common/types';
 import { getRewardText } from '../../utils/status';
-import { getRewardInstruction } from '../../../../server/src/utils/tankStatus';
 
 class Welcome {
   menuPanel: HTMLDivElement;
@@ -94,7 +93,7 @@ class Welcome {
       reward.classList.add('reward-cell');
       const rewardType = i as RewardType;
       reward.textContent = getRewardText(rewardType);
-      reward.title = getRewardInstruction(rewardType);
+      reward.title = this.getRewardInstruction(rewardType);
       rewardContainer.append(reward);
     }
 
@@ -124,8 +123,26 @@ class Welcome {
   showPanel(): void {
     this.menuPanel.style.display = 'block';
   }
+
   hidePanel(): void {
     this.menuPanel.style.display = 'none';
+  }
+
+  getRewardInstruction(type: RewardType): string {
+    switch (type) {
+      case RewardType.TANK_SWIFT:
+        return 'Swift, faster movement';
+      case RewardType.TANK_SAMLL:
+        return 'Dodge, tank shrinks';
+      case RewardType.TANK_INVULNERABLE:
+        return 'Invulnerability, can\'t be damaged';
+      case RewardType.BULLET_POWER:
+        return 'Battle Effectiveness, larger ammunition size';
+      case RewardType.BULLTET_LARGE:
+        return 'Fire Power, ammunition gains more scores';
+      default:
+        return 'Unknown';
+    }
   }
 }
 

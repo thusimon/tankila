@@ -6,7 +6,7 @@ import Reward from './components/reward';
 import { generateRandomPosition, randomEnum } from '../utils/dynamics';
 import { MoveStatus, MessageType, RewardType } from '../../../common/types';
 import { updateMoveStatus, updateMoveSpeed, updateMoveRotation, getRewardName, updateTankRewardStatus, updateTankSize } from '../utils/tankStatus';
-import { REWARD_DURATION } from '../constants';
+import { REWARD_DURATION } from '../../../common/constants';
 
 class World {
   world: CANNON.World;

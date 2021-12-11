@@ -1,6 +1,6 @@
 import * as CANNON from 'cannon-es';
 import {UserBody} from '../../types';
-import {ARENA_WIDTH, ARENA_HEIGHT} from '../../constants';
+import {ARENA_WIDTH, ARENA_HEIGHT} from '../../../../common/constants';
 
 class Arena {
   width: number;

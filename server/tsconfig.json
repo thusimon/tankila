@@ -69,5 +69,5 @@
   },
   "include": [
     "src/**/*"
-  ]
+, "../common/constants.ts"  ]
 }

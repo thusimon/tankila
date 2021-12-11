@@ -1,6 +1,6 @@
 import * as CANNON from 'cannon-es';
 import Tank from './tank';
-import { BULLET_SPEED } from '../../../../client/src/utils/constants';
+import { BULLET_SPEED } from '../../../../common/constants';
 import {UserBody, CollisionEvent} from '../../types';
 
 class Bullet {

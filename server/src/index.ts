@@ -4,7 +4,7 @@ import express from 'express';
 import WebSocket from 'ws';
 import mongoose from 'mongoose';
 import { MoveStatus, MessageType } from '../../common/types';
-import { WSClients } from '../../client/src/types/Types';
+import { WSClients } from './types';
 import * as CANNON from 'cannon-es'
 import { getQueryFromUrl } from './utils/url'
 import World from './physics/world';

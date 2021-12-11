@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { throttle } from 'lodash';
+import { REWARD_DURATION } from '../../../../common/constants';
 import Arena from './arena';
 import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import { MoveStatus, MessageType, RewardType, RewardStatus } from '../../../../common/types';
+import { BulletsType, Tanks, TanksStatus, ScoresData, TankStatus, MessageListenerData, RewardHitData, RewardPositionData } from '../../types/Types';
 import { getNewMoveStatus } from '../../../../common/utils/status';
-import { BulletsType, Tanks, TanksStatus, ScoresData, TankStatus } from '../../types/Types';
 import Tank from '../tank/tank';
 import Bullet from '../bullet/bullet';
 import Explosion from '../bullet/explosion';
@@ -15,7 +16,6 @@ import Settings from '../panels/settings';
 import RewaresPanel from '../panels/rewards';
 import Sounds from './sounds';
 import Reward from '../rewards/reward';
-import { REWARD_DURATION } from '../../../../server/src/constants';
 
 class Game {
   scene: THREE.Scene;
@@ -98,7 +98,7 @@ class Game {
     }
   }
 
-  messageHandler(type:string, data: string[] | TanksStatus | ScoresData | RewardType[] | [RewardType, number, number, number][]): void {
+  messageHandler(type:string, data: MessageListenerData): void {
     switch (type) {
       case MessageType.TANK_JOINED: {
         const tankJoinedData = data as string[];
@@ -147,7 +147,7 @@ class Game {
         break;
       }
       case MessageType.REWARD_HIT: {
-        const rewardHit = data as [string, RewardType, number];
+        const rewardHit = data as RewardHitData;
         const tankId = rewardHit[0] as string;
         const rewardType = rewardHit[1] as RewardType;
         const rewardIdx = rewardHit[2] as number;
@@ -155,7 +155,7 @@ class Game {
         break;
       }
       case MessageType.REWARD_UPDATE: {
-        const rewards = data as [RewardType, number, number, number][];
+        const rewards = data as RewardPositionData[];
         rewards.forEach(reward => {
           const rewardType = reward[0];
           const position = new THREE.Vector3(reward[1], reward[2], reward[3]);
