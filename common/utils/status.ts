@@ -10,6 +10,7 @@ export const getNewMoveStatus = (): MoveStatus => {
     forward: 0,
     direction: 0,
     speed: 0,
-    rotation: 0
+    rotation: 0,
+    rotationSpeed: 0
   };
 };

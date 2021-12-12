@@ -6,6 +6,7 @@ export interface MoveStatus {
   keySpace?: string,
   forward?: number, // 1 forward, 0 stop, -1 backward
   rotation?: number, // 1 right, 0 stop, -1 left
+  rotationSpeed?: number,
   speed?: number,
   direction?: number
 }

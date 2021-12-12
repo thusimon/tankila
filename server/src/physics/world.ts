@@ -68,7 +68,7 @@ class World {
       const moveStatus = tank.moveStatus;
       const rewardStatus = tank.rewards;
       updateMoveSpeed(moveStatus, rewardStatus);
-      updateMoveRotation(moveStatus);
+      updateMoveRotation(moveStatus, rewardStatus);
       const direction = moveStatus.direction || 0;
       const body = tank.body;
       body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), direction);

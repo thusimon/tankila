@@ -1,4 +1,4 @@
-import { MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_SPEED } from '../../../common/constants';
+import { MAX_FORWARD_SPEED, MAX_BACKWARD_SPEED, MAX_ROTATION_SPEED, FORWARD_ACC, BACKWARD_ACC, ROTATE_ACC } from '../../../common/constants';
 import { MoveStatus, RewardType, RewardStatus } from '../../../common/types';
 import Tank from '../physics/components/tank';
 
@@ -32,6 +32,24 @@ export const stop = (speed: number): number => {
   return speed;
 }
 
+export const rotationAccelerate = (speed: number, maxSpeed: number = MAX_ROTATION_SPEED): number => {
+  speed += ROTATE_ACC;
+  if (speed > maxSpeed) {
+    return maxSpeed;
+  } else {
+    return speed;
+  }
+}
+
+export const rotationDeaccelerate = (speed: number, minSpeed: number = -MAX_ROTATION_SPEED): number => {
+  speed -= ROTATE_ACC;
+  if (speed < minSpeed) {
+    return minSpeed;
+  } else {
+    return speed;
+  }
+}
+
 export const updateMoveSpeed = (currentMoveStatus: MoveStatus, rewardStatus: RewardStatus): void => {
   const currentSpeed = currentMoveStatus.speed || 0;
   if (currentMoveStatus.forward === 1) {
@@ -45,14 +63,20 @@ export const updateMoveSpeed = (currentMoveStatus: MoveStatus, rewardStatus: Rew
   }
 }
 
-export const updateMoveRotation = (currentMoveStatus: MoveStatus): void => {
+export const updateMoveRotation = (currentMoveStatus: MoveStatus, rewardStatus: RewardStatus): void => {
   const currentDirection = currentMoveStatus.direction || 0;
+  const currentRotationSpeed = currentMoveStatus.rotationSpeed || 0;
   if (currentMoveStatus.rotation === 1) {
-    currentMoveStatus.direction = currentDirection - ROTATE_SPEED;
+    const maxSpeed = rewardStatus[RewardType.TANK_SWIFT] > 0 ? MAX_ROTATION_SPEED * 2 : MAX_ROTATION_SPEED;
+    currentMoveStatus.rotationSpeed = rotationAccelerate(currentRotationSpeed, maxSpeed);
+    currentMoveStatus.direction = currentDirection - currentMoveStatus.rotationSpeed;
   } else if (currentMoveStatus.rotation === -1) {
-    currentMoveStatus.direction = currentDirection + ROTATE_SPEED;
+    const minSpeed = rewardStatus[RewardType.TANK_SWIFT] > 0 ? -MAX_ROTATION_SPEED * 2 : -MAX_ROTATION_SPEED;
+    currentMoveStatus.rotationSpeed = rotationDeaccelerate(currentRotationSpeed, minSpeed);
+    currentMoveStatus.direction = currentDirection - currentMoveStatus.rotationSpeed;
   } else {
-    // do nothing
+    // stop immediately
+    currentMoveStatus.rotationSpeed = 0;
   }
 }
 
