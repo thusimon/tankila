@@ -48,13 +48,22 @@ class Rewards {
         // show the status and update the time
         rewardView[0].classList.add('reward-container-show');
         rewardView[1].textContent = `${leftTime}s`;
-        const rewardTimeClass = leftTime > 10 ? 'reward-time-high' : 'reward-time-low';
-        rewardView[1].classList.add(rewardTimeClass);
+        this.toggleLeftTimeClass(rewardView[1], leftTime);
       } else {
         // hide the status
         rewardView[0].classList.remove('reward-container-show');
       }
     });
+  }
+
+  toggleLeftTimeClass(rewardReview: HTMLDivElement, leftTime: number): void {
+    if (leftTime > 10) {
+      rewardReview.classList.add('reward-time-high');
+      rewardReview.classList.remove('reward-time-low');
+    } else {
+      rewardReview.classList.add('reward-time-low');
+      rewardReview.classList.remove('reward-time-high');
+    }
   }
 }
 
