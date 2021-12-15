@@ -144,6 +144,7 @@ class Game {
         const rewardType = reward[0] as RewardType;
         const position = new THREE.Vector3(reward[1], reward[2], reward[3]);
         this.addReward(rewardType, position);
+        this.sounds.playRewardAdd();
         break;
       }
       case MessageType.REWARD_HIT: {

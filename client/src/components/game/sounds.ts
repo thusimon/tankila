@@ -3,6 +3,7 @@ class Sounds {
   engineRun: HTMLAudioElement;
   tankShoot: HTMLAudioElement;
   happyNotif: HTMLAudioElement;
+  rewardAdd: HTMLAudioElement;
   volumn = 0.2;
   constructor() {
     this.welcome = new Audio('./sounds/welcome.wav');
@@ -13,6 +14,8 @@ class Sounds {
     this.tankShoot.loop = false;
     this.happyNotif = new Audio('./sounds/happy-notification.wav');
     this.happyNotif.loop = false;
+    this.rewardAdd = new Audio('./sounds/reward-add.wav');
+    this.rewardAdd.loop = false;
     this.adjustVolumn(0.2);
   }
 
@@ -22,6 +25,7 @@ class Sounds {
     this.engineRun.volume = newVolumn * 1.5 < 1 ? newVolumn * 1.5 : 1;
     this.tankShoot.volume = newVolumn;
     this.happyNotif.volume = newVolumn;
+    this.rewardAdd.volume = newVolumn;
   }
 
   playWelcome(): void {
@@ -48,6 +52,12 @@ class Sounds {
     this.happyNotif.pause();
     this.happyNotif.currentTime = 0;
     this.happyNotif.play();
+  }
+
+  playRewardAdd(): void {
+    this.rewardAdd.pause();
+    this.rewardAdd.currentTime = 0;
+    this.rewardAdd.play();
   }
 }
 
