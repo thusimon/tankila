@@ -6,7 +6,7 @@ import Reward from './components/reward';
 import { generateRandomPosition, randomEnum } from '../utils/dynamics';
 import { MoveStatus, MessageType, RewardType } from '../../../common/types';
 import { updateMoveStatus, updateMoveSpeed, updateMoveRotation, getRewardName, updateTankRewardStatus, updateTankSize } from '../utils/tankStatus';
-import { REWARD_DURATION } from '../../../common/constants';
+import { REWARD_DURATION, REWARD_INTERVAL, REWARD_SPAWN_THRESHOLD, REWARD_MAX_NUM } from '../../../common/constants';
 
 class World {
   world: CANNON.World;
@@ -19,7 +19,6 @@ class World {
   rewardsToRemove: Reward[] = [];
   messager: (msg: string, id?: string) => void;
   rewardChecked = 10;
-  REWARD_INTERVAL = 1;
   constructor(messager: (msg: string, id?: string) => void) {
     this.world = new CANNON.World();
     this.world.gravity.set(0, -0.25, 0)
@@ -149,17 +148,17 @@ class World {
     if (Object.keys(this.tanks).length < 1) {
       return;
     }
-    // only allow 5 rewards at most
-    if (this.rewards.length > 20) {
+    // only allow 10 rewards at most
+    if (this.rewards.length > REWARD_MAX_NUM) {
       return;
     }
     // reward should be added at least with 10s interval
-    if (this.rewardChecked + this.REWARD_INTERVAL > this.world.time) {
+    if (this.rewardChecked + REWARD_INTERVAL > this.world.time) {
       return;
     }
     this.rewardChecked = this.world.time;
     // use a random number to check if needs to add reward
-    if (Math.random() < 0) {
+    if (Math.random() < REWARD_SPAWN_THRESHOLD) {
       return;
     }
     const lowerBound = new CANNON.Vec3(-this.arena.width + 20, 0, -this.arena.height + 20);

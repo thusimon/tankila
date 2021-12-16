@@ -16,3 +16,6 @@ export const BULLET_SPEED = 80;
 
 /* Reward status */
 export const REWARD_DURATION = 60;
+export const REWARD_INTERVAL = 4;
+export const REWARD_SPAWN_THRESHOLD = 0.8;
+export const REWARD_MAX_NUM = 10;
