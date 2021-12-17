@@ -148,11 +148,11 @@ class World {
     if (Object.keys(this.tanks).length < 1) {
       return;
     }
-    // only allow 10 rewards at most
+    // only allow a number of rewards at most
     if (this.rewards.length > REWARD_MAX_NUM) {
       return;
     }
-    // reward should be added at least with 10s interval
+    // reward should be added at least with an interval
     if (this.rewardChecked + REWARD_INTERVAL > this.world.time) {
       return;
     }
