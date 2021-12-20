@@ -18,6 +18,9 @@ Tankila is a multi player FPS game, implemented by [three.js](https://github.com
 - `yarn server-prod` # start game server
 - go to the game server
 
+# Demo
+https://tankila.utticus.com/
+
 # Useful tools in production
 - systemctl restart tankila.service
 - systemclt restart nginx
