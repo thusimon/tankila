@@ -2,6 +2,9 @@
   "name": "tankila",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=16.13.1"
+  },
   "dependencies": {
     "cannon-es": "^0.18.0",
     "dotenv": "^10.0.0",
@@ -55,7 +58,7 @@
     "html-loader": "^2.1.2",
     "html-webpack-plugin": "^5.3.2",
     "mini-css-extract-plugin": "^2.4.3",
-    "node-sass": "^4.14.1",
+    "node-sass": "^6.0.1",
     "nodemon": "^2.0.14",
     "sass-loader": "^12.2.0",
     "style-loader": "^3.3.1",
@@ -66,5 +69,8 @@
     "webpack-cli": "^4.8.0",
     "webpack-dev-server": "^4.3.0",
     "webpack-merge": "^5.8.0"
+  },
+  "resolutions": {
+    "node-sass/meow": "10.1.2"
   }
 }

@@ -4,6 +4,7 @@ Tankila is a multi player FPS game, implemented by [three.js](https://github.com
 <img src="demo/Tankila_demo.png" width="600" height="auto" />
 
 # Installation
+- minimum node version 16.13.1
 - `yarn install`
 - create a `.env` config file in the root, the follow configs are required
   - `MONGODB_URI`: mongodb url, game server needs this to connect to mongodb
