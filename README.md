@@ -26,3 +26,10 @@ https://tankila.utticus.com/
 - systemctl restart tankila.service
 - systemclt restart nginx
 - https://certbot.eff.org/
+- npm install pm2 -g
+- pm2 start npm --name "tankila" -- run "server-prod"
+- pm2 list
+- pm2 stop tankila
+- `screen`, then `yarn server-prod`, then `CTRL+a, press d`
+- screen -ls
+- screen -r (10835)
