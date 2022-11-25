@@ -30,6 +30,6 @@ https://tankila.utticus.com/
 - pm2 start npm --name "tankila" -- run "server-prod"
 - pm2 list
 - pm2 stop tankila
-- `screen`, then `yarn server-prod`, then `CTRL+a, press d`
+- `screen`, then `yarn server-prod`, then `CTRL+a, press d`, to kill a screen `CTRL+a, press k`
 - screen -ls
-- screen -r (10835)
+- screen -r \<screen-id\>

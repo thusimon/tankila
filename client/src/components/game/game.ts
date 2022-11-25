@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { throttle } from 'lodash';
 import { REWARD_DURATION } from '../../../../common/constants';
 import Arena from './arena';
@@ -173,7 +175,7 @@ class Game {
 
   async addTank(tankId: string, tankName: string): Promise<void | THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>> {
     const tankLoader = new GLTFLoader();
-    const fontLoader = new THREE.FontLoader();
+    const fontLoader = new FontLoader();
     const tankModelPromise = new Promise<Tank>(resolve => {
       tankLoader.load('./models/styled_tank/tank.glb', (gltf) => {
         const tankModel = gltf.scene.children[0];
@@ -191,7 +193,7 @@ class Game {
     });
     const tankNamePromise = new Promise<THREE.Mesh>(resolve => {
       fontLoader.load('./fonts/OpenSans_Bold.json', (font) => {
-        const fontGeo = new THREE.TextGeometry(tankName, {
+        const fontGeo = new TextGeometry(tankName, {
           font,
           size: 0.15,
           height: 0.02
