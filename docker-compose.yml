@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3006:3006
+    deploy:
+      resources:
+        limits:
+          cpus: "0.40"
+          memory: 128M

@@ -8,19 +8,20 @@ class Bullet {
   body: UserBody;
   tankId: string;
   id = 0;
+  bulletShape: CANNON.Sphere;
   bulletExplodeCallback: (id:string, bullet: Bullet, collisionTo: string) => void
   constructor(world: CANNON.World, tank: Tank, id: number, radius: number, bulletExplodeCb: (id: string, bullet: Bullet, collisionTo: string) => void) {
     this.world = world;
     this.tankId = tank.tankId;
     this.id = id;
     this.bulletExplodeCallback = bulletExplodeCb;
-    const bulletShape = new CANNON.Sphere(radius);
+    this.bulletShape = new CANNON.Sphere(radius);
     this.body = new CANNON.Body({
         mass: 0.1,
         type: CANNON.Body.DYNAMIC,
         isTrigger: true
     })
-    this.body.addShape(bulletShape)
+    this.body.addShape(this.bulletShape)
     const tankBody = tank.body;
     const euler = new CANNON.Vec3();
     tankBody.quaternion.toEuler(euler);
@@ -44,6 +45,7 @@ class Bullet {
   }
 
   remove(): void {
+    this.body.removeShape(this.bulletShape);
     this.body.removeEventListener('collide', this.collideCallback);
     this.world.removeBody(this.body);
   }

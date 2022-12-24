@@ -13,8 +13,11 @@ import { updateOne } from './db/utils';
 import { router } from './routes';
 import { TankMessageType } from './types';
 
+const workingDirectory = process.cwd();
+console.log(`working directory: ${workingDirectory}`)
+
 dotenv.config({
-  path: path.join(__dirname, '../../.env')
+  path: path.join(workingDirectory, '.env')
 });
 
 const CONNECTION_URI = process.env.MONGODB_URI;
@@ -35,11 +38,11 @@ const app = express();
 
 const PORT = process.env.PORT;
 
-const clientBuildPath = path.join(__dirname, '../../client/build');
+const clientBuildPath = path.join(workingDirectory, 'client/build');
 app.use(express.static(clientBuildPath));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../client/build/index.html'));
+  res.sendFile(path.join(workingDirectory, 'client/build/index.html'));
 });
 
 app.use(router);

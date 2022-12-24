@@ -21,15 +21,3 @@ Tankila is a multi player FPS game, implemented by [three.js](https://github.com
 
 # Demo
 https://tankila.utticus.com/
-
-# Useful tools in production
-- systemctl restart tankila.service
-- systemclt restart nginx
-- https://certbot.eff.org/
-- npm install pm2 -g
-- pm2 start npm --name "tankila" -- run "server-prod"
-- pm2 list
-- pm2 stop tankila
-- `screen`, then `yarn server-prod`, then `CTRL+a, press d`, to kill a screen `CTRL+a, press k`
-- screen -ls
-- screen -r \<screen-id\>

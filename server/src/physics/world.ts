@@ -45,12 +45,17 @@ class World {
   removeTank(id: string): void {
     const tank = this.tanks[id];
     if (tank) {
+      tank.remove();
       this.world.removeBody(tank.body);
     }
     this.bulletsToRemove[id] = this.bulletsToRemove[id].concat(this.bullets[id]);
-    this.bullets[id] = [];
+    delete this.bullets[id];
     delete this.tanks[id];
     delete this.scores[id];
+    this.bulletsToRemove[id].forEach(blt => {
+      blt.remove();
+    });
+    delete this.bulletsToRemove[id];
   }
 
   updateTankStatus(id: string, newMoveStatus: MoveStatus): void {
@@ -111,7 +116,10 @@ class World {
     this.bulletsToRemove[tankId].push(bullet);
     const tanksBullet = this.bullets[tankId];
     const tank = this.tanks[tankId];
-    this.bullets[tankId] = tanksBullet.filter(blt => blt != bullet);
+    const bulletIndex = tanksBullet.indexOf(bullet);
+    if (bulletIndex > -1) {
+      this.bullets[tankId].splice(bulletIndex, 1);
+    }
     if (this.scores[tankId] && collisionTo && collisionTo.startsWith('tank_')) {
       const hitTankId = collisionTo.split('_')[1];
       const hitTank = this.tanks[hitTankId];
@@ -149,7 +157,7 @@ class World {
       return;
     }
     // only allow a number of rewards at most
-    if (this.rewards.length > REWARD_MAX_NUM) {
+    if (this.rewards.length >= REWARD_MAX_NUM) {
       return;
     }
     // reward should be added at least with an interval

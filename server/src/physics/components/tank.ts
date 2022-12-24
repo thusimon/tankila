@@ -48,6 +48,10 @@ class Tank {
     this.body.addShape(this.geo);
     this.body.position.y = 0.5;
   }
+
+  remove(): void {
+    this.body.removeShape(this.geo);
+  }
 }
 
 export default Tank;
