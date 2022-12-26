@@ -20,4 +20,4 @@ Tankila is a multi player FPS game, implemented by [three.js](https://github.com
 - go to the game server
 
 # Demo
-https://tankila.utticus.com/
+<a href="https://tankila.utticus.com/" target="_blank">https://tankila.utticus.com</a>
