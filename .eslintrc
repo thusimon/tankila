@@ -9,5 +9,5 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "ignorePatterns": ["/client/build", "/client/static"]
+  "ignorePatterns": ["client/build", "server/build"]
 }
