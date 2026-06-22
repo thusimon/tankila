@@ -10,7 +10,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.20.0",
     "mongoose": "^8.9.5",
-    "ws": "^7.5.10"
+    "ws": "^7.5.11"
   },
   "scripts": {
     "client-dev": "webpack serve --config ./client/webpack.dev.ts",
